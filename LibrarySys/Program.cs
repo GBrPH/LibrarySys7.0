@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllers();
 
-// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -16,7 +15,6 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
-    // Add JWT auth support in Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -42,17 +40,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Register repositories and services
 builder.Services.AddSingleton<LibrarySys.Repositories.BookRepository>();
 builder.Services.AddScoped<LibrarySys.Services.BookService>();
 builder.Services.AddSingleton<LibrarySys.Repositories.UserRepository>();
 builder.Services.AddScoped<LibrarySys.Services.UserService>();
 
-// Add Authentication & Authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = "https://your-auth-server"; // replace with IdentityServer/Auth0/etc.
+        options.Authority = "https://your-auth-server"; 
         options.Audience = "LibrarySysAPI";
     });
 
@@ -69,7 +65,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();   // ?? must come before UseAuthorization
+app.UseAuthentication();   
 app.UseAuthorization();
 
 app.MapControllers();

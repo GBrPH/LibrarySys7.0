@@ -42,8 +42,6 @@ namespace LibrarySys.Repositories
 
             return query.ToList();
         }
-
-
         public UserDto Insert(UserDto user)
         {
             user.Id = _users.Count + 1;
@@ -63,7 +61,6 @@ namespace LibrarySys.Repositories
             }
             return existing;
         }
-
         public bool Delete(int id)
         {
             var user = _users.Find(u => u.Id == id);

@@ -12,7 +12,6 @@ namespace LibrarySys.Services
         {
             _repo = repo;
         }
-
         public IEnumerable<UserDto> GetAll()
         {
             return _repo.GetAll();
@@ -21,12 +20,10 @@ namespace LibrarySys.Services
         {
             return _repo.GetById(id);
         }
-
         public IEnumerable<UserDto> Search(string username, string role, bool? isActive)
         {
             return _repo.Search(username, role, isActive);
         }
-
         public UserDto Register(UserDto user)
         {
             return _repo.Insert(user);

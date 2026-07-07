@@ -51,7 +51,6 @@ namespace LibrarySys.Repositories
             var book = _books.Find(b => b.Id == id);
             return _books.Remove(book);
         }
-
         public BookDto BorrowBook(int bookId, int userId, int days = 14)
         {
             var book = _books.Find(b => b.Id == bookId);
@@ -63,7 +62,6 @@ namespace LibrarySys.Repositories
             book.DueDate = DateTime.UtcNow.AddDays(days);
             return book;
         }
-
         public BookDto ReturnBook(int bookId)
         {
             var book = _books.Find(b => b.Id == bookId);
@@ -75,7 +73,6 @@ namespace LibrarySys.Repositories
             book.DueDate = null;
             return book;
         }
-
         public List<BookDto> GetOverdueBooks()
         {
             var today = DateTime.UtcNow;
