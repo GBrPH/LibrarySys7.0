@@ -16,13 +16,13 @@ namespace LibrarySys.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public ActionResult<IEnumerable<UserDto>> GetAllUsers()
         {
             return Ok(_userService.GetAll());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/GetUserById")]
         public ActionResult<UserDto> GetUserById(int id)
         {
             var user = _userService.GetById(id);
@@ -30,14 +30,25 @@ namespace LibrarySys.Controllers
             return Ok(user);
         }
 
-        [HttpPost]
+        [HttpPost("BorrowBookforUser")]
+        public ActionResult<UserDto> RegisterBorrower([FromBody] UserDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.FullName))
+                return BadRequest("Username and FullName are required.");
+
+            var user = _userService.RegisterBorrower(dto.Username, dto.FullName);
+            return Ok(user);
+        }
+
+        [HttpPost("RegisterUser")]
         public ActionResult<UserDto> RegisterUser([FromBody] UserDto user)
         {
             var created = _userService.Register(user);
             return CreatedAtAction(nameof(GetUserById), new { id = created.Id }, created);
         }
 
-        [HttpPut("{id}")]
+
+        [HttpPut("{id}/UpdateUser")]
         public ActionResult<UserDto> UpdateUser(int id, [FromBody] UserDto user)
         {
             if (id != user.Id) return BadRequest("ID mismatch");
@@ -46,7 +57,7 @@ namespace LibrarySys.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}/DeleteUser")]
         public IActionResult DeleteUser(int id)
         {
             var deleted = _userService.Delete(id);

@@ -1,5 +1,7 @@
 ﻿using LibrarySys.Dtos;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LibrarySys.Repositories
 {
@@ -9,7 +11,7 @@ namespace LibrarySys.Repositories
 
         public UserRepository()
         {
-            //Dummy Data but users
+            // Dummy Data for initial users
             _users = new List<UserDto>
             {
                 new UserDto { Id = 1, Username = "librarian1", FullName = "Alice Librarian", Role = "Librarian", IsActive = true },
@@ -17,7 +19,6 @@ namespace LibrarySys.Repositories
                 new UserDto { Id = 3, Username = "student1", FullName = "Charlie Student", Role = "Student", IsActive = true }
             };
         }
-
         public IEnumerable<UserDto> GetAll()
         {
             return _users;
@@ -26,7 +27,6 @@ namespace LibrarySys.Repositories
         {
             return _users.Find(u => u.Id == id);
         }
-
         public IEnumerable<UserDto> Search(string username = null, string role = null, bool? isActive = null)
         {
             var query = _users.AsQueryable();
@@ -48,7 +48,19 @@ namespace LibrarySys.Repositories
             _users.Add(user);
             return user;
         }
-
+        public UserDto RegisterBorrower(string username, string fullName)
+        {
+            var user = new UserDto
+            {
+                Id = _users.Count + 1,
+                Username = username,
+                FullName = fullName,
+                Role = "Borrower",   // 👈 default role
+                IsActive = true
+            };
+            _users.Add(user);
+            return user;
+        }
         public UserDto Update(UserDto user)
         {
             var existing = _users.Find(u => u.Id == user.Id);

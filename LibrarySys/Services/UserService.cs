@@ -28,6 +28,18 @@ namespace LibrarySys.Services
         {
             return _repo.Insert(user);
         }
+        public UserDto RegisterBorrower(string username, string fullName)
+        {
+            var newUser = new UserDto
+            {
+                Username = username,
+                FullName = fullName,
+                Role = "Borrower",   // 👈 enforce Borrower role
+                IsActive = true
+            };
+
+            return _repo.Insert(newUser);
+        }
         public UserDto Update(UserDto user)
         {
             return _repo.Update(user);
@@ -36,5 +48,6 @@ namespace LibrarySys.Services
         {
             return _repo.Delete(id);
         }
+        
     }
 }
