@@ -1,5 +1,6 @@
 ﻿using LibrarySys.Dtos;
 using LibrarySys.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
@@ -44,20 +45,26 @@ namespace LibrarySys.Controllers
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
 
-        [HttpPost("{id}/BorrowBooks")]
-        public ActionResult BorrowBook(int id, int userId)
+        [HttpPost("{bookId}/BorrowBook")]
+        [Authorize(Roles = "Borrower")]
+        public ActionResult<BookDto> BorrowBook(int bookId, [FromBody] UserDto borrower)
         {
-            var book = _bookService.BorrowBook(id, userId);
-            if (book == null) return BadRequest("No copies available or book not found.");
+            var book = _bookService.BorrowBook(bookId, borrower);
+            if (book == null)
+                return BadRequest("Book not available or invalid borrower.");
+
             return Ok(book);
         }
 
-        [HttpPost("{id}/ReturnBook")]
-        public ActionResult<BookDto> ReturnBook(int id)
+        [HttpPost("{bookId}/ReturnBook")]
+        [Authorize(Roles = "Borrower")]
+        public ActionResult<BookDto> ReturnBook(int bookId, [FromBody] UserDto borrower)
         {
-            var returned = _bookService.ReturnBook(id);
-            if (returned == null) return BadRequest("Book not currently borrowed.");
-            return Ok(returned);
+            var book = _bookService.ReturnBook(bookId, borrower);
+            if (book == null)
+                return BadRequest("Book not borrowed by this user or invalid request.");
+
+            return Ok(book);
         }
 
         [HttpPut("{id}/UpdateBook")]

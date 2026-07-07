@@ -42,8 +42,13 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSingleton<LibrarySys.Repositories.BookRepository>();
 builder.Services.AddScoped<LibrarySys.Services.BookService>();
+
 builder.Services.AddSingleton<LibrarySys.Repositories.UserRepository>();
 builder.Services.AddScoped<LibrarySys.Services.UserService>();
+
+builder.Services.AddSingleton<LibrarySys.Repositories.BorrowingLogRepository>();
+builder.Services.AddScoped<LibrarySys.Services.BorrowingLogService>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
