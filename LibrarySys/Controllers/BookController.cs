@@ -37,14 +37,14 @@ namespace LibrarySys.Controllers
             return Ok(overdueBooks);
         }
 
-        [HttpPost]
+        [HttpPost("CreateBook")]
         public ActionResult<BookDto> CreateBook([FromBody] BookDto book)
         {
             var created = _bookService.Add(book);
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
 
-        [HttpPost("{id}/borrow")]
+        [HttpPost("{id}/BorrowBooks")]
         public ActionResult BorrowBook(int id, int userId)
         {
             var book = _bookService.BorrowBook(id, userId);
@@ -52,7 +52,6 @@ namespace LibrarySys.Controllers
             return Ok(book);
         }
 
-        // POST: api/book/{id}/return
         [HttpPost("{id}/ReturnBook")]
         public ActionResult<BookDto> ReturnBook(int id)
         {
@@ -60,7 +59,6 @@ namespace LibrarySys.Controllers
             if (returned == null) return BadRequest("Book not currently borrowed.");
             return Ok(returned);
         }
-
 
         [HttpPut("{id}/UpdateBook")]
         public ActionResult<BookDto> UpdateBook(int id, [FromBody] BookDto book)

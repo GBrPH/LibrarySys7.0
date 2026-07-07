@@ -12,10 +12,12 @@ namespace LibrarySys.Services
         {
             _repo = repo;
         }
+
         public IEnumerable<BorrowingLogDto> GetAll()
         {
             return _repo.GetAll();
         }
+
         public IEnumerable<BorrowingLogDto> GetHistoryByUser(int userId)
         {
             return _repo.GetHistoryByUser(userId);

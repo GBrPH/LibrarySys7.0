@@ -17,10 +17,12 @@ namespace LibrarySys.Services
         {
              return  _repo.GetAll();
         }
+
         public BookDto GetById(int id)
         {
             return _repo.GetById(id);
         }
+
         public IEnumerable<BookDto> GetOverdueBooks()
         {
             return _repo.GetOverdueBooks();
@@ -30,10 +32,12 @@ namespace LibrarySys.Services
         {
             return _repo.Insert(book);
         }
+
         public BookDto Update(BookDto book)  
         { 
             return _repo.Update(book); 
         }
+
         public bool Delete(int id)  
         { 
             return _repo.Delete(id); 

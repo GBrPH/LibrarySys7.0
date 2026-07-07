@@ -25,19 +25,24 @@ namespace LibrarySys.Repositories
             return log;
         }
 
+        public IEnumerable<BorrowingLogDto> GetAll()
+        {
+            return _logs;
+        }
+
+        public IEnumerable<BorrowingLogDto> GetHistoryByUser(int userId)
+        {
+            return _logs.Where(l => l.UserId == userId).ToList();
+        }
+
         public void LogReturn(int bookId, int userId, DateTime returnDate)
         {
             var log = _logs.LastOrDefault(l => l.BookId == bookId && l.UserId == userId && l.ReturnDate == null);
             if (log != null)
             {
                 log.ReturnDate = returnDate;
-                log.IsOverdue = returnDate > log.BorrowDate.AddDays(7); // 👈 example overdue rule
+                log.IsOverdue = returnDate > log.BorrowDate.AddDays(7); // Overdue rule
             }
         }
-
-        public IEnumerable<BorrowingLogDto> GetHistoryByUser(int userId) =>
-            _logs.Where(l => l.UserId == userId).ToList();
-
-        public IEnumerable<BorrowingLogDto> GetAll() => _logs;
     }
 }

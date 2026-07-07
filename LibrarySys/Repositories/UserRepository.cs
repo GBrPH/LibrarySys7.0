@@ -19,14 +19,17 @@ namespace LibrarySys.Repositories
                 new UserDto { Id = 3, Username = "student1", FullName = "Charlie Student", Role = "Student", IsActive = true }
             };
         }
+
         public IEnumerable<UserDto> GetAll()
         {
             return _users;
         }
+
         public UserDto GetById(int id)
         {
             return _users.Find(u => u.Id == id);
         }
+
         public IEnumerable<UserDto> Search(string username = null, string role = null, bool? isActive = null)
         {
             var query = _users.AsQueryable();
@@ -42,12 +45,14 @@ namespace LibrarySys.Repositories
 
             return query.ToList();
         }
+
         public UserDto Insert(UserDto user)
         {
             user.Id = _users.Count + 1;
             _users.Add(user);
             return user;
         }
+
         public UserDto RegisterBorrower(string username, string fullName)
         {
             var user = new UserDto
@@ -61,6 +66,7 @@ namespace LibrarySys.Repositories
             _users.Add(user);
             return user;
         }
+
         public UserDto Update(UserDto user)
         {
             var existing = _users.Find(u => u.Id == user.Id);
@@ -73,6 +79,7 @@ namespace LibrarySys.Repositories
             }
             return existing;
         }
+
         public bool Delete(int id)
         {
             var user = _users.Find(u => u.Id == id);
