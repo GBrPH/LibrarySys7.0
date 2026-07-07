@@ -16,18 +16,25 @@ namespace LibrarySys.Controllers
             _bookService = bookService;
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public ActionResult<IEnumerable<BookDto>> GetAllBooks() 
         { 
             return Ok(_bookService.GetAll()); 
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("BookById/{id}")]
         public ActionResult<BookDto> GetBookById(int id)
         {
             var book = _bookService.GetById(id);
             if (book == null) return NotFound();
             return Ok(book);
+        }
+
+        [HttpGet("BookOverdue")]
+        public ActionResult<IEnumerable<BookDto>> GetOverdueBooks()
+        {
+            var overdueBooks = _bookService.GetOverdueBooks();
+            return Ok(overdueBooks);
         }
 
         [HttpPost]
@@ -37,17 +44,16 @@ namespace LibrarySys.Controllers
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
 
-        // POST: api/book/{id}/borrow
         [HttpPost("{id}/borrow")]
-        public ActionResult<BookDto> BorrowBook(int id, [FromQuery] int userId)
+        public ActionResult BorrowBook(int id, int userId)
         {
-            var borrowed = _bookService.BorrowBook(id, userId);
-            if (borrowed == null) return BadRequest("Book not available.");
-            return Ok(borrowed);
+            var book = _bookService.BorrowBook(id, userId);
+            if (book == null) return BadRequest("No copies available or book not found.");
+            return Ok(book);
         }
 
         // POST: api/book/{id}/return
-        [HttpPost("{id}/return")]
+        [HttpPost("{id}/ReturnBook")]
         public ActionResult<BookDto> ReturnBook(int id)
         {
             var returned = _bookService.ReturnBook(id);
@@ -56,7 +62,7 @@ namespace LibrarySys.Controllers
         }
 
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}/UpdateBook")]
         public ActionResult<BookDto> UpdateBook(int id, [FromBody] BookDto book)
         {
             if (id != book.Id) return BadRequest("ID mismatch");
@@ -65,7 +71,7 @@ namespace LibrarySys.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}/DeleteBook")]
         public IActionResult DeleteBook(int id)
         {
             var deleted = _bookService.Delete(id);

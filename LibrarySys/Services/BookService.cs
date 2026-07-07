@@ -15,18 +15,23 @@ namespace LibrarySys.Services
 
         public IEnumerable<BookDto> GetAll() => _repo.GetAll();
         public BookDto GetById(int id) => _repo.GetById(id);
+        public IEnumerable<BookDto> GetOverdueBooks()
+        {
+            return _repo.GetOverdueBooks();
+        }
+
         public BookDto Add(BookDto book) => _repo.Insert(book);
         public BookDto Update(BookDto book) => _repo.Update(book);
         public bool Delete(int id) => _repo.Delete(id);
 
-        internal object BorrowBook(int id, int userId)
+        public BookDto BorrowBook(int bookId, int userId, int days = 14)
         {
-            throw new NotImplementedException();
+            return _repo.BorrowBook(bookId, userId, days);
         }
 
-        internal object ReturnBook(int id)
+        public BookDto ReturnBook(int bookId)
         {
-            throw new NotImplementedException();
+            return _repo.ReturnBook(bookId);
         }
     }
 }

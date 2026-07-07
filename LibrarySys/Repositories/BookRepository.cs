@@ -27,7 +27,7 @@ namespace LibrarySys.Repositories
         {
             return _books.Find(b => b.Id == id);
         }
-
+    
         public BookDto Insert(BookDto book)
         {
             book.Id = _books.Count + 1;
@@ -42,7 +42,6 @@ namespace LibrarySys.Repositories
             {
                 existing.Title = book.Title;
                 existing.Author = book.Author;
-                existing.CopiesAvailable = book.CopiesAvailable;
             }
             return existing;
         }
@@ -77,5 +76,14 @@ namespace LibrarySys.Repositories
             return book;
         }
 
+        public List<BookDto> GetOverdueBooks()
+        {
+            var today = DateTime.UtcNow;
+            return _books
+                .Where(b => b.BorrowedByUserId != null
+                            && b.DueDate.HasValue
+                            && b.DueDate.Value < today)
+                .ToList();
+        }
     }
 }
