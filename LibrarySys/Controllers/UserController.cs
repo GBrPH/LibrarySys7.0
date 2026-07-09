@@ -22,7 +22,7 @@ namespace LibrarySys.Controllers
             return Ok(_userService.GetAll());
         }
 
-        [HttpGet("{id}/GetUserById")]
+        [HttpGet("GetUserById/{id}")]
         public ActionResult<UserDto> GetUserById(int id)
         {
             var user = _userService.GetById(id);
@@ -48,7 +48,7 @@ namespace LibrarySys.Controllers
         }
 
 
-        [HttpPut("{id}/UpdateUser")]
+        [HttpPut("UpdateUser/{id}")]
         public ActionResult<UserDto> UpdateUser(int id, [FromBody] UserDto user)
         {
             if (id != user.Id) return BadRequest("ID mismatch");
@@ -57,7 +57,7 @@ namespace LibrarySys.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}/DeleteUser")]
+        [HttpDelete("DeleteUser/{id}")]
         public IActionResult DeleteUser(int id)
         {
             var deleted = _userService.Delete(id);

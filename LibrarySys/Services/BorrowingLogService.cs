@@ -13,20 +13,13 @@ namespace LibrarySys.Services
             _repo = repo;
         }
 
-        public IEnumerable<BorrowingLogDto> GetAll()
-        {
-            return _repo.GetAll();
-        }
+        public IEnumerable<BorrowingLogDto> GetAll() => _repo.GetAll();
 
-        public IEnumerable<BorrowingLogDto> GetHistoryByUser(int userId)
-        {
-            return _repo.GetHistoryByUser(userId);
-        }
+        public IEnumerable<BorrowingLogDto> GetHistoryByUser(int userId)       
+            => _repo.GetHistoryByUser(userId);
 
         public BorrowingLogDto LogBorrow(int bookId, string bookTitle, int userId, string username, DateTime borrowDate)
-        {
-            return _repo.LogBorrow(bookId, bookTitle, userId, username, borrowDate);
-        }
+            => _repo.LogBorrow(bookId, bookTitle, userId, username, borrowDate);
 
         public void LogReturn(int bookId, int userId, DateTime returnDate) 
             => _repo.LogReturn(bookId, userId, returnDate);

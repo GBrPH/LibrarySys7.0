@@ -15,69 +15,48 @@ namespace LibrarySys.Services
             _logService = logService;
         }
 
-        public IEnumerable<BookDto> GetAll()
-        {
-             return  _repo.GetAll();
-        }
+        public IEnumerable<BookDto> GetAll() => _repo.GetAll()!;
 
-        public BookDto GetById(int id)
-        {
-            return _repo.GetById(id);
-        }
+        public BookDto GetById(int id) => _repo.GetById(id);
+        
 
-        public IEnumerable<BookDto> GetOverdueBooks()
-        {
-            return _repo.GetOverdueBooks();
-        }
+        public IEnumerable<BookDto> GetOverdueBooks() => _repo.GetOverdueBooks()!;
 
-        public BookDto Add(BookDto book)
-        {
-            return _repo.Insert(book);
-        }
+        public BookDto Add(BookDto book) => _repo.Insert(book)!;
 
-        public BookDto Update(BookDto book)  
-        { 
-            return _repo.Update(book); 
-        }
+        public BookDto Update(BookDto book) => _repo.Update(book);
 
-        public bool Delete(int id)  
-        { 
-            return _repo.Delete(id); 
-        }
-
-        public BookDto BorrowBook(int bookId, UserDto borrower)
+        public BookDto BorrowBook(int bookId, int userId)
         {
             var book = _repo.GetById(bookId);
             if (book == null || book.CopiesAvailable <= 0)
                 return null;
 
-            book.CopiesAvailable -= 1;
-            book.BorrowedByUserId = borrower.Id;
-            book.BorrowedDate = DateTime.Now;
-            book.DueDate = book.BorrowedDate.Value.AddDays(7); // 👈 example rule
+            book.CopiesAvailable--;
+            book.IsAvailable = book.CopiesAvailable > 0;
+            book.BorrowedByUserId = userId;
+            book.BorrowedDate = DateTime.UtcNow;
+            book.DueDate = DateTime.UtcNow.AddDays(14); // unified rule
 
-            // Log borrow action
-            _logService.LogBorrow(book.Id, book.Title, borrower.Id, borrower.Username, book.BorrowedDate.Value);
-
+            _logService.LogBorrow(book.Id, book.Title, userId, "User" + userId, book.BorrowedDate.Value);
             return book;
         }
 
-        public BookDto ReturnBook(int bookId, UserDto borrower)
+        public BookDto ReturnBook(int bookId, int userId)
         {
             var book = _repo.GetById(bookId);
-            if (book == null || book.BorrowedByUserId != borrower.Id)
+            if (book == null || book.BorrowedByUserId != userId)
                 return null;
 
-            book.CopiesAvailable += 1;
+            book.CopiesAvailable++;
+            book.IsAvailable = book.CopiesAvailable > 0;
             book.BorrowedByUserId = null;
             book.BorrowedDate = null;
             book.DueDate = null;
 
-            // Log return action
-            _logService.LogReturn(book.Id, borrower.Id, DateTime.Now);
-
+            _logService.LogReturn(book.Id, userId, DateTime.UtcNow);
             return book;
         }
-
+        public bool Delete(int id) => _repo.Delete(id);
     }
 }

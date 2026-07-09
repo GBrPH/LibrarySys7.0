@@ -3,6 +3,7 @@ using LibrarySys.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Data;
 
 namespace LibrarySys.Controllers
 {
@@ -17,13 +18,15 @@ namespace LibrarySys.Controllers
             _bookService = bookService;
         }
 
-        [HttpGet("GetAll")]
+        [HttpGet("GetAllBooks")]
+        [AllowAnonymous]
         public ActionResult<IEnumerable<BookDto>> GetAllBooks() 
         { 
             return Ok(_bookService.GetAll()); 
         }
 
-        [HttpGet("BookById/{id}")]
+        [HttpGet("GetBookById/{id}")]
+        [AllowAnonymous]
         public ActionResult<BookDto> GetBookById(int id)
         {
             var book = _bookService.GetById(id);
@@ -31,43 +34,34 @@ namespace LibrarySys.Controllers
             return Ok(book);
         }
 
-        [HttpGet("BookOverdue")]
-        public ActionResult<IEnumerable<BookDto>> GetOverdueBooks()
-        {
-            var overdueBooks = _bookService.GetOverdueBooks();
-            return Ok(overdueBooks);
-        }
-
         [HttpPost("CreateBook")]
+        [Authorize(Roles = "Librarian")]
         public ActionResult<BookDto> CreateBook([FromBody] BookDto book)
         {
             var created = _bookService.Add(book);
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
 
-        [HttpPost("{bookId}/BorrowBook")]
+        [HttpPost("BorrowingBook/{id}")]
         [Authorize(Roles = "Borrower")]
-        public ActionResult<BookDto> BorrowBook(int bookId, [FromBody] UserDto borrower)
+        public ActionResult<BookDto> BorrowBook(int id, [FromQuery] int userId)
         {
-            var book = _bookService.BorrowBook(bookId, borrower);
-            if (book == null)
-                return BadRequest("Book not available or invalid borrower.");
-
-            return Ok(book);
+            var borrowed = _bookService.BorrowBook(id, userId);
+            if (borrowed == null) return BadRequest("Book not available.");
+            return Ok(borrowed);
         }
 
-        [HttpPost("{bookId}/ReturnBook")]
-        [Authorize(Roles = "Borrower")]
-        public ActionResult<BookDto> ReturnBook(int bookId, [FromBody] UserDto borrower)
+        [HttpPost("ReturnBook/{id}")]
+        [Authorize(Roles = "Librarian")]
+        public ActionResult<BookDto> ReturnBook(int id, [FromQuery] int userId)
         {
-            var book = _bookService.ReturnBook(bookId, borrower);
-            if (book == null)
-                return BadRequest("Book not borrowed by this user or invalid request.");
-
-            return Ok(book);
+            var returned = _bookService.ReturnBook(id, userId);
+            if (returned == null) return BadRequest("Book not currently borrowed.");
+            return Ok(returned);
         }
 
-        [HttpPut("{id}/UpdateBook")]
+        [HttpPut("UpdateBook/{id}")]
+        [Authorize(Roles = "Librarian")]
         public ActionResult<BookDto> UpdateBook(int id, [FromBody] BookDto book)
         {
             if (id != book.Id) return BadRequest("ID mismatch");
@@ -76,7 +70,8 @@ namespace LibrarySys.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}/DeleteBook")]
+        [HttpDelete("DeleteBook/{id}")]
+        [Authorize(Roles = "Librarian")]
         public IActionResult DeleteBook(int id)
         {
             var deleted = _bookService.Delete(id);

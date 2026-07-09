@@ -22,17 +22,14 @@ namespace LibrarySys.Repositories
                 IsOverdue = false
             };
             _logs.Add(log);
-            return log;
+            return log!;
         }
 
-        public IEnumerable<BorrowingLogDto> GetAll()
-        {
-            return _logs;
-        }
+        public IEnumerable<BorrowingLogDto> GetAll() => _logs!;
 
         public IEnumerable<BorrowingLogDto> GetHistoryByUser(int userId)
         {
-            return _logs.Where(l => l.UserId == userId).ToList();
+            return _logs.Where(l => l.UserId == userId).ToList()!;
         }
 
         public void LogReturn(int bookId, int userId, DateTime returnDate)

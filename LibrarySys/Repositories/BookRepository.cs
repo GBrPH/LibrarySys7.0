@@ -18,19 +18,14 @@ namespace LibrarySys.Repositories
             };
         }
 
-        public IEnumerable<BookDto> GetAll() 
-        { 
-            return _books; 
-        }
+        public IEnumerable<BookDto> GetAll() => _books!;
 
-        public BookDto GetById(int id)
-        {
-            return _books.Find(b => b.Id == id);
-        }
+        public BookDto GetById(int id) => _books.Find(b => b.Id == id);
+
         public List<BookDto> GetOverdueBooks()
         {
             var today = DateTime.UtcNow;
-            return _books
+            return _books!
                 .Where(b => b.BorrowedByUserId != null
                             && b.DueDate.HasValue
                             && b.DueDate.Value < today)
@@ -41,7 +36,7 @@ namespace LibrarySys.Repositories
         {
             book.Id = _books.Count + 1;
             _books.Add(book);
-            return book;
+            return book!;
         }
 
         public BookDto Update(BookDto book)
@@ -53,12 +48,6 @@ namespace LibrarySys.Repositories
                 existing.Author = book.Author;
             }
             return existing;
-        }
-
-        public bool Delete(int id)
-        {
-            var book = _books.Find(b => b.Id == id);
-            return _books.Remove(book);
         }
 
         public BookDto BorrowBook(int bookId, int userId, int days = 14)
@@ -84,6 +73,11 @@ namespace LibrarySys.Repositories
             book.DueDate = null;
             return book;
         }
-        
+
+        public bool Delete(int id)
+        {
+            var book = _books.Find(b => b.Id == id);
+            return _books.Remove(book);
+        }
     }
 }

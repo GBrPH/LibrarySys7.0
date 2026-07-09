@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,15 +55,23 @@ builder.Services.AddScoped<LibrarySys.Services.BorrowingLogService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = "https://your-auth-server"; 
-        options.Audience = "LibrarySysAPI";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
     });
 
 builder.Services.AddAuthorization();
 
-var app = builder.Build();
 
-// Configure middleware
+var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -69,10 +79,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();   
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

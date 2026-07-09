@@ -22,7 +22,7 @@ namespace LibrarySys.Repositories
 
         public IEnumerable<UserDto> GetAll()
         {
-            return _users;
+            return _users!;
         }
 
         public UserDto GetById(int id)
@@ -43,14 +43,14 @@ namespace LibrarySys.Repositories
             if (isActive.HasValue)
                 query = query.Where(u => u.IsActive == isActive.Value);
 
-            return query.ToList();
+            return query.ToList()!;
         }
 
         public UserDto Insert(UserDto user)
         {
             user.Id = _users.Count + 1;
             _users.Add(user);
-            return user;
+            return user!;
         }
 
         public UserDto RegisterBorrower(string username, string fullName)
@@ -64,7 +64,7 @@ namespace LibrarySys.Repositories
                 IsActive = true
             };
             _users.Add(user);
-            return user;
+            return user!;
         }
 
         public UserDto Update(UserDto user)
