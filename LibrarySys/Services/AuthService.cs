@@ -1,12 +1,12 @@
-﻿using LibrarySys.DTOs;
+﻿using LibrarySys.Dtos;
 
 namespace LibrarySys.Services
 {
     public class AuthService
     {
-        public Users Logout(Users user)
+        public UserDto Logout(UserDto user)
         {
-            user.IsLoggedIn = false;
+            user.IsActive = false;   
             return user;
         }
     }
