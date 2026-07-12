@@ -1,6 +1,26 @@
-﻿namespace LibrarySys.Pages.Users
-{
-    public class Index
-    {
-    }
-}
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@model UsersModel
+@attribute [Authorize(Roles = "Admin")]
+
+<h2>Registered Users</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.Role</td>
+                <td>@(user.IsLoggedIn ? "Online" : "Offline")</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,6 +1,33 @@
-﻿namespace LibrarySys.Pages.Books
-{
-    public class Index
-    {
-    }
-}
+﻿@page
+@model BooksModel
+
+<h2>Library Books</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Available Copies</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model.Books)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@book.Author</td>
+                <td>@book.CopiesAvailable</td>
+                <td>
+                    <form method="post" asp-page-handler="Borrow" asp-route-id="@book.Id">
+                        <button type="submit">Borrow</button>
+                    </form>
+                    <form method="post" asp-page-handler="Return" asp-route-id="@book.Id">
+                        <button type="submit">Return</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
