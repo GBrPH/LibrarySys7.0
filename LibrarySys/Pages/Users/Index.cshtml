@@ -1,7 +1,7 @@
 ﻿@page
 @using Microsoft.AspNetCore.Authorization
 @model UsersModel
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Librarian")]
 
 <h2>Registered Users</h2>
 
@@ -9,6 +9,7 @@
     <thead>
         <tr>
             <th>Username</th>
+            <th>Full Name</th>
             <th>Role</th>
             <th>Status</th>
         </tr>
@@ -18,6 +19,7 @@
         {
             <tr>
                 <td>@user.Username</td>
+                <td>@user.FullName</td>
                 <td>@user.Role</td>
                 <td>@(user.IsLoggedIn ? "Online" : "Offline")</td>
             </tr>

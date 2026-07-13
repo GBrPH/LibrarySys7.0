@@ -1,33 +1,48 @@
 ﻿@page
 @model BooksModel
 
-<h2>Library Books</h2>
+<h2 class="mb-4">Library Inventory</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Available Copies</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var book in Model.Books)
-        {
-            <tr>
-                <td>@book.Title</td>
-                <td>@book.Author</td>
-                <td>@book.CopiesAvailable</td>
-                <td>
-                    <form method="post" asp-page-handler="Borrow" asp-route-id="@book.Id">
-                        <button type="submit">Borrow</button>
-                    </form>
-                    <form method="post" asp-page-handler="Return" asp-route-id="@book.Id">
-                        <button type="submit">Return</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="row">
+    @foreach (var book in Model.Books)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <!-- Book cover placeholder -->
+                <img src="https://via.placeholder.com/150x200?text=@book.Title"
+                     class="card-img-top" alt="@book.Title" />
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@book.Title</h5>
+                    <p class="card-text text-muted">by @book.Author</p>
+
+                    <p>
+                        <span class="badge bg-info">Copies: @book.CopiesAvailable</span>
+                        @if (book.IsAvailable)
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Not Available</span>
+                        }
+                    </p>
+
+                    <div class="mt-auto">
+                        <form method="post" asp-page-handler="Borrow" class="d-inline">
+                            <input type="hidden" name="id" value="@book.Id" />
+                            <input type="hidden" name="userId" value="1" /> <!-- Example user -->
+                            <button type="submit" class="btn btn-primary btn-sm">Borrow</button>
+                        </form>
+
+                        <form method="post" asp-page-handler="Return" class="d-inline">
+                            <input type="hidden" name="id" value="@book.Id" />
+                            <input type="hidden" name="userId" value="1" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Return</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

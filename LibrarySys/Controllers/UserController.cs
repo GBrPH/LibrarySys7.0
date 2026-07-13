@@ -1,10 +1,12 @@
-﻿using LibrarySys.Dtos;
+﻿using System.Collections.Generic;
+using LibrarySys.Dtos;
 using LibrarySys.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace LibrarySys.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -17,12 +19,14 @@ namespace LibrarySys.Controllers
         }
 
         [HttpGet("GetAll")]
+        [Authorize(Roles = "Librarian")]
         public ActionResult<IEnumerable<UserDto>> GetAllUsers()
         {
-            return Ok(_userService.GetAll());
+            return Ok();
         }
 
         [HttpGet("GetUserById/{id}")]
+        [Authorize(Roles = "Librarian")]
         public ActionResult<UserDto> GetUserById(int id)
         {
             var user = _userService.GetById(id);
@@ -31,6 +35,7 @@ namespace LibrarySys.Controllers
         }
 
         [HttpPost("BorrowBookforUser")]
+        [Authorize(Roles = "Librarian")]
         public ActionResult<UserDto> RegisterBorrower([FromBody] UserDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.FullName))
@@ -41,6 +46,7 @@ namespace LibrarySys.Controllers
         }
 
         [HttpPost("RegisterUser")]
+        [Authorize(Roles = "Librarian")]
         public ActionResult<UserDto> RegisterUser([FromBody] UserDto user)
         {
             var created = _userService.Register(user);
@@ -49,6 +55,7 @@ namespace LibrarySys.Controllers
 
 
         [HttpPut("UpdateUser/{id}")]
+        [Authorize(Roles = "Librarian")]
         public ActionResult<UserDto> UpdateUser(int id, [FromBody] UserDto user)
         {
             if (id != user.Id) return BadRequest("ID mismatch");
@@ -58,6 +65,7 @@ namespace LibrarySys.Controllers
         }
 
         [HttpDelete("DeleteUser/{id}")]
+        [Authorize(Roles = "Librarian")]
         public IActionResult DeleteUser(int id)
         {
             var deleted = _userService.Delete(id);

@@ -13,19 +13,17 @@ namespace LibrarySys.Controllers
     {
         private readonly IConfiguration _config;
 
-        public AuthController(IConfiguration config)
-        {
-            _config = config;
-        }
+        public AuthController(IConfiguration config) => _config = config;
 
         [HttpPost("LogIn")]
         public IActionResult Login([FromBody] LoginDto login)
         {
+            // Example hard-coded users
             if (login.Username == "HMIR" && login.Password == "123456")
-            {
-                var token = GenerateJwtToken(login.Username, "Borrower");
-                return Ok(new { token });
-            }
+                return Ok(new { token = GenerateJwtToken(login.Username, "Librarian") });
+
+            if (login.Username == "Borrower1" && login.Password == "123456")
+                return Ok(new { token = GenerateJwtToken(login.Username, "Borrower") });
 
             return Unauthorized("Invalid credentials");
         }
@@ -37,15 +35,15 @@ namespace LibrarySys.Controllers
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
-                new Claim(ClaimTypes.Role, role)
-            };
+            new Claim(JwtRegisteredClaimNames.Sub, username),
+            new Claim(ClaimTypes.Role, role)
+        };
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

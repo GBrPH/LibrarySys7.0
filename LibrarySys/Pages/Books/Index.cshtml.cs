@@ -2,19 +2,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 public class BooksModel : PageModel
 {
-    public List<BookDto> Books { get; set; }
+    public List<BookDto> Books { get; set; } = new();
 
     public async Task OnGetAsync()
     {
         using var client = new HttpClient();
         var token = HttpContext.Session.GetString("JwtToken");
-        client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        if (!string.IsNullOrEmpty(token))
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await client.GetAsync("https://localhost:5001/api/Book");
+        var response = await client.GetAsync("https://localhost:7089/api/Book/GetAllBooks");
         if (response.IsSuccessStatusCode)
         {
             var json = await response.Content.ReadAsStringAsync();
@@ -22,15 +23,23 @@ public class BooksModel : PageModel
         }
     }
 
-    public async Task<IActionResult> OnPostBorrowAsync(int id)
+    public async Task<IActionResult> OnPostBorrowAsync(int id, int userId)
     {
-        // Call BorrowBook API with Bearer token
+        using var client = new HttpClient();
+        var token = HttpContext.Session.GetString("JwtToken");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        await client.PostAsync($"https://localhost:7089/api/Book/BorrowingBook/{id}?userId={userId}", null);
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostReturnAsync(int id)
+    public async Task<IActionResult> OnPostReturnAsync(int id, int userId)
     {
-        // Call ReturnBook API with Bearer token
+        using var client = new HttpClient();
+        var token = HttpContext.Session.GetString("JwtToken");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        await client.PostAsync($"https://localhost:7089/api/Book/ReturnBook/{id}?userId={userId}", null);
         return RedirectToPage();
     }
 }
