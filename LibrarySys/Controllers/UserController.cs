@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using LibrarySys.Dtos;
+using LibrarySys.Models;
 using LibrarySys.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace LibrarySys.Controllers
         [Authorize(Roles = "Librarian")]
         public ActionResult<IEnumerable<UserDto>> GetAllUsers()
         {
-            return Ok();
+            return Ok(_userService.GetAll());
         }
 
         [HttpGet("GetUserById/{id}")]
@@ -52,7 +53,6 @@ namespace LibrarySys.Controllers
             var created = _userService.Register(user);
             return CreatedAtAction(nameof(GetUserById), new { id = created.Id }, created);
         }
-
 
         [HttpPut("UpdateUser/{id}")]
         [Authorize(Roles = "Librarian")]

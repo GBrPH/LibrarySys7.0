@@ -18,7 +18,6 @@ namespace LibrarySys.Controllers
         [HttpPost("LogIn")]
         public IActionResult Login([FromBody] LoginDto login)
         {
-            // Example hard-coded users
             if (login.Username == "HMIR" && login.Password == "123456")
                 return Ok(new { token = GenerateJwtToken(login.Username, "Librarian") });
 

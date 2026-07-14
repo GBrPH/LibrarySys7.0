@@ -20,8 +20,8 @@ public class LoginModel : PageModel
             var obj = JsonConvert.DeserializeObject<dynamic>(json);
             string token = obj.token;
 
-            HttpContext.Session.SetString("JwtToken", token);  // ✅ Save token in session
-            return RedirectToPage("/Books/Index");             // Redirect to Books page
+            HttpContext.Session.SetString("JwtToken", token);  
+            return RedirectToPage("/Books/Index");             
         }
 
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");

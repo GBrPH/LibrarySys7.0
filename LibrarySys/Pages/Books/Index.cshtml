@@ -8,7 +8,6 @@
     {
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
-                <!-- Book cover placeholder -->
                 <img src="https://via.placeholder.com/150x200?text=@book.Title"
                      class="card-img-top" alt="@book.Title" />
 
@@ -31,7 +30,7 @@
                     <div class="mt-auto">
                         <form method="post" asp-page-handler="Borrow" class="d-inline">
                             <input type="hidden" name="id" value="@book.Id" />
-                            <input type="hidden" name="userId" value="1" /> <!-- Example user -->
+                            <input type="hidden" name="userId" value="1" /> 
                             <button type="submit" class="btn btn-primary btn-sm">Borrow</button>
                         </form>
 
