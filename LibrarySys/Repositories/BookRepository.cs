@@ -77,7 +77,7 @@ namespace LibrarySys.Repositories
         public bool Delete(int id)
         {
             var book = _books.Find(b => b.Id == id);
-            return _books.Remove(book);
+            return _books.Remove(book!);
         }
     }
 }

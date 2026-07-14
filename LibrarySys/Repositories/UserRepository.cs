@@ -11,7 +11,8 @@ namespace LibrarySys.Repositories
 
         public UserRepository()
         {
-            // Dummy Data for initial users
+            // Dummy Data so that my system can work
+            // Note to self make a database in sql
             _users = new List<UserDto>
             {
                 new UserDto { Id = 1, Username = "librarian1", FullName = "Alice Librarian", Role = "Librarian", IsActive = true },
@@ -20,15 +21,10 @@ namespace LibrarySys.Repositories
             };
         }
 
-        public IEnumerable<UserDto> GetAll()
-        {
-            return _users!;
-        }
+        public IEnumerable<UserDto> GetAll() => _users!;
 
-        public UserDto GetById(int id)
-        {
-            return _users.Find(u => u.Id == id);
-        }
+        public UserDto GetById(int id) => _users.Find(u => u.Id == id);
+
 
         public IEnumerable<UserDto> Search(string username = null, string role = null, bool? isActive = null)
         {
