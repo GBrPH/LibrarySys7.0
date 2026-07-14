@@ -1,4 +1,5 @@
 ﻿using LibrarySys.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -7,6 +8,7 @@ using System.Text;
 
 namespace LibrarySys.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -18,7 +20,7 @@ namespace LibrarySys.Controllers
         [HttpPost("LogIn")]
         public IActionResult Login([FromBody] LoginDto login)
         {
-            // Example hard-coded users
+            // Example hard-coded for users
             if (login.Username == "HMIR" && login.Password == "123456")
                 return Ok(new { token = GenerateJwtToken(login.Username, "Librarian") });
 
@@ -27,6 +29,11 @@ namespace LibrarySys.Controllers
 
             return Unauthorized("Invalid credentials");
         }
+
+        //public IActionResult Logout()
+        //{
+            
+        //}
 
         private string GenerateJwtToken(string username, string role)
         {

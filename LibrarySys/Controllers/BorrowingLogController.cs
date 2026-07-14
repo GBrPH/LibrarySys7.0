@@ -6,6 +6,7 @@ using System.Data;
 
 namespace LibrarySys.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BorrowingLogController : ControllerBase
@@ -18,16 +19,14 @@ namespace LibrarySys.Controllers
         }
 
         [HttpGet("GetAllLog")]
-        [Authorize(Roles = "Librarian")]
-        [Authorize(Roles = "Borrower")]
+        [Authorize(Roles = "Librarian,Borrower")]
         public ActionResult<IEnumerable<BorrowingLogDto>> GetAll()
         {
             return Ok(_service.GetAll());
         }
 
         [HttpGet("LogOfUser/{id}")]
-        [Authorize(Roles = "Librarian")]
-        [Authorize(Roles = "Borrower")]
+        [Authorize(Roles = "Librarian,Borrower")]
         public ActionResult<IEnumerable<BorrowingLogDto>> GetHistoryByUser(int userId)
         {
             var history = _service.GetHistoryByUser(userId);

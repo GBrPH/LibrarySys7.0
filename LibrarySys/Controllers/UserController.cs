@@ -53,7 +53,6 @@ namespace LibrarySys.Controllers
             return CreatedAtAction(nameof(GetUserById), new { id = created.Id }, created);
         }
 
-
         [HttpPut("UpdateUser/{id}")]
         [Authorize(Roles = "Librarian")]
         public ActionResult<UserDto> UpdateUser(int id, [FromBody] UserDto user)
