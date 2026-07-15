@@ -7,14 +7,14 @@ function Books() {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        axios.get(process.env.REACT_APP_API_URL + "/books")
+        axios.get(`${process.env.REACT_APP_API_URL}/Book/GetAllBooks`)
             .then(res => setBooks(res.data))
-            .catch(err => console.error(err));
+            .catch(err => console.error("Error fetching books:", err));
     }, []);
 
     const filteredBooks = books.filter(b =>
-        b.title.toLowerCase().includes(search.toLowerCase()) ||
-        b.author.toLowerCase().includes(search.toLowerCase())
+        b.title?.toLowerCase().includes(search.toLowerCase()) ||
+        b.author?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
@@ -30,7 +30,10 @@ function Books() {
             <table className="table table-striped">
                 <thead>
                     <tr>
-                        <th>Title</th><th>Author</th><th>Category</th><th>Status</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Copies Available</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,8 +41,8 @@ function Books() {
                         <tr key={book.id}>
                             <td>{book.title}</td>
                             <td>{book.author}</td>
-                            <td>{book.category}</td>
-                            <td>{book.isBorrowed ? "Borrowed" : "Available"}</td>
+                            <td>{book.copiesAvailable}</td>
+                            <td>{book.isAvailable ? "Available" : "Borrowed"}</td>
                         </tr>
                     ))}
                 </tbody>
