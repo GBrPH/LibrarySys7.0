@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -6,6 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="NewFolder1\**" />
+    <Content Remove="NewFolder1\**" />
+    <EmbeddedResource Remove="NewFolder1\**" />
+    <None Remove="NewFolder1\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.79" />
@@ -16,6 +23,19 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
     <PackageReference Include="System.Security.Permissions" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="backend\Migrations\" />
+    <Folder Include="backend\Configurations\" />
+    <Folder Include="frontend\node_modules\" />
+    <Folder Include="frontend\src\assets\" />
+    <Folder Include="frontend\src\context\" />
+    <Folder Include="frontend\src\hooks\" />
+    <Folder Include="frontend\src\utils\" />
+    <Folder Include="frontend\public\" />
+    <Folder Include="test\BackEnd\" />
+    <Folder Include="test\FrontEnd\" />
   </ItemGroup>
 
 </Project>
