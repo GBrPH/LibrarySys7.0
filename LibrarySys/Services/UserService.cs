@@ -13,15 +13,18 @@ namespace LibrarySys.Services
             _repo = repo;
         }
 
+<<<<<<< HEAD
         public IEnumerable<UserDto> GetAll() => _repo.GetAll()!;
+=======
+        public IEnumerable<UserDto> GetAll()  => _repo.GetAll()!;
+>>>>>>> fc138d0cd9900d0608136949f1d6564949de2012
 
         public UserDto GetById(int id) => _repo.GetById(id);
 
         public IEnumerable<UserDto> Search(string username, string role, bool? isActive)
             => _repo.Search(username, role, isActive)!;
 
-        public UserDto Register(UserDto user)
-            => _repo.Insert(user)!;
+        public UserDto Register(UserDto user) => _repo.Insert(user)!;
 
         public UserDto RegisterBorrower(string username, string fullName)
         {
@@ -38,6 +41,10 @@ namespace LibrarySys.Services
 
         public UserDto Update(UserDto user) => _repo.Update(user);
 
+<<<<<<< HEAD
         public bool Delete(int id) => _repo.Delete(id);      
+=======
+        public bool Delete(int id)  => _repo.Delete(id);      
+>>>>>>> fc138d0cd9900d0608136949f1d6564949de2012
     }
 }

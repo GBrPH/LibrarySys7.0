@@ -7,6 +7,7 @@ using System.Data;
 
 namespace LibrarySys.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BookController : ControllerBase
@@ -43,7 +44,7 @@ namespace LibrarySys.Controllers
         }
 
         [HttpPost("BorrowingBook/{id}")]
-        [Authorize(Roles = "Borrower")]
+        [Authorize(Roles = "Librarian,Borrower")]
         public ActionResult<BookDto> BorrowBook(int id, [FromQuery] int userId)
         {
             var borrowed = _bookService.BorrowBook(id, userId);
@@ -52,7 +53,7 @@ namespace LibrarySys.Controllers
         }
 
         [HttpPost("ReturnBook/{id}")]
-        [Authorize(Roles = "Librarian")]
+        [Authorize(Roles = "Librarian,Borrower")]
         public ActionResult<BookDto> ReturnBook(int id, [FromQuery] int userId)
         {
             var returned = _bookService.ReturnBook(id, userId);
@@ -66,6 +67,7 @@ namespace LibrarySys.Controllers
         {
             if (id != book.Id) return BadRequest("ID mismatch");
             var updated = _bookService.Update(book);
+
             if (updated == null) return NotFound();
             return Ok(updated);
         }
@@ -80,3 +82,4 @@ namespace LibrarySys.Controllers
         }
     }
 }
+

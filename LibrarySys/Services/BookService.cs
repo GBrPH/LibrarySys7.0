@@ -19,7 +19,6 @@ namespace LibrarySys.Services
 
         public BookDto GetById(int id) => _repo.GetById(id);
         
-
         public IEnumerable<BookDto> GetOverdueBooks() => _repo.GetOverdueBooks()!;
 
         public BookDto Add(BookDto book) => _repo.Insert(book)!;
