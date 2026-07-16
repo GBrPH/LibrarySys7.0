@@ -1,2 +1,39 @@
-﻿body {
+﻿:root {
+    --steel-blue: #4682B4;
+    --copper: #B76E1E;
+    --light-gray: #F5F5F5;
+    --dark-navy: #2C3E50;
+    --gold: #D9B86B;
+    --cool-gray: #7F8C8D;
+}
+
+body {
+    background-color: var(--light-gray);
+    color: var(--dark-navy);
+}
+
+.navbar {
+    background-color: var(--dark-navy) !important;
+}
+
+.btn-primary {
+    background-color: var(--steel-blue);
+    border-color: var(--steel-blue);
+}
+
+.btn-warning {
+    background-color: var(--copper);
+    border-color: var(--copper);
+}
+
+.badge-success {
+    background-color: var(--steel-blue);
+}
+
+.badge-danger {
+    background-color: var(--copper);
+}
+
+.badge-secondary {
+    background-color: var(--cool-gray);
 }

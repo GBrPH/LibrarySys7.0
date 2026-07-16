@@ -1,5 +1,6 @@
 ﻿using LibrarySys.BackEnd.DTOs;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LibrarySys.BackEnd.Repositories
 {
@@ -9,7 +10,7 @@ namespace LibrarySys.BackEnd.Repositories
 
         public BookRepository()
         {
-            // Dumy Data
+            // Dummy Data
             _books = new List<BookDto>
             {
                 new BookDto { Id = 1, Title = "C# in Depth", Author = "Jon Skeet", CopiesAvailable = 3 },

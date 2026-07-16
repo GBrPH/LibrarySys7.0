@@ -3,13 +3,12 @@ using LibrarySys.BackEnd.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Data;
 
 namespace LibrarySys.BackEnd.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // require JWT auth
     public class BookController : ControllerBase
     {
         private readonly BookService _bookService;
@@ -35,15 +34,22 @@ namespace LibrarySys.BackEnd.Controllers
             return Ok(book);
         }
 
+        [HttpGet("GetOverdueBooks")]
+        [Authorize(Roles = "Librarian")]
+        public ActionResult<IEnumerable<BookDto>> GetOverdueBooks()
+        {
+            return Ok(_bookService.GetOverdueBooks());
+        }
+
         [HttpPost("CreateBook")]
         [Authorize(Roles = "Librarian")]
         public ActionResult<BookDto> CreateBook([FromBody] BookDto book)
         {
-            var created = _bookService.Add(book);
+            var created = _bookService.Add(book); // calls Insert internally
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
 
-        [HttpPost("BorrowingBook/{id}")]
+        [HttpPost("BorrowBook/{id}")]
         [Authorize(Roles = "Librarian,Borrower")]
         public ActionResult<BookDto> BorrowBook(int id, [FromQuery] int userId)
         {
@@ -67,7 +73,6 @@ namespace LibrarySys.BackEnd.Controllers
         {
             if (id != book.Id) return BadRequest("ID mismatch");
             var updated = _bookService.Update(book);
-
             if (updated == null) return NotFound();
             return Ok(updated);
         }
@@ -82,4 +87,3 @@ namespace LibrarySys.BackEnd.Controllers
         }
     }
 }
-
