@@ -1,10 +1,11 @@
+﻿import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Books from "./pages/Books";
 import Users from "./pages/Users";
 import BorrowingLog from "./pages/BorrowingLog";
-import Login from "./pages/Login";   
-import "./assets/theme.css";
+import Login from "./pages/Login";
+// import SignUp from "./pages/SignUp"; // 
 
 function App() {
     return (
@@ -14,7 +15,8 @@ function App() {
                 <Route path="/books" element={<Books />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/borrowing-log" element={<BorrowingLog />} />
-                <Route path="/login" element={<Login />} /> 
+                <Route path="/login" element={<Login />} />
+                {/* <Route path="/signup" element={<SignUp />} />  */}
             </Routes>
         </Router>
     );

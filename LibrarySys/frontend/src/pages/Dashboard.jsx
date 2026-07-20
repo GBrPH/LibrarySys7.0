@@ -55,6 +55,10 @@ function Dashboard() {
                             <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
                         </ul>
+                        <div className="d-flex ms-auto">
+                            <Link className="btn btn-outline-light me-3" to="/login">Login</Link>
+                            <Link className="btn btn-primary" to="/signup">Sign Up</Link>
+                        </div>
                     </div>
                 </div>
             </nav>
