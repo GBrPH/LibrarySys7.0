@@ -18,8 +18,17 @@ function Books() {
     const filteredBooks = books.filter(book => {
         if (filters.status === "Available" && !book.isAvailable) return false;
         if (filters.status === "Borrowed" && book.isAvailable) return false;
+
+        if (filters.author && !book.author.toLowerCase().includes(filters.author.toLowerCase())) return false;
+
+        if (filters.borrower && (!book.borrowerName || !book.borrowerName.toLowerCase().includes(filters.borrower.toLowerCase()))) return false;
+
+        if (filters.copies === "Low Stock (≤2)" && book.copiesAvailable > 2) return false;
+        if (filters.copies === "In Stock (>2)" && book.copiesAvailable <= 2) return false;
+
         return true;
     });
+
 
     return (
         <div className="container-fluid">
@@ -44,8 +53,11 @@ function Books() {
 
             <div className="row">
                 {/* Sidebar */}
+                {/* Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
+
+                    {/* Book Status */}
                     <div className="mb-3">
                         <label className="form-label">Status</label>
                         <select
@@ -58,10 +70,59 @@ function Books() {
                             <option>Borrowed</option>
                         </select>
                     </div>
-                    <div className="d-grid gap-2">
+
+                    {/* Author */}
+                    <div className="mb-3">
+                        <label className="form-label">Author</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search by author"
+                            value={filters.author || ""}
+                            onChange={e => setFilters({ ...filters, author: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Borrower Name */}
+                    <div className="mb-3">
+                        <label className="form-label">Borrower</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search by borrower"
+                            value={filters.borrower || ""}
+                            onChange={e => setFilters({ ...filters, borrower: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Copies Available */}
+                    <div className="mb-3">
+                        <label className="form-label">Copies Available</label>
+                        <select
+                            className="form-select"
+                            value={filters.copies}
+                            onChange={e => setFilters({ ...filters, copies: e.target.value })}
+                        >
+                            <option>All</option>
+                            <option>Low Stock (≤2)</option>
+                            <option>In Stock (>2)</option>
+                        </select>
+                    </div>
+
+                    {/* Reset Filters */}
+                    <button
+                        className="btn btn-outline-secondary w-100"
+                        onClick={() => setFilters({ status: "All", author: "", borrower: "", copies: "All" })}
+                    >
+                        Reset Filters
+                    </button>
+
+                    {/* Add Book */}
+                    <div className="d-grid gap-2 mt-3">
                         <Link to="/books/add" className="btn btn-success">Add Book</Link>
                     </div>
                 </div>
+
 
                 {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">

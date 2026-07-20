@@ -16,11 +16,26 @@ function Users() {
     }, []);
 
     const filteredUsers = users.filter(user => {
-        if (filters.role === "Librarian" && user.role !== "Librarian") return false;
-        if (filters.role === "Faculty" && user.role !== "Faculty") return false;
-        if (filters.role === "Student" && user.role !== "Student") return false;
+        // Role filter
+        if (filters.role !== "All" && user.role !== filters.role) return false;
+
+        // Active filter
+        if (filters.active === "Active" && !user.isActive) return false;
+        if (filters.active === "Inactive" && user.isActive) return false;
+
+        // Logged In filter
+        if (filters.loggedIn === "Online" && !user.isLoggedIn) return false;
+        if (filters.loggedIn === "Offline" && user.isLoggedIn) return false;
+
+        // Username filter
+        if (filters.username && !user.username.toLowerCase().includes(filters.username.toLowerCase())) return false;
+
+        // Full Name filter
+        if (filters.fullName && !user.fullName.toLowerCase().includes(filters.fullName.toLowerCase())) return false;
+
         return true;
     });
+
 
     return (
         <div className="container-fluid">
@@ -45,8 +60,11 @@ function Users() {
 
             <div className="row">
                 {/* Sidebar */}
+                {/* Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
+
+                    {/* Role */}
                     <div className="mb-3">
                         <label className="form-label">Role</label>
                         <select
@@ -60,10 +78,73 @@ function Users() {
                             <option>Student</option>
                         </select>
                     </div>
-                    <div className="d-grid gap-2">
+
+                    {/* Active Status */}
+                    <div className="mb-3">
+                        <label className="form-label">Active Status</label>
+                        <select
+                            className="form-select"
+                            value={filters.active}
+                            onChange={e => setFilters({ ...filters, active: e.target.value })}
+                        >
+                            <option>All</option>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+
+                    {/* Logged In Status */}
+                    <div className="mb-3">
+                        <label className="form-label">Logged In</label>
+                        <select
+                            className="form-select"
+                            value={filters.loggedIn}
+                            onChange={e => setFilters({ ...filters, loggedIn: e.target.value })}
+                        >
+                            <option>All</option>
+                            <option>Online</option>
+                            <option>Offline</option>
+                        </select>
+                    </div>
+
+                    {/* Search by Username */}
+                    <div className="mb-3">
+                        <label className="form-label">Username</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search by username"
+                            value={filters.username || ""}
+                            onChange={e => setFilters({ ...filters, username: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Search by Full Name */}
+                    <div className="mb-3">
+                        <label className="form-label">Full Name</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search by full name"
+                            value={filters.fullName || ""}
+                            onChange={e => setFilters({ ...filters, fullName: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Reset Filters */}
+                    <button
+                        className="btn btn-outline-secondary w-100"
+                        onClick={() => setFilters({ role: "All", active: "All", loggedIn: "All", username: "", fullName: "" })}
+                    >
+                        Reset Filters
+                    </button>
+
+                    {/* Add User */}
+                    <div className="d-grid gap-2 mt-3">
                         <Link to="/users/add" className="btn btn-success">Add User</Link>
                     </div>
                 </div>
+
 
                 {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
