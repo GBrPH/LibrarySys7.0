@@ -16,21 +16,16 @@ function Users() {
     }, []);
 
     const filteredUsers = users.filter(user => {
-        // Role filter
         if (filters.role !== "All" && user.role !== filters.role) return false;
 
-        // Active filter
         if (filters.active === "Active" && !user.isActive) return false;
         if (filters.active === "Inactive" && user.isActive) return false;
 
-        // Logged In filter
         if (filters.loggedIn === "Online" && !user.isLoggedIn) return false;
         if (filters.loggedIn === "Offline" && user.isLoggedIn) return false;
 
-        // Username filter
         if (filters.username && !user.username.toLowerCase().includes(filters.username.toLowerCase())) return false;
 
-        // Full Name filter
         if (filters.fullName && !user.fullName.toLowerCase().includes(filters.fullName.toLowerCase())) return false;
 
         return true;

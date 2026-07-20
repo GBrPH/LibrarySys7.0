@@ -5,7 +5,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Books() {
     const [books, setBooks] = useState([]);
-    const [filters, setFilters] = useState({ status: "All" });
+    const [filters, setFilters] = useState({
+        status: "All",
+        author: "",
+        borrower: "",
+        copies: "All",
+        search: ""
+    });
 
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/Book/GetAllBooks`, {
@@ -16,19 +22,28 @@ function Books() {
     }, []);
 
     const filteredBooks = books.filter(book => {
+        // Status filter
         if (filters.status === "Available" && !book.isAvailable) return false;
         if (filters.status === "Borrowed" && book.isAvailable) return false;
 
+        // Author filter
         if (filters.author && !book.author.toLowerCase().includes(filters.author.toLowerCase())) return false;
 
+        // Borrower filter
         if (filters.borrower && (!book.borrowerName || !book.borrowerName.toLowerCase().includes(filters.borrower.toLowerCase()))) return false;
 
+        // Copies filter
         if (filters.copies === "Low Stock (≤2)" && book.copiesAvailable > 2) return false;
         if (filters.copies === "In Stock (>2)" && book.copiesAvailable <= 2) return false;
 
+        // Search filter (title or author)
+        if (filters.search && !(
+            book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+            book.author.toLowerCase().includes(filters.search.toLowerCase())
+        )) return false;
+
         return true;
     });
-
 
     return (
         <div className="container-fluid">
@@ -52,7 +67,6 @@ function Books() {
             </nav>
 
             <div className="row">
-                {/* Sidebar */}
                 {/* Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
@@ -78,24 +92,24 @@ function Books() {
                             type="text"
                             className="form-control"
                             placeholder="Search by author"
-                            value={filters.author || ""}
+                            value={filters.author}
                             onChange={e => setFilters({ ...filters, author: e.target.value })}
                         />
                     </div>
 
-                    {/* Borrower Name */}
+                    {/* Borrower */}
                     <div className="mb-3">
                         <label className="form-label">Borrower</label>
                         <input
                             type="text"
                             className="form-control"
                             placeholder="Search by borrower"
-                            value={filters.borrower || ""}
+                            value={filters.borrower}
                             onChange={e => setFilters({ ...filters, borrower: e.target.value })}
                         />
                     </div>
 
-                    {/* Copies Available */}
+                    {/* Copies */}
                     <div className="mb-3">
                         <label className="form-label">Copies Available</label>
                         <select
@@ -112,28 +126,60 @@ function Books() {
                     {/* Reset Filters */}
                     <button
                         className="btn btn-outline-secondary w-100"
-                        onClick={() => setFilters({ status: "All", author: "", borrower: "", copies: "All" })}
+                        onClick={() => setFilters({ status: "All", author: "", borrower: "", copies: "All", search: "" })}
                     >
                         Reset Filters
                     </button>
-
-                    {/* Add Book */}
-                    <div className="d-grid gap-2 mt-3">
-                        <Link to="/books/add" className="btn btn-success">Add Book</Link>
-                    </div>
                 </div>
-
 
                 {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    <h2 className="mb-4">Books</h2>
+                    {/* Top bar */}
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                        {/* Left: Title + total count */}
+                        <h5 className="mb-0">
+                            Books <span className="text-muted">({filteredBooks.length} total)</span>
+                        </h5>
+
+                        {/* Center: Search bar */}
+                        <div className="input-group w-50">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search books..."
+                                value={filters.search}
+                                onChange={e => setFilters({ ...filters, search: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Right: icons + add book */}
+                        <div className="d-flex align-items-center">
+                            <button className="btn btn-outline-secondary me-2">
+                                <i className="bi bi-grid"></i>
+                            </button>
+                            <button className="btn btn-outline-secondary me-2">
+                                <i className="bi bi-list"></i>
+                            </button>
+                            <Link to="/settings" className="btn btn-outline-secondary me-2">
+                                <i className="bi bi-three-dots"></i>
+                            </Link>
+                            <Link to="/books/add" className="btn btn-success">Add Book</Link>
+                        </div>
+                    </div>
+
+                    {/* Books table */}
                     <div className="card shadow-sm">
                         <div className="card-body">
-                            <h5>All Books</h5>
                             <table className="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>ID</th><th>Title</th><th>Author</th><th>Copies</th><th>Status</th><th>Actions</th>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Borrower</th>
+                                        <th>Copies</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -142,6 +188,7 @@ function Books() {
                                             <td>{book.id}</td>
                                             <td>{book.title}</td>
                                             <td>{book.author}</td>
+                                            <td>{book.borrowerName || "-"}</td>
                                             <td>{book.copiesAvailable}</td>
                                             <td>
                                                 <span className={`badge ${book.isAvailable ? "bg-success" : "bg-secondary"}`}>
@@ -155,7 +202,7 @@ function Books() {
                                         </tr>
                                     ))}
                                     {filteredBooks.length === 0 && (
-                                        <tr><td colSpan="6" className="text-center text-muted">No records match filters</td></tr>
+                                        <tr><td colSpan="7" className="text-center text-muted">No records match filters</td></tr>
                                     )}
                                 </tbody>
                             </table>
