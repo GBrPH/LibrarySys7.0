@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import Books from "./pages/Books";
 import Users from "./pages/Users";
 import BorrowingLog from "./pages/BorrowingLog";
+import Login from "./pages/Login";   
 import "./assets/theme.css";
 
 function App() {
@@ -13,9 +14,10 @@ function App() {
                 <Route path="/books" element={<Books />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/borrowing-log" element={<BorrowingLog />} />
+                <Route path="/login" element={<Login />} /> 
             </Routes>
         </Router>
     );
-}   
+}
 
 export default App;

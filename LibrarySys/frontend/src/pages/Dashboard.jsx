@@ -54,7 +54,6 @@ function Dashboard() {
                             <li className="nav-item"><Link className="nav-link" to="/books">Books</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/reports">Reports</Link></li>
                         </ul>
                     </div>
                 </div>

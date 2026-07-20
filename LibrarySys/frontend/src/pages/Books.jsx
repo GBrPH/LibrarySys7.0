@@ -33,7 +33,6 @@ function Books() {
                             <li className="nav-item"><Link className="nav-link" to="/books">Books</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/reports">Reports</Link></li>
                         </ul>
                     </div>
                 </div>
@@ -65,9 +64,9 @@ function Books() {
                     <div className="mb-4">
                         <h5>Manage Books</h5>
                         <div className="d-flex gap-2">
-                            <button className="btn btn-primary">➕ Add Book</button>
-                            <button className="btn btn-warning">✏️ Update Book</button>
-                            <button className="btn btn-danger">🗑️ Delete Book</button>
+                            <button className="btn btn-primary">Add Book</button>
+                            <button className="btn btn-warning">Update Book</button>
+                            <button className="btn btn-danger">Delete Book</button>
                         </div>
                     </div>
 

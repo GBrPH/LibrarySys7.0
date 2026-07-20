@@ -9,6 +9,45 @@ namespace LibrarySys.BackEnd.Repositories
         private readonly List<BorrowingLogDto> _logs = new();
         private int _nextId = 1;
 
+        public BorrowingLogRepository()
+        {
+            _logs.Add(new BorrowingLogDto
+            {
+                Id = _nextId++,
+                BookId = 1,
+                BookTitle = "C# Fundamentals",
+                UserId = 101,
+                Username = "Alice Librarian",
+                BorrowDate = DateTime.Now.AddDays(-5),
+                ReturnDate = null,
+                IsOverdue = false
+            });
+
+            _logs.Add(new BorrowingLogDto
+            {
+                Id = _nextId++,
+                BookId = 2,
+                BookTitle = "ASP.NET Core Guide",
+                UserId = 102,
+                Username = "Bob Borrower",
+                BorrowDate = DateTime.Now.AddDays(-10),
+                ReturnDate = DateTime.Now.AddDays(-2),
+                IsOverdue = false
+            });
+
+            _logs.Add(new BorrowingLogDto
+            {
+                Id = _nextId++,
+                BookId = 3,
+                BookTitle = "React for Beginners",
+                UserId = 103,
+                Username = "Charlie Student",
+                BorrowDate = DateTime.Now.AddDays(-12),
+                ReturnDate = null,
+                IsOverdue = true
+            });
+        }
+
         public BorrowingLogDto LogBorrow(int bookId, string bookTitle, int userId, string username, DateTime borrowDate)
         {
             var log = new BorrowingLogDto

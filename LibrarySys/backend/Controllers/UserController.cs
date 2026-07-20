@@ -18,7 +18,7 @@ namespace LibrarySys.BackEnd.Controllers
             _userService = userService;
         }
 
-        [HttpGet("GetAll")]
+        [HttpGet("GetAllUsers")]
         [Authorize(Roles = "Librarian")]
         public ActionResult<IEnumerable<UserDto>> GetAllUsers()
         {

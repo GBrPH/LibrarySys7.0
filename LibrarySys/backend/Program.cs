@@ -6,14 +6,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
 builder.Services.AddControllers();
 
-// Enable Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
-// JWT Authentication
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -32,7 +29,6 @@ builder.Services.AddAuthentication("Bearer")
 
 builder.Services.AddAuthorization();
 
-// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -65,7 +61,6 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod());
 });
 
-// Register repositories/services
 builder.Services.AddSingleton<BookRepository>();
 builder.Services.AddScoped<BookService>();
 builder.Services.AddSingleton<UserRepository>();
@@ -75,7 +70,6 @@ builder.Services.AddScoped<BorrowingLogService>();
 
 var app = builder.Build();
 
-// Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -83,10 +77,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowReactApp");
+
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AllowReactApp");
+
 app.MapControllers();
 
 app.Run();
