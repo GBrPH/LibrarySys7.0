@@ -11,18 +11,14 @@ function Users() {
         axios.get(`${process.env.REACT_APP_API_URL}/User/GetAllUsers`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         })
-            .then(res => {
-                console.log("Users API response:", res.data);
-                setUsers(res.data || []);
-            })
-            .catch(err => {
-                console.error("Error fetching users:", err.response || err);
-                alert(`Failed to fetch users: ${err.response?.status} ${err.response?.statusText}`);
-            });
+            .then(res => setUsers(res.data || []))
+            .catch(err => console.error("Error fetching users:", err));
     }, []);
 
     const filteredUsers = users.filter(user => {
-        if (filters.role !== "All" && user.role !== filters.role) return false;
+        if (filters.role === "Librarian" && user.role !== "Librarian") return false;
+        if (filters.role === "Faculty" && user.role !== "Faculty") return false;
+        if (filters.role === "Student" && user.role !== "Student") return false;
         return true;
     });
 
@@ -48,44 +44,37 @@ function Users() {
             </nav>
 
             <div className="row">
-                {/* Sidebar filter */}
+                {/* Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
-                    <label className="form-label">Role</label>
-                    <select
-                        className="form-select"
-                        value={filters.role}
-                        onChange={e => setFilters({ ...filters, role: e.target.value })}
-                    >
-                        <option>All</option>
-                        <option>Librarian</option>
-                        <option>Faculty</option>
-                        <option>Borrower</option>
-                    </select>
+                    <div className="mb-3">
+                        <label className="form-label">Role</label>
+                        <select
+                            className="form-select"
+                            value={filters.role}
+                            onChange={e => setFilters({ ...filters, role: e.target.value })}
+                        >
+                            <option>All</option>
+                            <option>Librarian</option>
+                            <option>Faculty</option>
+                            <option>Student</option>
+                        </select>
+                    </div>
+                    <div className="d-grid gap-2">
+                        <Link to="/users/add" className="btn btn-success">Add User</Link>
+                    </div>
                 </div>
 
                 {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
                     <h2 className="mb-4">Users</h2>
-
-                    {/* Manage Users */}
-                    <div className="mb-4">
-                        <h5>Manage Users</h5>
-                        <div className="d-flex gap-2">
-                            <button className="btn btn-primary">Add User</button>
-                            <button className="btn btn-warning">Update User</button>
-                            <button className="btn btn-danger">Delete User</button>
-                        </div>
-                    </div>
-
-                    {/* Users table */}
                     <div className="card shadow-sm">
                         <div className="card-body">
                             <h5>All Users</h5>
                             <table className="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Status</th>
+                                        <th>ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Active</th><th>Logged In</th><th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -94,20 +83,25 @@ function Users() {
                                             <td>{user.id}</td>
                                             <td>{user.fullName}</td>
                                             <td>{user.username}</td>
+                                            <td>{user.role}</td>
                                             <td>
-                                                <span className={`badge ${user.role === "Librarian" ? "bg-primary" : "bg-secondary"}`}>
-                                                    {user.role}
+                                                <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
+                                                    {user.isActive ? "Active" : "Inactive"}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className={`badge ${user.isActive ? "bg-success" : "bg-danger"}`}>
-                                                    {user.isActive ? "Active" : "Inactive"}
+                                                <span className={`badge ${user.isLoggedIn ? "bg-info" : "bg-secondary"}`}>
+                                                    {user.isLoggedIn ? "Online" : "Offline"}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm me-2">Update</Link>
+                                                <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">Delete</Link>
                                             </td>
                                         </tr>
                                     ))}
                                     {filteredUsers.length === 0 && (
-                                        <tr><td colSpan="5" className="text-center text-muted">No records match filters</td></tr>
+                                        <tr><td colSpan="7" className="text-center text-muted">No records match filters</td></tr>
                                     )}
                                 </tbody>
                             </table>

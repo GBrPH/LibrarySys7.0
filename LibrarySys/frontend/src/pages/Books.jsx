@@ -23,14 +23,14 @@ function Books() {
 
     return (
         <div className="container-fluid">
-            {/* Top Navbar (same as Dashboard) */}
+            {/* Navbar */}
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
                 <div className="container-fluid">
                     <Link className="navbar-brand" to="/">LibrarySys</Link>
                     <div className="collapse navbar-collapse">
                         <ul className="navbar-nav me-auto">
                             <li className="nav-item"><Link className="nav-link" to="/">Dashboard</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/books">Books</Link></li>
+                            <li className="nav-item"><Link className="nav-link active" to="/books">Books</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
                         </ul>
@@ -43,7 +43,7 @@ function Books() {
             </nav>
 
             <div className="row">
-                {/* Sidebar filter */}
+                {/* Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
                     <div className="mb-3">
@@ -58,30 +58,21 @@ function Books() {
                             <option>Borrowed</option>
                         </select>
                     </div>
+                    <div className="d-grid gap-2">
+                        <Link to="/books/add" className="btn btn-success">Add Book</Link>
+                    </div>
                 </div>
 
                 {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
                     <h2 className="mb-4">Books</h2>
-
-                    {/* Manage Books section */}
-                    <div className="mb-4">
-                        <h5>Manage Books</h5>
-                        <div className="d-flex gap-2">
-                            <button className="btn btn-primary">Add Book</button>
-                            <button className="btn btn-warning">Update Book</button>
-                            <button className="btn btn-danger">Delete Book</button>
-                        </div>
-                    </div>
-
-                    {/* All Books table */}
                     <div className="card shadow-sm">
                         <div className="card-body">
                             <h5>All Books</h5>
                             <table className="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>ID</th><th>Title</th><th>Author</th><th>Copies</th><th>Status</th>
+                                        <th>ID</th><th>Title</th><th>Author</th><th>Copies</th><th>Status</th><th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -96,10 +87,14 @@ function Books() {
                                                     {book.isAvailable ? "Available" : "Borrowed"}
                                                 </span>
                                             </td>
+                                            <td>
+                                                <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm me-2">Update</Link>
+                                                <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm">Delete</Link>
+                                            </td>
                                         </tr>
                                     ))}
                                     {filteredBooks.length === 0 && (
-                                        <tr><td colSpan="5" className="text-center text-muted">No records match filters</td></tr>
+                                        <tr><td colSpan="6" className="text-center text-muted">No records match filters</td></tr>
                                     )}
                                 </tbody>
                             </table>

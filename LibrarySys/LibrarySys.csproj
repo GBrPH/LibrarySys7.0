@@ -32,6 +32,7 @@
     <Folder Include="frontend\src\assets\" />
     <Folder Include="frontend\src\context\" />
     <Folder Include="frontend\src\hooks\" />
+    <Folder Include="frontend\src\pages\NewFolder\" />
     <Folder Include="frontend\src\utils\" />
     <Folder Include="frontend\public\" />
     <Folder Include="test\BackEnd\" />
