@@ -53,7 +53,7 @@ function Login() {
                 {message && <p className="mt-3 text-center">{message}</p>}
                 <div className="text-center mt-3">
                     <span>Don’t have an account? </span>
-                    {/* 👉 Sign Up link is present but non-functional */}
+                    {/* Sign Up link not functional */}
                     <Link to="/signup" className="text-decoration-none text-secondary">Sign Up</Link>
                 </div>
             </div>

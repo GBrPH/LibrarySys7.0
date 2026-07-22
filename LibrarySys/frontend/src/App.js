@@ -21,7 +21,6 @@ function App() {
     return (
         <Router>
             <Routes>
-
                 <Route path="/" element={<Dashboard />} />
 
                 <Route path="/books" element={<Books />} />
@@ -33,7 +32,6 @@ function App() {
                 <Route path="/users/add" element={<AddUser />} />
                 <Route path="/users/update/:id" element={<UpdateUser />} />
                 <Route path="/users/delete/:id" element={<DeleteUser />} />
-
 
                 <Route path="/borrowing-log" element={<BorrowingLog />} />
 

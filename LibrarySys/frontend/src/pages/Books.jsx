@@ -10,7 +10,11 @@ function Books() {
         author: "",
         borrower: "",
         copies: "All",
-        search: ""
+        search: "",
+        startDate: null,
+        endDate: null,
+        materialType: "All",   // new filter
+        az: "None"             // new A–Z sort
     });
 
     useEffect(() => {
@@ -21,22 +25,27 @@ function Books() {
             .catch(err => console.error("Error fetching books:", err));
     }, []);
 
-    const filteredBooks = books.filter(book => {
-        // Status filter
+    let filteredBooks = books.filter(book => {
         if (filters.status === "Available" && !book.isAvailable) return false;
         if (filters.status === "Borrowed" && book.isAvailable) return false;
 
-        // Author filter
         if (filters.author && !book.author.toLowerCase().includes(filters.author.toLowerCase())) return false;
 
-        // Borrower filter
         if (filters.borrower && (!book.borrowerName || !book.borrowerName.toLowerCase().includes(filters.borrower.toLowerCase()))) return false;
 
-        // Copies filter
-        if (filters.copies === "Low Stock (≤2)" && book.copiesAvailable > 2) return false;
-        if (filters.copies === "In Stock (>2)" && book.copiesAvailable <= 2) return false;
+        if (filters.copies === "Low Stock (1–9)" && (book.copiesAvailable < 1 || book.copiesAvailable > 9)) return false;
+        if (filters.copies === "High Stock (≥10)" && book.copiesAvailable < 10) return false;
+        if (filters.copies === "Out of Stock (0)" && book.copiesAvailable !== 0) return false;
+        if (filters.copies === "Recently Stocked") {
+            const daysAgo = 20; 
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - daysAgo);
+            const created = new Date(book.createdAt);
+            if (created < cutoff) return false;
+        }
 
-        // Search filter (title or author)
+        if (filters.materialType !== "All" && book.type !== filters.materialType) return false;
+
         if (filters.search && !(
             book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
             book.author.toLowerCase().includes(filters.search.toLowerCase())
@@ -44,6 +53,19 @@ function Books() {
 
         return true;
     });
+
+    if (filters.az === "Title (A–Z)") {
+        filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
+    }
+    if (filters.az === "Title (Z–A)") {
+        filteredBooks.sort((a, b) => b.title.localeCompare(a.title));
+    }
+    if (filters.az === "Author (A–Z)") {
+        filteredBooks.sort((a, b) => a.author.localeCompare(b.author));
+    }
+    if (filters.az === "Author (Z–A)") {
+        filteredBooks.sort((a, b) => b.author.localeCompare(a.author));
+    }
 
     return (
         <div className="container-fluid">
@@ -91,22 +113,29 @@ function Books() {
                         <input
                             type="text"
                             className="form-control"
-                            placeholder="Search by author"
+                            placeholder="Search by Author"
                             value={filters.author}
+                            maxLength={50} 
                             onChange={e => setFilters({ ...filters, author: e.target.value })}
                         />
                     </div>
 
-                    {/* Borrower */}
+                    {/* Material Type */}
                     <div className="mb-3">
-                        <label className="form-label">Borrower</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search by borrower"
-                            value={filters.borrower}
-                            onChange={e => setFilters({ ...filters, borrower: e.target.value })}
-                        />
+                        <label className="form-label">Material Type</label>
+                        <select
+                            className="form-select"
+                            value={filters.materialType}   // ✅ match state key
+                            onChange={e => setFilters({ ...filters, materialType: e.target.value })}
+                        >
+                            <option>All</option>
+                            <option>Book</option>
+                            <option>Magazine</option>
+                            <option>Newspaper</option>
+                            <option>Journal</option>
+                            <option>eBook</option>
+                            <option>Other</option>
+                        </select>
                     </div>
 
                     {/* Copies */}
@@ -118,18 +147,74 @@ function Books() {
                             onChange={e => setFilters({ ...filters, copies: e.target.value })}
                         >
                             <option>All</option>
-                            <option>Low Stock (≤2)</option>
-                            <option>In Stock (>2)</option>
+                            <option>Low Stock</option>
+                            <option>High Stock</option>
+                            <option>Out of Stock </option>
+                            <option>Recently Stocked</option>
                         </select>
                     </div>
+
+                    {/* Created Date */}
+                    <div className="mb-3">
+                        <label className="form-label">Created Between</label>
+                        <div className="d-flex gap-2">
+                            {/* Start Date */}
+                            <input
+                                type="date"
+                                style={{ maxWidth: "140px" }}
+                                className="form-control"
+                                value={filters.startDate || ""}
+                                onChange={e => setFilters({ ...filters, startDate: e.target.value })}
+                            />
+
+                            {/* End Date */}
+                            <input
+                                type="date"
+                                style={{ maxWidth: "140px" }}
+                                className="form-control"
+                                value={filters.endDate || ""}
+                                onChange={e => setFilters({ ...filters, endDate: e.target.value })}
+                            />
+                        </div>
+                    </div> 
+
+                    {/* A–Z Filter */}
+                    <div className="mb-3">
+                        <label className="form-label">Sort A–Z</label>
+                        <select
+                            className="form-select"
+                            value={filters.az}
+                            onChange={e => setFilters({ ...filters, az: e.target.value })}
+                        >
+                            <option>None</option>
+                            <option>Title (A–Z)</option>
+                            <option>Title (Z–A)</option>
+                            <option>Author (A–Z)</option>
+                            <option>Author (Z–A)</option>
+                        </select>
+                    </div>
+
 
                     {/* Reset Filters */}
                     <button
                         className="btn btn-outline-secondary w-100"
-                        onClick={() => setFilters({ status: "All", author: "", borrower: "", copies: "All", search: "" })}
+                        onClick={() =>
+                            setFilters({
+                                status: "All",
+                                borrower: "",
+                                author: "",
+                                search: "",
+                                copies: "All",
+                                startDate: null,
+                                endDate: null,
+                                materialType: "All",
+                                az: "None"
+                            })
+                        }
                     >
                         Reset Filters
                     </button>
+
                 </div>
 
                 {/* Main content */}
@@ -154,16 +239,18 @@ function Books() {
 
                         {/* Right: icons + add book */}
                         <div className="d-flex align-items-center">
-                            <button className="btn btn-outline-secondary me-2">
-                                <i className="bi bi-grid"></i>
-                            </button>
-                            <button className="btn btn-outline-secondary me-2">
-                                <i className="bi bi-list"></i>
-                            </button>
+                            <div className="btn-group me-2" role="group">
+                                <button className="btn btn-outline-secondary">
+                                    <span style={{ fontFamily: "monospace" }}>⬛</span>
+                                </button>
+                                <button className="btn btn-outline-secondary">
+                                    <span style={{ fontFamily: "monospace" }}>☰</span>
+                                </button>
+                            </div>
                             <Link to="/settings" className="btn btn-outline-secondary me-2">
-                                <i className="bi bi-three-dots"></i>
+                                <span style={{ fontStyle: "normal" }}>⚙</span>
                             </Link>
-                            <Link to="/books/add" className="btn btn-success">Add Book</Link>
+                            <Link to="/users/add" className="btn btn-success">Add User</Link>
                         </div>
                     </div>
 

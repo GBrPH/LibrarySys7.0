@@ -55,7 +55,6 @@ function Users() {
 
             <div className="row">
                 {/* Sidebar */}
-                {/* Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
 
@@ -133,17 +132,45 @@ function Users() {
                     >
                         Reset Filters
                     </button>
-
-                    {/* Add User */}
-                    <div className="d-grid gap-2 mt-3">
-                        <Link to="/users/add" className="btn btn-success">Add User</Link>
-                    </div>
                 </div>
 
 
                 {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    <h2 className="mb-4">Users</h2>
+                    {/* Top bar */}
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                        {/* Left: Title + total count */}
+                        <h5 className="mb-0">
+                            Users <span className="text-muted">({filteredUsers.length} total)</span>
+                        </h5>
+
+                        {/* Center: Search bar */}
+                        <div className="input-group w-50">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search users..."
+                                value={filters.search}
+                                onChange={e => setFilters({ ...filters, search: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Right: icons + add user */}
+                        <div className="d-flex align-items-center">
+                            <div className="btn-group me-2" role="group">
+                                <button className="btn btn-outline-secondary">
+                                    <span style={{ fontFamily: "monospace" }}>⬛</span>
+                                </button>
+                                <button className="btn btn-outline-secondary">
+                                    <span style={{ fontFamily: "monospace" }}>☰</span>
+                                </button> 
+                            </div>
+                            <Link to="/settings" className="btn btn-outline-secondary me-2">
+                                <span style={{ fontStyle: "normal" }}>⚙</span>
+                            </Link>
+                            <Link to="/users/add" className="btn btn-success">Add User</Link>
+                        </div>
+                    </div>
                     <div className="card shadow-sm">
                         <div className="card-body">
                             <h5>All Users</h5>
