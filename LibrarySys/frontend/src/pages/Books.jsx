@@ -13,8 +13,8 @@ function Books() {
         search: "",
         startDate: null,
         endDate: null,
-        materialType: "All",   // new filter
-        az: "None"             // new A–Z sort
+        materialType: "All",   
+        az: "None"            
     });
 
     useEffect(() => {
@@ -125,7 +125,7 @@ function Books() {
                         <label className="form-label">Material Type</label>
                         <select
                             className="form-select"
-                            value={filters.materialType}   // ✅ match state key
+                            value={filters.materialType}   
                             onChange={e => setFilters({ ...filters, materialType: e.target.value })}
                         >
                             <option>All</option>
@@ -250,7 +250,7 @@ function Books() {
                             <Link to="/settings" className="btn btn-outline-secondary me-2">
                                 <span style={{ fontStyle: "normal" }}>⚙</span>
                             </Link>
-                            <Link to="/users/add" className="btn btn-success">Add User</Link>
+                            <Link to="/books/add" className="btn btn-success">Add Book</Link>
                         </div>
                     </div>
 
