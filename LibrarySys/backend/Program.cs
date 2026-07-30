@@ -1,8 +1,10 @@
+using System.Text;
+using LibrarySys.BackEnd.Data;
 using LibrarySys.BackEnd.Repositories;
 using LibrarySys.BackEnd.Services;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +62,9 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
+
+builder.Services.AddDbContext<LibraryContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDb")));
 
 builder.Services.AddSingleton<BookRepository>();
 builder.Services.AddScoped<BookService>();

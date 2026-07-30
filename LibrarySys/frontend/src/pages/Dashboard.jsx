@@ -44,7 +44,7 @@ function Dashboard() {
 
     return (
         <div className="container-fluid">
-            {/* Original Top Navbar */}
+            {/* Top Navbar */}
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
                 <div className="container-fluid">
                     <Link className="navbar-brand" to="/">LibrarySys</Link>
@@ -64,7 +64,7 @@ function Dashboard() {
             </nav>
 
             <div className="row">
-                {/* Filter Sidebar */}
+                {/* Filter Sidebar (always visible) */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
                     <div className="mb-3">
@@ -85,6 +85,35 @@ function Dashboard() {
                 {/* Main Content */}
                 <div className="col-md-9 col-lg-10 p-4">
                     <h2 className="mb-4">Dashboard</h2>
+
+                    {/* Top bar: Search + Buttons */}
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        {/* Search bar */}
+                        <div className="input-group w-50">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search books..."
+                                value={filters.search}
+                                onChange={e => setFilters({ ...filters, search: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Three buttons */}
+                        <div className="d-flex align-items-center">
+                            <div className="btn-group me-2" role="group">
+                                <button className="btn btn-outline-secondary">
+                                    <span style={{ fontFamily: "monospace" }}>?</span>
+                                </button>
+                                <button className="btn btn-outline-secondary">
+                                    <span style={{ fontFamily: "monospace" }}>?</span>
+                                </button>
+                            </div>
+                            <Link to="/settings" className="btn btn-outline-secondary me-2">
+                                <span style={{ fontStyle: "normal" }}>?</span>
+                            </Link>
+                        </div>
+                    </div>
 
                     {/* Stats Cards */}
                     <div className="row mb-4">

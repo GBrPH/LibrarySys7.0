@@ -161,7 +161,7 @@ function Books() {
                             {/* Start Date */}
                             <input
                                 type="date"
-                                style={{ maxWidth: "140px" }}
+                                style={{ maxWidth: "140" }}
                                 className="form-control"
                                 value={filters.startDate || ""}
                                 onChange={e => setFilters({ ...filters, startDate: e.target.value })}
@@ -194,7 +194,6 @@ function Books() {
                         </select>
                     </div>
 
-
                     {/* Reset Filters */}
                     <button
                         className="btn btn-outline-secondary w-100"
@@ -221,12 +220,12 @@ function Books() {
                 <div className="col-md-9 col-lg-10 p-4">
                     {/* Top bar */}
                     <div className="d-flex align-items-center justify-content-between mb-3">
-                        {/* Left: Title + total count */}
+                        {/* Title + total count */}
                         <h5 className="mb-0">
                             Books <span className="text-muted">({filteredBooks.length} total)</span>
                         </h5>
 
-                        {/* Center: Search bar */}
+                        {/* Search bar */}
                         <div className="input-group w-50">
                             <input
                                 type="text"
