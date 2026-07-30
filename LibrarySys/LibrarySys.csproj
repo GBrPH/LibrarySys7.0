@@ -32,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="backend\Migrations\" />
     <Folder Include="backend\Configurations\" />
     <Folder Include="frontend\node_modules\" />
     <Folder Include="frontend\src\assets\" />

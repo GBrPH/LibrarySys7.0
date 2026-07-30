@@ -1,6 +1,16 @@
-﻿namespace LibrarySys.BackEnd.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace LibrarySys.BackEnd.Models
 {
-    public class Users
+    public class User
     {
+        [Key]
+        public int Id { get; set; }   // Primary key
+
+        public string? Username { get; set; }
+        public string? FullName { get; set; }
+        public string? Role { get; set; } = "Borrower";
+        public bool IsActive { get; set; }
+        public bool IsLoggedIn { get; set; }
     }
 }
