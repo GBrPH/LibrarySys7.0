@@ -12,7 +12,8 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`${process.env.REACT_APP_API_URL}/Auth/Login`, {
+            // Added /api prefix to match [Route("api/[controller]")]
+            const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/Auth/Login`, {
                 username,
                 password
             });
@@ -37,6 +38,7 @@ function Login() {
                             className="form-control"
                             value={username}
                             onChange={e => setUsername(e.target.value)}
+                            required
                         />
                     </div>
                     <div className="mb-3">
@@ -46,15 +48,15 @@ function Login() {
                             className="form-control"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
+                            required
                         />
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Login</button>
                 </form>
-                {message && <p className="mt-3 text-center">{message}</p>}
+                {message && <p className="mt-3 text-center text-info">{message}</p>}
                 <div className="text-center mt-3">
                     <span>Don’t have an account? </span>
-                    {/* Sign Up link not functional */}
-                    <Link to="/signup" className="text-decoration-none text-secondary">Sign Up</Link>
+                    <Link to="/signup" className="text-decoration-none">Sign Up</Link>
                 </div>
             </div>
         </div>

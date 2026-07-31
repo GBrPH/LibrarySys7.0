@@ -37,6 +37,7 @@ namespace LibrarySys.BackEnd.Services
                 Id = dto.Id,
                 Title = dto.Title,
                 Author = dto.Author,
+                BorrowerName = dto.BorrowerName ?? "",
                 CopiesAvailable = dto.CopiesAvailable,
                 IsAvailable = dto.IsAvailable,
                 BorrowedByUserId = dto.BorrowedByUserId,

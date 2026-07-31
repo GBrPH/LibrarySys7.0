@@ -6,19 +6,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Dashboard() {
     const [stats, setStats] = useState({ books: 0, users: 0, borrowed: 0, overdue: 0 });
     const [recentLogs, setRecentLogs] = useState([]);
-    const [filters, setFilters] = useState({ status: "All" });
+    const [filters, setFilters] = useState({ status: "All", search: "" });
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
+        const headers = { Authorization: `Bearer ${token}` };
+
         Promise.all([
-            axios.get(`${process.env.REACT_APP_API_URL}/Book/GetAllBooks`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-            }),
-            axios.get(`${process.env.REACT_APP_API_URL}/User/GetAll`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-            }),
-            axios.get(`${process.env.REACT_APP_API_URL}/BorrowingLog/GetAllLog`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-            })
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, { headers }),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetAllUsers`, { headers }),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/GetAllLog`, { headers })
         ]).then(([booksRes, usersRes, logsRes]) => {
             const books = booksRes.data || [];
             const users = usersRes.data || [];
@@ -50,7 +47,7 @@ function Dashboard() {
                     <Link className="navbar-brand" to="/">LibrarySys</Link>
                     <div className="collapse navbar-collapse">
                         <ul className="navbar-nav me-auto">
-                            <li className="nav-item"><Link className="nav-link" to="/">Dashboard</Link></li>
+                            <li className="nav-item"><Link className="nav-link active" to="/">Dashboard</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/books">Books</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
                             <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
@@ -64,7 +61,7 @@ function Dashboard() {
             </nav>
 
             <div className="row">
-                {/* Filter Sidebar (always visible) */}
+                {/* Filter Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
                     <div className="mb-3">
@@ -86,38 +83,32 @@ function Dashboard() {
                 <div className="col-md-9 col-lg-10 p-4">
                     <h2 className="mb-4">Dashboard</h2>
 
-                    {/* Top bar: Search + Buttons */}
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                        {/* Search bar */}
-                        <div className="input-group w-50">
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Search books..."
-                                value={filters.search}
-                                onChange={e => setFilters({ ...filters, search: e.target.value })}
-                            />
-                        </div>
-
-                        {/* Three buttons */}
-                        <div className="d-flex align-items-center">
-                            <div className="btn-group me-2" role="group">
-                                <button className="btn btn-outline-secondary">
-                                    <span style={{ fontFamily: "monospace" }}>?</span>
-                                </button>
-                                <button className="btn btn-outline-secondary">
-                                    <span style={{ fontFamily: "monospace" }}>?</span>
-                                </button>
-                            </div>
-                            <Link to="/settings" className="btn btn-outline-secondary me-2">
-                                <span style={{ fontStyle: "normal" }}>?</span>
-                            </Link>
-                        </div>
-                    </div>
-
                     {/* Stats Cards */}
                     <div className="row mb-4">
-                        {/* Cards same as before */}
+                        <div className="col-md-3">
+                            <div className="card bg-primary text-white shadow-sm p-3">
+                                <h5>Total Books</h5>
+                                <h3>{stats.books}</h3>
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <div className="card bg-success text-white shadow-sm p-3">
+                                <h5>Total Users</h5>
+                                <h3>{stats.users}</h3>
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <div className="card bg-warning text-white shadow-sm p-3">
+                                <h5>Borrowed</h5>
+                                <h3>{stats.borrowed}</h3>
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <div className="card bg-danger text-white shadow-sm p-3">
+                                <h5>Overdue</h5>
+                                <h3>{stats.overdue}</h3>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Recent Borrowing Table */}
@@ -133,7 +124,8 @@ function Dashboard() {
                                 <tbody>
                                     {filteredLogs.map(log => (
                                         <tr key={log.id}>
-                                            <td>{log.userName}</td>
+                                            {/* Fixed property: log.username instead of log.userName */}
+                                            <td>{log.username}</td>
                                             <td>{log.bookTitle}</td>
                                             <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
                                             <td>

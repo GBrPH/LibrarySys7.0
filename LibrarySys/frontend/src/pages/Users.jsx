@@ -8,8 +8,12 @@ function Users() {
     const [filters, setFilters] = useState({ role: "All" });
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/User/GetAllUsers`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        const token = localStorage.getItem("token");
+
+        if (!token) return;
+
+        axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetAllUsers`, {
+            headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setUsers(res.data || []))
             .catch(err => console.error("Error fetching users:", err));

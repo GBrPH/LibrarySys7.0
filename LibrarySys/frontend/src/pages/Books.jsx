@@ -13,13 +13,17 @@ function Books() {
         search: "",
         startDate: null,
         endDate: null,
-        materialType: "All",   
-        az: "None"            
+        materialType: "All",
+        az: "None"
     });
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/Book/GetAllBooks`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        const token = localStorage.getItem("token");
+
+        if (!token) return;
+
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
+            headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setBooks(res.data || []))
             .catch(err => console.error("Error fetching books:", err));
@@ -36,15 +40,6 @@ function Books() {
         if (filters.copies === "Low Stock (1–9)" && (book.copiesAvailable < 1 || book.copiesAvailable > 9)) return false;
         if (filters.copies === "High Stock (≥10)" && book.copiesAvailable < 10) return false;
         if (filters.copies === "Out of Stock (0)" && book.copiesAvailable !== 0) return false;
-        if (filters.copies === "Recently Stocked") {
-            const daysAgo = 20; 
-            const cutoff = new Date();
-            cutoff.setDate(cutoff.getDate() - daysAgo);
-            const created = new Date(book.createdAt);
-            if (created < cutoff) return false;
-        }
-
-        if (filters.materialType !== "All" && book.type !== filters.materialType) return false;
 
         if (filters.search && !(
             book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -89,11 +84,10 @@ function Books() {
             </nav>
 
             <div className="row">
-                {/* Sidebar */}
+                {/* Sidebar Filters */}
                 <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
                     <h5>Filters</h5>
 
-                    {/* Book Status */}
                     <div className="mb-3">
                         <label className="form-label">Status</label>
                         <select
@@ -107,7 +101,6 @@ function Books() {
                         </select>
                     </div>
 
-                    {/* Author */}
                     <div className="mb-3">
                         <label className="form-label">Author</label>
                         <input
@@ -115,70 +108,11 @@ function Books() {
                             className="form-control"
                             placeholder="Search by Author"
                             value={filters.author}
-                            maxLength={50} 
+                            maxLength={50}
                             onChange={e => setFilters({ ...filters, author: e.target.value })}
                         />
                     </div>
 
-                    {/* Material Type */}
-                    <div className="mb-3">
-                        <label className="form-label">Material Type</label>
-                        <select
-                            className="form-select"
-                            value={filters.materialType}   
-                            onChange={e => setFilters({ ...filters, materialType: e.target.value })}
-                        >
-                            <option>All</option>
-                            <option>Book</option>
-                            <option>Magazine</option>
-                            <option>Newspaper</option>
-                            <option>Journal</option>
-                            <option>eBook</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-
-                    {/* Copies */}
-                    <div className="mb-3">
-                        <label className="form-label">Copies Available</label>
-                        <select
-                            className="form-select"
-                            value={filters.copies}
-                            onChange={e => setFilters({ ...filters, copies: e.target.value })}
-                        >
-                            <option>All</option>
-                            <option>Low Stock</option>
-                            <option>High Stock</option>
-                            <option>Out of Stock </option>
-                            <option>Recently Stocked</option>
-                        </select>
-                    </div>
-
-                    {/* Created Date */}
-                    <div className="mb-3">
-                        <label className="form-label">Created Between</label>
-                        <div className="d-flex gap-2">
-                            {/* Start Date */}
-                            <input
-                                type="date"
-                                style={{ maxWidth: "140" }}
-                                className="form-control"
-                                value={filters.startDate || ""}
-                                onChange={e => setFilters({ ...filters, startDate: e.target.value })}
-                            />
-
-                            {/* End Date */}
-                            <input
-                                type="date"
-                                style={{ maxWidth: "140px" }}
-                                className="form-control"
-                                value={filters.endDate || ""}
-                                onChange={e => setFilters({ ...filters, endDate: e.target.value })}
-                            />
-                        </div>
-                    </div> 
-
-                    {/* A–Z Filter */}
                     <div className="mb-3">
                         <label className="form-label">Sort A–Z</label>
                         <select
@@ -194,7 +128,6 @@ function Books() {
                         </select>
                     </div>
 
-                    {/* Reset Filters */}
                     <button
                         className="btn btn-outline-secondary w-100"
                         onClick={() =>
@@ -213,19 +146,15 @@ function Books() {
                     >
                         Reset Filters
                     </button>
-
                 </div>
 
                 {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    {/* Top bar */}
                     <div className="d-flex align-items-center justify-content-between mb-3">
-                        {/* Title + total count */}
                         <h5 className="mb-0">
                             Books <span className="text-muted">({filteredBooks.length} total)</span>
                         </h5>
 
-                        {/* Search bar */}
                         <div className="input-group w-50">
                             <input
                                 type="text"
@@ -236,19 +165,7 @@ function Books() {
                             />
                         </div>
 
-                        {/* Right: icons + add book */}
-                        <div className="d-flex align-items-center">
-                            <div className="btn-group me-2" role="group">
-                                <button className="btn btn-outline-secondary">
-                                    <span style={{ fontFamily: "monospace" }}>⬛</span>
-                                </button>
-                                <button className="btn btn-outline-secondary">
-                                    <span style={{ fontFamily: "monospace" }}>☰</span>
-                                </button>
-                            </div>
-                            <Link to="/settings" className="btn btn-outline-secondary me-2">
-                                <span style={{ fontStyle: "normal" }}>⚙</span>
-                            </Link>
+                        <div>
                             <Link to="/books/add" className="btn btn-success">Add Book</Link>
                         </div>
                     </div>
