@@ -19,7 +19,7 @@ function Books() {
 
         if (!token) return;
 
-        axios.get(`${process.env.REACT_APP_API_URL}/Book/GetAllBooks`, {
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setBooks(res.data || []))
@@ -27,19 +27,15 @@ function Books() {
     }, []);
 
     let filteredBooks = books.filter(book => {
-        // Status filter
         if (filters.status === "Available" && !book.isAvailable) return false;
         if (filters.status === "Borrowed" && book.isAvailable) return false;
 
-        // Author filter
         if (filters.author && !book.author.toLowerCase().includes(filters.author.toLowerCase())) return false;
 
-        // Stock Copies filter
         if (filters.copies === "Low Stock (1–9)" && (book.copiesAvailable < 1 || book.copiesAvailable > 9)) return false;
         if (filters.copies === "High Stock (≥10)" && book.copiesAvailable < 10) return false;
         if (filters.copies === "Out of Stock (0)" && book.copiesAvailable !== 0) return false;
 
-        // Top Search Bar (Title or Author)
         if (filters.search && !(
             book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
             book.author.toLowerCase().includes(filters.search.toLowerCase())
@@ -48,7 +44,6 @@ function Books() {
         return true;
     });
 
-    // Sorting
     if (filters.az === "Title (A–Z)") {
         filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
     }

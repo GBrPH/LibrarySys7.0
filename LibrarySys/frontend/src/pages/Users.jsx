@@ -19,7 +19,7 @@ function Users() {
 
         if (!token) return;
 
-        axios.get(`${process.env.REACT_APP_API_URL}/User/GetAllUsers`, {
+        axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetAllUsers`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setUsers(res.data || []))

@@ -13,10 +13,17 @@ function AddBook() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${process.env.REACT_APP_API_URL}/Book/CreateBook`, {
-                title,
-                author,
-                copiesAvailable: copies
+            await axios.post(`${process.env.REACT_APP_API_URL}/api/Book/CreateBook`, {
+                id: 0,
+                title: title,
+                author: author,
+                borrowerName: "",                   // Fixes non-nullable string validation
+                copiesAvailable: parseInt(copies),  // Matches BookDto property name
+                copies: parseInt(copies),           // Matches Book model property name (covers both!)
+                isAvailable: true,
+                borrowedByUserId: null,
+                borrowedDate: null,
+                dueDate: null
             }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             });
@@ -29,43 +36,25 @@ function AddBook() {
     };
 
     return (
-        <div className="container-fluid">
-            {/* Top Navbar */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+        <div className="container-fluid p-0 bg-light min-vh-100">
+            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm px-3">
                 <div className="container-fluid">
-                    <Link className="navbar-brand" to="/">LibrarySys</Link>
-                    <div className="collapse navbar-collapse">
-                        <ul className="navbar-nav me-auto">
-                            <li className="nav-item"><Link className="nav-link" to="/">Dashboard</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/books">Books</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
-                        </ul>
-                        <div className="d-flex ms-auto">
-                            <Link className="btn btn-outline-light me-3" to="/login">Login</Link>
-                            <Link className="btn btn-primary" to="/signup">Sign Up</Link>
-                        </div>
-                    </div>
+                    <Link className="navbar-brand fw-bold" to="/">LibrarySys</Link>
                 </div>
             </nav>
 
-            <div className="row">
-                {/* Sidebar */}
-                <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
-                    <h5>Actions</h5>
-                    <div className="d-grid gap-2">
-                        <Link to="/books" className="btn btn-secondary">Back to Books</Link>
-                    </div>
+            <div className="row g-0">
+                <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
+                    <Link to="/books" className="btn btn-secondary w-100">Back to Books</Link>
                 </div>
 
-                {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    <h2 className="mb-4">Add Book</h2>
-                    <div className="card shadow-sm">
-                        <div className="card-body">
+                    <h2 className="fw-bold mb-4">Add Book</h2>
+                    <div className="card border-0 shadow-sm" style={{ borderRadius: "16px" }}>
+                        <div className="card-body p-4">
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label className="form-label">Title</label>
+                                    <label className="form-label text-muted small fw-bold">TITLE</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -75,7 +64,7 @@ function AddBook() {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Author</label>
+                                    <label className="form-label text-muted small fw-bold">AUTHOR</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -85,17 +74,17 @@ function AddBook() {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Copies Available</label>
+                                    <label className="form-label text-muted small fw-bold">COPIES AVAILABLE</label>
                                     <input
                                         type="number"
                                         className="form-control"
                                         value={copies}
-                                        onChange={e => setCopies(parseInt(e.target.value))}
+                                        onChange={e => setCopies(e.target.value)}
                                         min="1"
                                         required
                                     />
                                 </div>
-                                <button type="submit" className="btn btn-success">Save</button>
+                                <button type="submit" className="btn btn-success fw-semibold">Save Book</button>
                             </form>
                             {message && <p className="mt-3 text-info">{message}</p>}
                         </div>

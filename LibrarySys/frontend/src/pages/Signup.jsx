@@ -27,11 +27,11 @@ function SignUp() {
 
     return (
         <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
-            <div className="card shadow-lg p-4" style={{ maxWidth: "400px", width: "100%" }}>
-                <h2 className="text-center mb-4 text-primary">Sign Up</h2>
+            <div className="card border-0 shadow-lg p-4" style={{ maxWidth: "400px", width: "100%", borderRadius: "16px" }}>
+                <h2 className="text-center mb-4 text-primary fw-bold">Sign Up</h2>
                 <form onSubmit={handleSignUp}>
                     <div className="mb-3">
-                        <label className="form-label">Full Name</label>
+                        <label className="form-label text-muted small fw-bold">FULL NAME</label>
                         <input
                             type="text"
                             className="form-control"
@@ -41,7 +41,7 @@ function SignUp() {
                         />
                     </div>
                     <div className="mb-3">
-                        <label className="form-label">Username</label>
+                        <label className="form-label text-muted small fw-bold">USERNAME</label>
                         <input
                             type="text"
                             className="form-control"
@@ -50,12 +50,12 @@ function SignUp() {
                             required
                         />
                     </div>
-                    <button type="submit" className="btn btn-primary w-100">Register</button>
+                    <button type="submit" className="btn btn-primary w-100 fw-semibold">Register</button>
                 </form>
-                {message && <p className="mt-3 text-center text-info">{message}</p>}
+                {message && <p className="mt-3 text-center text-info mb-0">{message}</p>}
                 <div className="text-center mt-3">
-                    <span>Already have an account? </span>
-                    <Link to="/login" className="text-decoration-none">Login</Link>
+                    <span className="text-muted small">Already have an account? </span>
+                    <Link to="/login" className="text-decoration-none fw-bold">Login</Link>
                 </div>
             </div>
         </div>

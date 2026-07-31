@@ -13,9 +13,9 @@ function Dashboard() {
         const headers = { Authorization: `Bearer ${token}` };
 
         Promise.all([
-            axios.get(`${process.env.REACT_APP_API_URL}/Book/GetAllBooks`, { headers }),
-            axios.get(`${process.env.REACT_APP_API_URL}/User/GetAllUsers`, { headers }),
-            axios.get(`${process.env.REACT_APP_API_URL}/BorrowingLog/GetAllLog`, { headers })
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, { headers }),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetAllUsers`, { headers }),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/GetAllLog`, { headers })
         ]).then(([booksRes, usersRes, logsRes]) => {
             const books = booksRes.data || [];
             const users = usersRes.data || [];

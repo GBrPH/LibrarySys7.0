@@ -12,8 +12,7 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            // Added /api prefix to match [Route("api/[controller]")]
-            const res = await axios.post(`${process.env.REACT_APP_API_URL}/Auth/Login`, {
+            const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/Auth/Login`, {
                 username,
                 password
             });

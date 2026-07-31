@@ -14,7 +14,7 @@ function AddUser() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${process.env.REACT_APP_API_URL}/User/CreateUser`, {
+            await axios.post(`${process.env.REACT_APP_API_URL}/api/User/CreateUser`, {
                 fullName,
                 username,
                 role,
@@ -31,28 +31,25 @@ function AddUser() {
     };
 
     return (
-        <div className="container-fluid">
-            {/* Navbar */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+        <div className="container-fluid p-0 bg-light min-vh-100">
+            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm px-3">
                 <div className="container-fluid">
-                    <Link className="navbar-brand" to="/">LibrarySys</Link>
+                    <Link className="navbar-brand fw-bold" to="/">LibrarySys</Link>
                 </div>
             </nav>
 
-            <div className="row">
-                {/* Sidebar */}
-                <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
+            <div className="row g-0">
+                <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
                     <Link to="/users" className="btn btn-secondary w-100">Back to Users</Link>
                 </div>
 
-                {/* Main content */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    <h2 className="mb-4">Add User</h2>
-                    <div className="card shadow-sm">
-                        <div className="card-body">
+                    <h2 className="fw-bold mb-4">Add User</h2>
+                    <div className="card border-0 shadow-sm" style={{ borderRadius: "16px" }}>
+                        <div className="card-body p-4">
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label className="form-label">Full Name</label>
+                                    <label className="form-label text-muted small fw-bold">FULL NAME</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -62,7 +59,7 @@ function AddUser() {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Username</label>
+                                    <label className="form-label text-muted small fw-bold">USERNAME</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -72,7 +69,7 @@ function AddUser() {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Role</label>
+                                    <label className="form-label text-muted small fw-bold">ROLE</label>
                                     <select
                                         className="form-select"
                                         value={role}
@@ -84,7 +81,7 @@ function AddUser() {
                                     </select>
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Active Status</label>
+                                    <label className="form-label text-muted small fw-bold">ACTIVE STATUS</label>
                                     <select
                                         className="form-select"
                                         value={isActive ? "Active" : "Inactive"}
@@ -94,7 +91,7 @@ function AddUser() {
                                         <option>Inactive</option>
                                     </select>
                                 </div>
-                                <button type="submit" className="btn btn-success">Save</button>
+                                <button type="submit" className="btn btn-success fw-semibold">Save User</button>
                             </form>
                             {message && <p className="mt-3 text-info">{message}</p>}
                         </div>
