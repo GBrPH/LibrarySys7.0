@@ -1,6 +1,9 @@
 ﻿using LibrarySys.BackEnd.DTOs;
+using LibrarySys.BackEnd.Models;
 using LibrarySys.BackEnd.Repositories;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LibrarySys.BackEnd.Services
 {
@@ -15,47 +18,84 @@ namespace LibrarySys.BackEnd.Services
             _logService = logService;
         }
 
-        public IEnumerable<BookDto> GetAll() => _repo.GetAll()!;
+        private BookDto ToDto(Book book) =>
+            book == null ? null : new BookDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                CopiesAvailable = book.CopiesAvailable,
+                IsAvailable = book.IsAvailable,
+                BorrowedByUserId = book.BorrowedByUserId,
+                BorrowedDate = book.BorrowedDate,
+                DueDate = book.DueDate
+            };
 
-        public BookDto GetById(int id) => _repo.GetById(id);
+        private Book ToModel(BookDto dto) =>
+            dto == null ? null : new Book
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Author = dto.Author,
+                CopiesAvailable = dto.CopiesAvailable,
+                IsAvailable = dto.IsAvailable,
+                BorrowedByUserId = dto.BorrowedByUserId,
+                BorrowedDate = dto.BorrowedDate,
+                DueDate = dto.DueDate
+            };
 
-        public IEnumerable<BookDto> GetOverdueBooks() => _repo.GetOverdueBooks()!;
+        public IEnumerable<BookDto> GetAll()
+        {
+            var books = _repo.GetAll();
+            return books.Select(ToDto);
+        }
 
-        public BookDto Add(BookDto book) => _repo.Insert(book)!;
+        public BookDto GetById(int id)
+        {
+            var book = _repo.GetById(id);
+            return ToDto(book);
+        }
 
-        public BookDto Update(BookDto book) => _repo.Update(book);
+        public IEnumerable<BookDto> GetOverdueBooks()
+        {
+            var books = _repo.GetOverdueBooks();
+            return books.Select(ToDto);
+        }
+
+        public BookDto Add(BookDto dto)
+        {
+            var model = ToModel(dto);
+            var saved = _repo.Insert(model);
+            return ToDto(saved);
+        }
+
+        public BookDto Update(BookDto dto)
+        {
+            var model = ToModel(dto);
+            var updated = _repo.Update(model);
+            return ToDto(updated);
+        }
 
         public BookDto BorrowBook(int bookId, int userId)
         {
-            var book = _repo.GetById(bookId);
-            if (book == null || book.CopiesAvailable <= 0)
-                return null;
-
-            book.CopiesAvailable--;
-            book.IsAvailable = book.CopiesAvailable > 0;
-            book.BorrowedByUserId = userId;
-            book.BorrowedDate = DateTime.UtcNow;
-            book.DueDate = DateTime.UtcNow.AddDays(14); // unified rule
-
-            _logService.LogBorrow(book.Id, book.Title, userId, "User" + userId, book.BorrowedDate.Value);
-            return book;
+            var borrowed = _repo.BorrowBook(bookId, userId);
+            if (borrowed != null && borrowed.BorrowedDate.HasValue)
+            {
+                _logService.LogBorrow(bookId, borrowed.Title, userId, "UnknownUser", borrowed.BorrowedDate.Value);
+            }
+            return ToDto(borrowed);
         }
 
         public BookDto ReturnBook(int bookId, int userId)
         {
-            var book = _repo.GetById(bookId);
-            if (book == null || book.BorrowedByUserId != userId)
-                return null;
-
-            book.CopiesAvailable++;
-            book.IsAvailable = book.CopiesAvailable > 0;
-            book.BorrowedByUserId = null;
-            book.BorrowedDate = null;
-            book.DueDate = null;
-
-            _logService.LogReturn(book.Id, userId, DateTime.UtcNow);
-            return book;
+            var returned = _repo.ReturnBook(bookId);
+            if (returned != null)
+            {
+                _logService.LogReturn(bookId, userId, returned.DueDate ?? DateTime.UtcNow);
+            }
+            return ToDto(returned);
         }
+
         public bool Delete(int id) => _repo.Delete(id);
     }
 }

@@ -1,5 +1,5 @@
-﻿using LibrarySys.BackEnd.DTOs;
-using System;
+﻿using LibrarySys.BackEnd.Data;
+using LibrarySys.BackEnd.Models;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,79 +7,93 @@ namespace LibrarySys.BackEnd.Repositories
 {
     public class UserRepository
     {
-        private readonly List<UserDto> _users;
+        private readonly LibraryContext _db;
 
-        public UserRepository()
+        public UserRepository(LibraryContext db)
         {
-            // Dummy Data so that my system can work
-            // Note to self make a database in sql
-            _users = new List<UserDto>
-            {
-                new UserDto { Id = 1, Username = "librarian1", FullName = "Alice Librarian", Role = "Librarian", IsActive = true },
-                new UserDto { Id = 2, Username = "faculty1", FullName = "Bob Faculty", Role = "Faculty", IsActive = true },
-                new UserDto { Id = 3, Username = "student1", FullName = "Charlie Student", Role = "Student", IsActive = true }
-            };
+            _db = db;
+            SeedData();
         }
 
-        public IEnumerable<UserDto> GetAll() => _users!;
-
-        public UserDto GetById(int id) => _users.Find(u => u.Id == id);
-
-
-        public IEnumerable<UserDto> Search(string username = null, string role = null, bool? isActive = null)
+        private void SeedData()
         {
-            var query = _users.AsQueryable();
+            if (!_db.Users.Any())
+            {
+                _db.Users.AddRange(
+                    new User { Id = 1, Username = "HMIR", FullName = "Head Librarian", Role = "Librarian", IsActive = true },
+                    new User { Id = 2, Username = "Borrower1", FullName = "John Doe", Role = "Borrower", IsActive = true },
+                    new User { Id = 3, Username = "Borrower2", FullName = "Jane Smith", Role = "Borrower", IsActive = true }
+                );
+                _db.SaveChanges();
+            }
+        }
 
-            if (!string.IsNullOrEmpty(username))
-                query = query.Where(u => u.Username.Contains(username, StringComparison.OrdinalIgnoreCase));
+        public IEnumerable<User> GetAll() =>
+            _db.Users.ToList();
 
-            if (!string.IsNullOrEmpty(role))
-                query = query.Where(u => u.Role.Equals(role, StringComparison.OrdinalIgnoreCase));
+        public User GetById(int id) =>
+            _db.Users.Find(id);
+
+        public IEnumerable<User> Search(string username, string role, bool? isActive)
+        {
+            var query = _db.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(username))
+                query = query.Where(u => u.Username.Contains(username));
+
+            if (!string.IsNullOrWhiteSpace(role))
+                query = query.Where(u => u.Role == role);
 
             if (isActive.HasValue)
                 query = query.Where(u => u.IsActive == isActive.Value);
 
-            return query.ToList()!;
+            return query.ToList();
         }
 
-        public UserDto Insert(UserDto user)
+        public User Insert(User user)
         {
-            user.Id = _users.Count + 1;
-            _users.Add(user);
-            return user!;
+            _db.Users.Add(user);
+            _db.SaveChanges();
+            return user;
         }
 
-        public UserDto RegisterBorrower(string username, string fullName)
+        public User RegisterBorrower(string username, string fullName)
         {
-            var user = new UserDto
+            var user = new User
             {
-                Id = _users.Count + 1,
                 Username = username,
                 FullName = fullName,
-                Role = "Borrower",   // 👈 default role
+                Role = "Borrower",
                 IsActive = true
             };
-            _users.Add(user);
-            return user!;
+
+            _db.Users.Add(user);
+            _db.SaveChanges();
+            return user;
         }
 
-        public UserDto Update(UserDto user)
+        public User Update(User user)
         {
-            var existing = _users.Find(u => u.Id == user.Id);
-            if (existing != null)
-            {
-                existing.Username = user.Username;
-                existing.FullName = user.FullName;
-                existing.Role = user.Role;
-                existing.IsActive = user.IsActive;
-            }
+            var existing = _db.Users.Find(user.Id);
+            if (existing == null) return null;
+
+            existing.Username = user.Username;
+            existing.FullName = user.FullName;
+            existing.Role = user.Role;
+            existing.IsActive = user.IsActive;
+
+            _db.SaveChanges();
             return existing;
         }
 
         public bool Delete(int id)
         {
-            var user = _users.Find(u => u.Id == id);
-            return _users.Remove(user);
+            var user = _db.Users.Find(id);
+            if (user == null) return false;
+
+            _db.Users.Remove(user);
+            _db.SaveChanges();
+            return true;
         }
     }
 }

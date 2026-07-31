@@ -8,7 +8,7 @@ namespace LibrarySys.BackEnd.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // require JWT auth
+    [Authorize]
     public class BookController : ControllerBase
     {
         private readonly BookService _bookService;
@@ -22,7 +22,8 @@ namespace LibrarySys.BackEnd.Controllers
         [AllowAnonymous]
         public ActionResult<IEnumerable<BookDto>> GetAllBooks()
         {
-            return Ok(_bookService.GetAll());
+            var books = _bookService.GetAll();
+            return Ok(books);
         }
 
         [HttpGet("GetBookById/{id}")]
@@ -38,14 +39,15 @@ namespace LibrarySys.BackEnd.Controllers
         [Authorize(Roles = "Librarian")]
         public ActionResult<IEnumerable<BookDto>> GetOverdueBooks()
         {
-            return Ok(_bookService.GetOverdueBooks());
+            var books = _bookService.GetOverdueBooks();
+            return Ok(books);
         }
 
         [HttpPost("CreateBook")]
         [Authorize(Roles = "Librarian")]
         public ActionResult<BookDto> CreateBook([FromBody] BookDto book)
         {
-            var created = _bookService.Add(book); // calls Insert internally
+            var created = _bookService.Add(book);
             return CreatedAtAction(nameof(GetBookById), new { id = created.Id }, created);
         }
 

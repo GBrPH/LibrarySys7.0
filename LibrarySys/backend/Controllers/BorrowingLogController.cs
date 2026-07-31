@@ -2,7 +2,7 @@
 using LibrarySys.BackEnd.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
+using System.Collections.Generic;
 
 namespace LibrarySys.BackEnd.Controllers
 {
@@ -22,10 +22,11 @@ namespace LibrarySys.BackEnd.Controllers
         [Authorize(Roles = "Librarian,Borrower")]
         public ActionResult<IEnumerable<BorrowingLogDto>> GetAll()
         {
-            return Ok(_service.GetAll());
+            var logs = _service.GetAll();
+            return Ok(logs);
         }
 
-        [HttpGet("LogOfUser/{id}")]
+        [HttpGet("LogOfUser/{userId}")]
         [Authorize(Roles = "Librarian,Borrower")]
         public ActionResult<IEnumerable<BorrowingLogDto>> GetHistoryByUser(int userId)
         {

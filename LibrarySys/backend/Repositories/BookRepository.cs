@@ -1,4 +1,6 @@
-﻿using LibrarySys.BackEnd.DTOs;
+﻿using LibrarySys.BackEnd.Data;
+using LibrarySys.BackEnd.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,79 +8,82 @@ namespace LibrarySys.BackEnd.Repositories
 {
     public class BookRepository
     {
-        private readonly List<BookDto> _books;
+        private readonly LibraryContext _bookdb;
 
-        public BookRepository()
+        public BookRepository(LibraryContext bookdb)
         {
-            // Dummy Data
-            _books = new List<BookDto>
+            _bookdb = bookdb;
+            SeedData();
+        }
+
+        private void SeedData()
+        {
+            if (!_bookdb.Books.Any())
             {
-                new BookDto { Id = 1, Title = "C# in Depth", Author = "Jon Skeet", CopiesAvailable = 3 },
-                new BookDto { Id = 2, Title = "Clean Code", Author = "Robert C. Martin", CopiesAvailable = 5 },
-                new BookDto { Id = 3, Title = "Design Patterns", Author = "GoF", CopiesAvailable = 2 }
-            };
-        }
-
-        public IEnumerable<BookDto> GetAll() => _books!;
-
-        public BookDto GetById(int id) => _books.Find(b => b.Id == id);
-
-        public List<BookDto> GetOverdueBooks()
-        {
-            var today = DateTime.UtcNow;
-            return _books!
-                .Where(b => b.BorrowedByUserId != null
-                            && b.DueDate.HasValue
-                            && b.DueDate.Value < today)
-                .ToList();
-        }
-
-        public BookDto Insert(BookDto book)
-        {
-            book.Id = _books.Count + 1;
-            _books.Add(book);
-            return book!;
-        }
-
-        public BookDto Update(BookDto book)
-        {
-            var existing = _books.Find(b => b.Id == book.Id);
-            if (existing != null)
-            {
-                existing.Title = book.Title;
-                existing.Author = book.Author;
+                _bookdb.Books.AddRange(
+                    new Book { Id = 1, Title = "The Clean Coder", Author = "Robert C. Martin", BorrowerName = "", CopiesAvailable = 5, IsAvailable = true },
+                    new Book { Id = 2, Title = "Design Patterns", Author = "Erich Gamma", BorrowerName = "", CopiesAvailable = 3, IsAvailable = true },
+                    new Book { Id = 3, Title = "React Key Concepts", Author = "Maximilian S.", BorrowerName = "John Doe", CopiesAvailable = 0, IsAvailable = false, BorrowedByUserId = 2 },
+                    new Book { Id = 4, Title = "Pro ASP.NET Core 7", Author = "Adam Freeman", BorrowerName = "", CopiesAvailable = 2, IsAvailable = true }
+                );
+                _bookdb.SaveChanges();
             }
+        }
+
+        public IEnumerable<Book> GetAll() => _bookdb.Books.ToList();
+        public Book GetById(int id) => _bookdb.Books.Find(id);
+        public List<Book> GetOverdueBooks() => _bookdb.Books.Where(b => b.BorrowedByUserId != null && b.DueDate.HasValue && b.DueDate.Value < DateTime.UtcNow).ToList();
+
+        public Book Insert(Book book)
+        {
+            _bookdb.Books.Add(book);
+            _bookdb.SaveChanges();
+            return book;
+        }
+
+        public Book Update(Book book)
+        {
+            var existing = _bookdb.Books.Find(book.Id);
+            if (existing == null) return null;
+            existing.Title = book.Title;
+            existing.Author = book.Author;
+            existing.CopiesAvailable = book.CopiesAvailable;
+            existing.IsAvailable = book.IsAvailable;
+            _bookdb.SaveChanges();
             return existing;
         }
 
-        public BookDto BorrowBook(int bookId, int userId, int days = 14)
+        public Book BorrowBook(int bookId, int userId, int days = 14)
         {
-            var book = _books.Find(b => b.Id == bookId);
+            var book = _bookdb.Books.Find(bookId);
             if (book == null || book.CopiesAvailable <= 0) return null;
-
             book.CopiesAvailable--;
             book.BorrowedByUserId = userId;
             book.BorrowedDate = DateTime.UtcNow;
             book.DueDate = DateTime.UtcNow.AddDays(days);
+            _bookdb.SaveChanges();
             return book;
         }
 
-        public BookDto ReturnBook(int bookId)
+        public Book ReturnBook(int bookId)
         {
-            var book = _books.Find(b => b.Id == bookId);
+            var book = _bookdb.Books.Find(bookId);
             if (book == null || book.BorrowedByUserId == null) return null;
-
             book.CopiesAvailable++;
             book.BorrowedByUserId = null;
             book.BorrowedDate = null;
             book.DueDate = null;
+            _bookdb.SaveChanges();
             return book;
         }
 
         public bool Delete(int id)
         {
-            var book = _books.Find(b => b.Id == id);
-            return _books.Remove(book!);
+            var book = _bookdb.Books.Find(id);
+            if (book == null) return false;
+            _bookdb.Books.Remove(book);
+            _bookdb.SaveChanges();
+            return true;
         }
     }
 }

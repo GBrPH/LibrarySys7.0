@@ -22,7 +22,8 @@ namespace LibrarySys.BackEnd.Controllers
         [Authorize(Roles = "Librarian")]
         public ActionResult<IEnumerable<UserDto>> GetAllUsers()
         {
-            return Ok(_userService.GetAll());
+            var users = _userService.GetAll();
+            return Ok(users);
         }
 
         [HttpGet("GetUserById/{id}")]

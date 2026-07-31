@@ -63,14 +63,16 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod());
 });
 
+// In-Memory DB setup
 builder.Services.AddDbContext<LibraryContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDb")));
+    options.UseInMemoryDatabase("LibrarySysDevDb"));
 
-builder.Services.AddSingleton<BookRepository>();
+builder.Services.AddScoped<BookRepository>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<BorrowingLogRepository>();
+
 builder.Services.AddScoped<BookService>();
-builder.Services.AddSingleton<UserRepository>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddSingleton<BorrowingLogRepository>();
 builder.Services.AddScoped<BorrowingLogService>();
 
 var app = builder.Build();
