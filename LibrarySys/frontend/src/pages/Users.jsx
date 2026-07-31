@@ -5,14 +5,21 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Users() {
     const [users, setUsers] = useState([]);
-    const [filters, setFilters] = useState({ role: "All" });
+    const [filters, setFilters] = useState({
+        role: "All",
+        active: "All",
+        loggedIn: "All",
+        username: "",
+        fullName: "",
+        search: ""
+    });
 
     useEffect(() => {
         const token = localStorage.getItem("token");
 
         if (!token) return;
 
-        axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetAllUsers`, {
+        axios.get(`${process.env.REACT_APP_API_URL}/User/GetAllUsers`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setUsers(res.data || []))
@@ -32,16 +39,20 @@ function Users() {
 
         if (filters.fullName && !user.fullName.toLowerCase().includes(filters.fullName.toLowerCase())) return false;
 
+        if (filters.search && !(
+            user.fullName.toLowerCase().includes(filters.search.toLowerCase()) ||
+            user.username.toLowerCase().includes(filters.search.toLowerCase())
+        )) return false;
+
         return true;
     });
 
-
     return (
-        <div className="container-fluid">
+        <div className="container-fluid p-0 bg-light min-vh-100">
             {/* Navbar */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm px-3">
                 <div className="container-fluid">
-                    <Link className="navbar-brand" to="/">LibrarySys</Link>
+                    <Link className="navbar-brand fw-bold" to="/">LibrarySys</Link>
                     <div className="collapse navbar-collapse">
                         <ul className="navbar-nav me-auto">
                             <li className="nav-item"><Link className="nav-link" to="/">Dashboard</Link></li>
@@ -57,16 +68,16 @@ function Users() {
                 </div>
             </nav>
 
-            <div className="row">
-                {/* Sidebar */}
-                <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
-                    <h5>Filters</h5>
+            <div className="row g-0">
+                {/* Sidebar Filters */}
+                <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
+                    <h5 className="fw-bold mb-3">Filters</h5>
 
                     {/* Role */}
                     <div className="mb-3">
-                        <label className="form-label">Role</label>
+                        <label className="form-label text-muted small fw-bold">ROLE</label>
                         <select
-                            className="form-select"
+                            className="form-select shadow-none"
                             value={filters.role}
                             onChange={e => setFilters({ ...filters, role: e.target.value })}
                         >
@@ -79,9 +90,9 @@ function Users() {
 
                     {/* Active Status */}
                     <div className="mb-3">
-                        <label className="form-label">Active Status</label>
+                        <label className="form-label text-muted small fw-bold">ACTIVE STATUS</label>
                         <select
-                            className="form-select"
+                            className="form-select shadow-none"
                             value={filters.active}
                             onChange={e => setFilters({ ...filters, active: e.target.value })}
                         >
@@ -93,9 +104,9 @@ function Users() {
 
                     {/* Logged In Status */}
                     <div className="mb-3">
-                        <label className="form-label">Logged In</label>
+                        <label className="form-label text-muted small fw-bold">LOGGED IN</label>
                         <select
-                            className="form-select"
+                            className="form-select shadow-none"
                             value={filters.loggedIn}
                             onChange={e => setFilters({ ...filters, loggedIn: e.target.value })}
                         >
@@ -105,92 +116,83 @@ function Users() {
                         </select>
                     </div>
 
-                    {/* Search by Username */}
-                    <div className="mb-3">
-                        <label className="form-label">Username</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search by username"
-                            value={filters.username || ""}
-                            onChange={e => setFilters({ ...filters, username: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Search by Full Name */}
-                    <div className="mb-3">
-                        <label className="form-label">Full Name</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search by full name"
-                            value={filters.fullName || ""}
-                            onChange={e => setFilters({ ...filters, fullName: e.target.value })}
-                        />
-                    </div>
-
                     {/* Reset Filters */}
                     <button
-                        className="btn btn-outline-secondary w-100"
-                        onClick={() => setFilters({ role: "All", active: "All", loggedIn: "All", username: "", fullName: "" })}
+                        className="btn btn-outline-secondary w-100 mt-2"
+                        onClick={() => setFilters({ role: "All", active: "All", loggedIn: "All", username: "", fullName: "", search: "" })}
                     >
                         Reset Filters
                     </button>
                 </div>
 
-
-                {/* Main content */}
+                {/* Main Content Area */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    {/* Top bar */}
-                    <div className="d-flex align-items-center justify-content-between mb-3">
-                        {/* Left: Title + total count */}
-                        <h5 className="mb-0">
-                            Users <span className="text-muted">({filteredUsers.length} total)</span>
+                    {/* Top Control Bar */}
+                    <div className="d-flex align-items-center justify-content-between mb-4">
+                        <h5 className="fw-bold mb-0">
+                            Users <span className="text-muted fw-normal">({filteredUsers.length} total)</span>
                         </h5>
 
-                        {/* Center: Search bar */}
                         <div className="input-group w-50">
                             <input
                                 type="text"
-                                className="form-control"
+                                className="form-control shadow-none"
                                 placeholder="Search users..."
                                 value={filters.search}
                                 onChange={e => setFilters({ ...filters, search: e.target.value })}
                             />
                         </div>
 
-                        {/* Right: icons + add user */}
                         <div className="d-flex align-items-center">
                             <div className="btn-group me-2" role="group">
-                                <button className="btn btn-outline-secondary">
-                                    <span style={{ fontFamily: "monospace" }}>⬛</span>
+                                <button className="btn btn-outline-secondary" title="Grid View">
+                                    <span>&#9632;</span>
                                 </button>
-                                <button className="btn btn-outline-secondary">
-                                    <span style={{ fontFamily: "monospace" }}>☰</span>
-                                </button> 
+                                <button className="btn btn-outline-secondary" title="List View">
+                                    <span>&#9776;</span>
+                                </button>
                             </div>
-                            <Link to="/settings" className="btn btn-outline-secondary me-2">
-                                <span style={{ fontStyle: "normal" }}>⚙</span>
+                            <Link to="/settings" className="btn btn-outline-secondary me-2" title="Settings">
+                                <span>&#9881;</span>
                             </Link>
-                            <Link to="/users/add" className="btn btn-success">Add User</Link>
+                            <Link to="/users/add" className="btn btn-success fw-semibold">Add User</Link>
                         </div>
                     </div>
-                    <div className="card shadow-sm">
-                        <div className="card-body">
-                            <h5>All Users</h5>
-                            <table className="table table-hover">
+
+                    {/* Users Table Card */}
+                    <div className="card border-0 shadow-sm" style={{ borderRadius: "16px" }}>
+                        <div className="card-body p-4">
+                            <table className="table table-hover align-middle mb-0">
                                 <thead>
-                                    <tr>
-                                        <th>ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Active</th><th>Logged In</th><th>Actions</th>
+                                    <tr className="text-muted small">
+                                        <th>ID</th>
+                                        <th>FULL NAME</th>
+                                        <th>USERNAME</th>
+                                        <th>ROLE</th>
+                                        <th>ACTIVE</th>
+                                        <th>LOGGED IN</th>
+                                        <th>ACTIONS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredUsers.map(user => (
                                         <tr key={user.id}>
-                                            <td>{user.id}</td>
-                                            <td>{user.fullName}</td>
+                                            <td className="fw-semibold">{user.id}</td>
+                                            <td>
+                                                <div className="d-flex align-items-center">
+                                                    <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                        style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
+                                                        {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
+                                                    </div>
+                                                    <span className="fw-bold text-dark">{user.fullName}</span>
+                                                </div>
+                                            </td>
                                             <td>{user.username}</td>
-                                            <td>{user.role}</td>
+                                            <td>
+                                                <span className="badge bg-light text-dark border px-2 py-1">
+                                                    {user.role}
+                                                </span>
+                                            </td>
                                             <td>
                                                 <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
                                                     {user.isActive ? "Active" : "Inactive"}
@@ -208,7 +210,9 @@ function Users() {
                                         </tr>
                                     ))}
                                     {filteredUsers.length === 0 && (
-                                        <tr><td colSpan="7" className="text-center text-muted">No records match filters</td></tr>
+                                        <tr>
+                                            <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
+                                        </tr>
                                     )}
                                 </tbody>
                             </table>

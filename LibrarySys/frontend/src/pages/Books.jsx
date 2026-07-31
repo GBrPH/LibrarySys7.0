@@ -8,12 +8,9 @@ function Books() {
     const [filters, setFilters] = useState({
         status: "All",
         author: "",
-        borrower: "",
         copies: "All",
-        search: "",
-        startDate: null,
-        endDate: null,
         materialType: "All",
+        search: "",
         az: "None"
     });
 
@@ -22,7 +19,7 @@ function Books() {
 
         if (!token) return;
 
-        axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
+        axios.get(`${process.env.REACT_APP_API_URL}/Book/GetAllBooks`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setBooks(res.data || []))
@@ -30,17 +27,19 @@ function Books() {
     }, []);
 
     let filteredBooks = books.filter(book => {
+        // Status filter
         if (filters.status === "Available" && !book.isAvailable) return false;
         if (filters.status === "Borrowed" && book.isAvailable) return false;
 
+        // Author filter
         if (filters.author && !book.author.toLowerCase().includes(filters.author.toLowerCase())) return false;
 
-        if (filters.borrower && (!book.borrowerName || !book.borrowerName.toLowerCase().includes(filters.borrower.toLowerCase()))) return false;
-
+        // Stock Copies filter
         if (filters.copies === "Low Stock (1–9)" && (book.copiesAvailable < 1 || book.copiesAvailable > 9)) return false;
         if (filters.copies === "High Stock (≥10)" && book.copiesAvailable < 10) return false;
         if (filters.copies === "Out of Stock (0)" && book.copiesAvailable !== 0) return false;
 
+        // Top Search Bar (Title or Author)
         if (filters.search && !(
             book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
             book.author.toLowerCase().includes(filters.search.toLowerCase())
@@ -49,6 +48,7 @@ function Books() {
         return true;
     });
 
+    // Sorting
     if (filters.az === "Title (A–Z)") {
         filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
     }
@@ -63,11 +63,11 @@ function Books() {
     }
 
     return (
-        <div className="container-fluid">
+        <div className="container-fluid p-0 bg-light min-vh-100">
             {/* Navbar */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm px-3">
                 <div className="container-fluid">
-                    <Link className="navbar-brand" to="/">LibrarySys</Link>
+                    <Link className="navbar-brand fw-bold" to="/">LibrarySys</Link>
                     <div className="collapse navbar-collapse">
                         <ul className="navbar-nav me-auto">
                             <li className="nav-item"><Link className="nav-link" to="/">Dashboard</Link></li>
@@ -83,15 +83,16 @@ function Books() {
                 </div>
             </nav>
 
-            <div className="row">
-                {/* Sidebar Filters */}
-                <div className="col-md-3 col-lg-2 bg-light border-end vh-100 p-3">
-                    <h5>Filters</h5>
+            <div className="row g-0">
+                {/* Book-Specific Sidebar Filters */}
+                <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
+                    <h5 className="fw-bold mb-3">Book Filters</h5>
 
+                    {/* Status */}
                     <div className="mb-3">
-                        <label className="form-label">Status</label>
+                        <label className="form-label text-muted small fw-bold">STATUS</label>
                         <select
-                            className="form-select"
+                            className="form-select shadow-none"
                             value={filters.status}
                             onChange={e => setFilters({ ...filters, status: e.target.value })}
                         >
@@ -101,22 +102,39 @@ function Books() {
                         </select>
                     </div>
 
+                    {/* Author Filter */}
                     <div className="mb-3">
-                        <label className="form-label">Author</label>
+                        <label className="form-label text-muted small fw-bold">AUTHOR</label>
                         <input
                             type="text"
-                            className="form-control"
-                            placeholder="Search by Author"
+                            className="form-control shadow-none"
+                            placeholder="Filter by Author"
                             value={filters.author}
                             maxLength={50}
                             onChange={e => setFilters({ ...filters, author: e.target.value })}
                         />
                     </div>
 
+                    {/* Stock Copies */}
                     <div className="mb-3">
-                        <label className="form-label">Sort A–Z</label>
+                        <label className="form-label text-muted small fw-bold">STOCK LEVEL</label>
                         <select
-                            className="form-select"
+                            className="form-select shadow-none"
+                            value={filters.copies}
+                            onChange={e => setFilters({ ...filters, copies: e.target.value })}
+                        >
+                            <option>All</option>
+                            <option>High Stock (≥10)</option>
+                            <option>Low Stock (1–9)</option>
+                            <option>Out of Stock (0)</option>
+                        </select>
+                    </div>
+
+                    {/* Sort Order */}
+                    <div className="mb-3">
+                        <label className="form-label text-muted small fw-bold">SORT ORDER</label>
+                        <select
+                            className="form-select shadow-none"
                             value={filters.az}
                             onChange={e => setFilters({ ...filters, az: e.target.value })}
                         >
@@ -128,18 +146,16 @@ function Books() {
                         </select>
                     </div>
 
+                    {/* Reset Button */}
                     <button
-                        className="btn btn-outline-secondary w-100"
+                        className="btn btn-outline-secondary w-100 mt-2"
                         onClick={() =>
                             setFilters({
                                 status: "All",
-                                borrower: "",
                                 author: "",
-                                search: "",
                                 copies: "All",
-                                startDate: null,
-                                endDate: null,
                                 materialType: "All",
+                                search: "",
                                 az: "None"
                             })
                         }
@@ -148,48 +164,60 @@ function Books() {
                     </button>
                 </div>
 
-                {/* Main content */}
+                {/* Main Content Area */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    <div className="d-flex align-items-center justify-content-between mb-3">
-                        <h5 className="mb-0">
-                            Books <span className="text-muted">({filteredBooks.length} total)</span>
+                    {/* Top Control Bar */}
+                    <div className="d-flex align-items-center justify-content-between mb-4">
+                        <h5 className="fw-bold mb-0">
+                            Books <span className="text-muted fw-normal">({filteredBooks.length} total)</span>
                         </h5>
 
                         <div className="input-group w-50">
                             <input
                                 type="text"
-                                className="form-control"
-                                placeholder="Search books..."
+                                className="form-control shadow-none"
+                                placeholder="Search books by title or author..."
                                 value={filters.search}
                                 onChange={e => setFilters({ ...filters, search: e.target.value })}
                             />
                         </div>
 
-                        <div>
-                            <Link to="/books/add" className="btn btn-success">Add Book</Link>
+                        <div className="d-flex align-items-center">
+                            <div className="btn-group me-2" role="group">
+                                <button className="btn btn-outline-secondary" title="Grid View">
+                                    <span>&#9632;</span>
+                                </button>
+                                <button className="btn btn-outline-secondary" title="List View">
+                                    <span>&#9776;</span>
+                                </button>
+                            </div>
+                            <Link to="/settings" className="btn btn-outline-secondary me-2" title="Settings">
+                                <span>&#9881;</span>
+                            </Link>
+                            <Link to="/books/add" className="btn btn-success fw-semibold">Add Book</Link>
                         </div>
                     </div>
 
-                    {/* Books table */}
-                    <div className="card shadow-sm">
-                        <div className="card-body">
-                            <table className="table table-hover">
+                    {/* Books Table Card */}
+                    <div className="card border-0 shadow-sm" style={{ borderRadius: "16px" }}>
+                        <div className="card-body p-4">
+                            <table className="table table-hover align-middle mb-0">
                                 <thead>
-                                    <tr>
+                                    <tr className="text-muted small">
                                         <th>ID</th>
-                                        <th>Title</th>
-                                        <th>Author</th>
-                                        <th>Borrower</th>
-                                        <th>Copies</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+                                        <th>TITLE</th>
+                                        <th>AUTHOR</th>
+                                        <th>BORROWER</th>
+                                        <th>COPIES</th>
+                                        <th>STATUS</th>
+                                        <th>ACTIONS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredBooks.map(book => (
                                         <tr key={book.id}>
-                                            <td>{book.id}</td>
-                                            <td>{book.title}</td>
+                                            <td className="fw-semibold">{book.id}</td>
+                                            <td className="fw-bold text-dark">{book.title}</td>
                                             <td>{book.author}</td>
                                             <td>{book.borrowerName || "-"}</td>
                                             <td>{book.copiesAvailable}</td>
@@ -205,7 +233,9 @@ function Books() {
                                         </tr>
                                     ))}
                                     {filteredBooks.length === 0 && (
-                                        <tr><td colSpan="7" className="text-center text-muted">No records match filters</td></tr>
+                                        <tr>
+                                            <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
+                                        </tr>
                                     )}
                                 </tbody>
                             </table>
