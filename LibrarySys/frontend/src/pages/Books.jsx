@@ -6,18 +6,21 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Books() {
     const [books, setBooks] = useState([]);
+    const [borrowMessage, setBorrowMessage] = useState("");
+    const [borrowingId, setBorrowingId] = useState(null);
     const [filters, setFilters] = useState({
         status: "All",
         author: "",
         copies: "All",
-        materialType: "All",
         search: "",
         az: "None"
     });
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+    const roleString = localStorage.getItem("role")?.toUpperCase() || "";
+    const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN");
 
+    const fetchBooks = () => {
+        const token = localStorage.getItem("token");
         if (!token) return;
 
         axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
@@ -25,17 +28,60 @@ function Books() {
         })
             .then(res => setBooks(res.data || []))
             .catch(err => console.error("Error fetching books:", err));
+    };
+
+    useEffect(() => {
+        fetchBooks();
     }, []);
 
+    // Borrow Action Handler
+    const handleBorrow = async (bookId) => {
+        setBorrowingId(bookId);
+        setBorrowMessage("");
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setBorrowMessage("Please log in to borrow books.");
+            setBorrowingId(null);
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/Borrow/BorrowBook`,
+                { bookId: bookId },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+            setBorrowMessage(response.data.message || "Book borrowed successfully!");
+            fetchBooks();
+        } catch (err) {
+            console.error("Error borrowing book:", err);
+            const errorText = err.response?.data?.message || "Failed to borrow book.";
+            setBorrowMessage(errorText);
+        } finally {
+            setBorrowingId(null);
+        }
+    };
+
+    // Filter Logic
     let filteredBooks = books.filter(book => {
-        if (filters.status === "Available" && !book.isAvailable) return false;
-        if (filters.status === "Borrowed" && book.isAvailable) return false;
+        const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
+        const isAvailable = copyCount > 0;
+
+        if (filters.status === "Available" && !isAvailable) return false;
+        if (filters.status === "Borrowed" && isAvailable) return false;
 
         if (filters.author && !book.author.toLowerCase().includes(filters.author.toLowerCase())) return false;
 
-        if (filters.copies === "Low Stock (1–9)" && (book.copiesAvailable < 1 || book.copiesAvailable > 9)) return false;
-        if (filters.copies === "High Stock (≥10)" && book.copiesAvailable < 10) return false;
-        if (filters.copies === "Out of Stock (0)" && book.copiesAvailable !== 0) return false;
+        if (filters.copies === "Low Stock (1–9)" && (copyCount < 1 || copyCount > 9)) return false;
+        if (filters.copies === "High Stock (≥10)" && copyCount < 10) return false;
+        if (filters.copies === "Out of Stock (0)" && copyCount !== 0) return false;
 
         if (filters.search && !(
             book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -45,6 +91,7 @@ function Books() {
         return true;
     });
 
+    // Sorting Logic
     if (filters.az === "Title (A–Z)") {
         filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
     }
@@ -60,15 +107,13 @@ function Books() {
 
     return (
         <div className="container-fluid p-0 bg-light min-vh-100">
-            {/* Dynamic Reusable Navbar */}
             <Navbar activePage="books" />
 
             <div className="row g-0">
-                {/* Book-Specific Sidebar Filters */}
+                {/* Sidebar Filters */}
                 <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
                     <h5 className="fw-bold mb-3">Book Filters</h5>
 
-                    {/* Status */}
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">STATUS</label>
                         <select
@@ -82,7 +127,6 @@ function Books() {
                         </select>
                     </div>
 
-                    {/* Author Filter */}
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">AUTHOR</label>
                         <input
@@ -95,7 +139,6 @@ function Books() {
                         />
                     </div>
 
-                    {/* Stock Copies */}
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">STOCK LEVEL</label>
                         <select
@@ -110,7 +153,6 @@ function Books() {
                         </select>
                     </div>
 
-                    {/* Sort Order */}
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">SORT ORDER</label>
                         <select
@@ -126,7 +168,6 @@ function Books() {
                         </select>
                     </div>
 
-                    {/* Reset Button */}
                     <button
                         className="btn btn-outline-secondary w-100 mt-2"
                         onClick={() =>
@@ -134,7 +175,6 @@ function Books() {
                                 status: "All",
                                 author: "",
                                 copies: "All",
-                                materialType: "All",
                                 search: "",
                                 az: "None"
                             })
@@ -146,16 +186,16 @@ function Books() {
 
                 {/* Main Content Area */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    {/* Top Control Bar */}
-                    <div className="d-flex align-items-center justify-content-between mb-4">
-                        <div className="d-flex align-items-center flex-grow-1">
-                            <div style={{ minWidth: "220px" }}>
+                    {/* Header Controls */}
+                    <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+                        <div className="d-flex align-items-center flex-grow-1 gap-3">
+                            <div style={{ minWidth: "180px" }}>
                                 <h5 className="fw-bold mb-0 text-nowrap">
                                     Books <span className="text-muted fw-normal">({filteredBooks.length} total)</span>
                                 </h5>
                             </div>
 
-                            <div className="input-group" style={{ width: "500px" }}>
+                            <div className="input-group" style={{ maxWidth: "400px" }}>
                                 <input
                                     type="text"
                                     className="form-control shadow-none"
@@ -167,10 +207,7 @@ function Books() {
                         </div>
 
                         <div className="d-flex align-items-center gap-2">
-                            <Link to="/add-book" className="btn btn-success fw-semibold text-nowrap">
-                                Add Book
-                            </Link>
-
+                            <Link to="/add-book" className="btn btn-success fw-semibold text-nowrap ms-2"> Add Book </Link>
                             <div className="btn-group" role="group">
                                 <button className="btn btn-outline-secondary" title="Grid View">
                                     <span>&#9632;</span>
@@ -179,14 +216,27 @@ function Books() {
                                     <span>&#9776;</span>
                                 </button>
                             </div>
-
                             <Link to="/settings" className="btn btn-outline-secondary" title="Settings">
                                 <span>&#9881;</span>
                             </Link>
+
+                            
                         </div>
                     </div>
 
-                    {/* Books Table Card */}
+                    {/* Notification Banner */}
+                    {borrowMessage && (
+                        <div className={`alert ${borrowMessage.includes("successfully") ? "alert-success" : "alert-info"} alert-dismissible fade show`} role="alert">
+                            {borrowMessage}
+                            <button
+                                type="button"
+                                className="btn-close"
+                                onClick={() => setBorrowMessage("")}
+                            ></button>
+                        </div>
+                    )}
+
+                    {/* Books Table */}
                     <div className="card border-0 shadow-sm" style={{ borderRadius: "16px" }}>
                         <div className="card-body p-4">
                             <table className="table table-hover align-middle mb-0">
@@ -202,24 +252,50 @@ function Books() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredBooks.map(book => (
-                                        <tr key={book.id}>
-                                            <td className="fw-semibold">{book.id}</td>
-                                            <td className="fw-bold text-dark">{book.title}</td>
-                                            <td>{book.author}</td>
-                                            <td>{book.borrowerName || "-"}</td>
-                                            <td>{book.copiesAvailable}</td>
-                                            <td>
-                                                <span className={`badge ${book.isAvailable ? "bg-success" : "bg-secondary"}`}>
-                                                    {book.isAvailable ? "Available" : "Borrowed"}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm me-2">Update</Link>
-                                                <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm">Delete</Link>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {filteredBooks.map(book => {
+                                        const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
+                                        const isBookAvailable = copyCount > 0;
+
+                                        return (
+                                            <tr key={book.id}>
+                                                <td className="fw-semibold">{book.id}</td>
+                                                <td className="fw-bold text-dark">{book.title}</td>
+                                                <td>{book.author}</td>
+                                                <td>{book.borrowerName || "-"}</td>
+                                                <td>{copyCount}</td>
+                                                <td>
+                                                    <span className={`badge ${isBookAvailable ? "bg-success" : "bg-secondary"}`}>
+                                                        {isBookAvailable ? "Available" : "Borrowed"}
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    <div className="d-flex align-items-center gap-1">
+                                                        <button
+                                                            onClick={() => handleBorrow(book.id)}
+                                                            disabled={borrowingId === book.id || !isBookAvailable}
+                                                            className="btn btn-primary btn-sm text-nowrap"
+                                                            style={{ minWidth: "105px" }}
+                                                        >
+                                                            {borrowingId === book.id ? "Borrowing..." : isBookAvailable ? "Borrow" : "Out of Stock"}
+                                                        </button>
+
+                                                        {/* Only show Update and Delete to HMIR/Admins */}
+                                                        {isPrivilegedUser && (
+                                                            <>
+                                                                <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm text-nowrap">
+                                                                    Update
+                                                                </Link>
+                                                                <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm text-nowrap">
+                                                                    Delete
+                                                                </Link>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                     {filteredBooks.length === 0 && (
                                         <tr>
                                             <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>

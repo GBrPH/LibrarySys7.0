@@ -53,8 +53,9 @@ function AddUser() {
                                     <input
                                         type="text"
                                         className="form-control"
-                                        value={fullName}
-                                        onChange={e => setFullName(e.target.value)}
+                                        maxLength={50}  
+                                        value={username}
+                                        onChange={e => setUsername(e.target.value)}
                                         required
                                     />
                                 </div>
@@ -63,6 +64,7 @@ function AddUser() {
                                     <input
                                         type="text"
                                         className="form-control"
+                                        maxLength={50}  
                                         value={username}
                                         onChange={e => setUsername(e.target.value)}
                                         required

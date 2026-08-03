@@ -1,39 +1,340 @@
 ﻿:root {
-    --steel-blue: #4682B4;
-    --copper: #B76E1E;
-    --light-gray: #F5F5F5;
-    --dark-navy: #2C3E50;
-    --gold: #D9B86B;
-    --cool-gray: #7F8C8D;
+    /* Primary Wave & Brand Palette */
+    --brand-primary: #2575fc;
+    --brand-secondary: #8ebafd;
+    --bg-light: #f8fafc;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    /* UI Status & Feedback Colors */
+    --status-success: #10b981;
+    --status-warning: #f59e0b;
+    --status-danger: #ef4444;
+    --status-info: #3b82f6;
 }
 
+/* Global Page Background & Text */
 body {
-    background-color: var(--light-gray);
-    color: var(--dark-navy);
+    background-color: var(--bg-light) !important;
+    color: var(--text-dark) !important;
 }
 
+/* --- Navbar Styling --- */
 .navbar {
-    background-color: var(--dark-navy) !important;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0;
 }
 
+/* Navbar Brand (LibrarySys text) */
+.navbar-brand,
+.navbar-brand:hover,
+.navbar-brand:focus {
+    color: var(--brand-primary) !important;
+    font-weight: 800 !important;
+    font-size: 1.25rem !important;
+}
+
+/* --- Top Navbar Inverse Curve --- */
+.curved-navbar {
+    background-color: #212529; /* Matches Bootstrap bg-dark */
+    display: flex;
+    align-items: flex-end;
+    height: 70px;
+    padding: 0 2rem;
+    margin-bottom: 0 !important;
+    /* ADD THESE TWO LINES TO REMOVE THE SEAM */
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+.navbar-brand-container {
+    padding-bottom: 20px;
+}
+
+.curved-navbar .nav-links {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0 auto; /* Centers the tabs in the navbar */
+    height: 55px;
+}
+
+    .curved-navbar .nav-links li {
+        position: relative;
+        display: flex;
+        align-items: center;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        transition: background-color 0.3s;
+    }
+
+        /* NEW: Dashed border for inactive tabs to show clickable bounds */
+        .curved-navbar .nav-links li:not(.active) {
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-bottom: none; /* Keeps it flat on the bottom */
+            margin: 0 3px; /* Small gap between bordered tabs */
+        }
+
+        .curved-navbar .nav-links li a {
+            position: relative;
+            z-index: 1;
+            color: #adb5bd;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: color 0.3s;
+            /* Expanding the padding inside the <a> tag ensures the entire bounded box is clickable */
+            padding: 10px 25px;
+            display: block;
+            height: 100%;
+        }
+
+        .curved-navbar .nav-links li:hover a {
+            color: #ffffff;
+        }
+
+        /* --- ACTIVE STATE MAGIC --- */
+        .curved-navbar .nav-links li.active {
+            background-color: var(--bg-light);
+            border: 1px solid var(--bg-light);
+            border-bottom: none;
+            margin: 0 3px; 
+        }
+
+            .curved-navbar .nav-links li.active a {
+                color: var(--brand-primary);
+            }
+
+            /* Bottom-Left Inverse Curve */
+            .curved-navbar .nav-links li.active::before {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: -20px;
+                width: 20px;
+                height: 20px;
+                background-color: transparent;
+                border-bottom-right-radius: 20px;
+                /* Matches exactly to --bg-light */
+                box-shadow: 10px 10px 0 0 var(--bg-light);
+                pointer-events: none;
+            }
+
+            /* Bottom-Right Inverse Curve */
+            .curved-navbar .nav-links li.active::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                right: -20px;
+                width: 20px;
+                height: 20px;
+                background-color: transparent;
+                border-bottom-left-radius: 20px;
+                /* Matches exactly to --bg-light */
+                box-shadow: -10px 10px 0 0 var(--bg-light);
+                pointer-events: none;
+            }
+
+.auth-buttons {
+    padding-bottom: 15px;
+}
+
+/* Nav Links */
+.navbar .nav-link {
+    color: var(--text-dark) !important;
+}
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link:focus {
+        color: var(--brand-primary) !important;
+    }
+
+    .navbar .nav-link.active {
+        color: var(--brand-primary) !important;
+        font-weight: 700;
+    }
+
+/* --- Button Styling --- */
+
+/* Primary Filled Buttons (e.g. Sign Up) */
 .btn-primary {
-    background-color: var(--steel-blue);
-    border-color: var(--steel-blue);
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+    color: #ffffff !important;
 }
 
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active,
+    .btn-primary.active {
+        background-color: #1a5ed8 !important;
+        border-color: #1a5ed8 !important;
+        color: #ffffff !important;
+    }
+
+/* Outline Buttons (e.g. Inactive Login) */
+.btn-outline-secondary,
+.btn-outline-primary {
+    color: var(--brand-primary) !important;
+    border: 1px solid var(--brand-primary) !important;
+    background-color: transparent !important;
+}
+
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus,
+    .btn-outline-secondary:active,
+    .btn-outline-secondary.active,
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active,
+    .btn-outline-primary.active {
+        background-color: var(--brand-primary) !important;
+        color: #ffffff !important;
+        border-color: var(--brand-primary) !important;
+    }
+
+/* Success Buttons (e.g. Add Book) */
+.btn-success {
+    background-color: var(--status-success) !important;
+    border-color: var(--status-success) !important;
+    color: #ffffff !important;
+}
+
+    .btn-success:hover,
+    .btn-success:focus,
+    .btn-success:active {
+        background-color: #0d9668 !important;
+        border-color: #0d9668 !important;
+        color: #ffffff !important;
+    }
+
+/* Warning Buttons (e.g. Update) */
 .btn-warning {
-    background-color: var(--copper);
-    border-color: var(--copper);
+    background-color: var(--status-warning) !important;
+    border-color: var(--status-warning) !important;
+    color: #ffffff !important;
 }
 
-.badge-success {
-    background-color: var(--steel-blue);
+    .btn-warning:hover,
+    .btn-warning:focus,
+    .btn-warning:active {
+        background-color: #d97706 !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+    }
+
+/* Danger Buttons (e.g. Delete) */
+.btn-danger {
+    background-color: var(--status-danger) !important;
+    border-color: var(--status-danger) !important;
+    color: #ffffff !important;
 }
 
-.badge-danger {
-    background-color: var(--copper);
+    .btn-danger:hover,
+    .btn-danger:focus,
+    .btn-danger:active {
+        background-color: #dc2626 !important;
+        border-color: #dc2626 !important;
+        color: #ffffff !important;
+    }
+
+/* Badges */
+.bg-success, .badge-success {
+    background-color: var(--status-success) !important;
 }
 
-.badge-secondary {
-    background-color: var(--cool-gray);
+.bg-warning, .badge-warning {
+    background-color: var(--status-warning) !important;
 }
+
+.bg-danger, .badge-danger {
+    background-color: var(--status-danger) !important;
+}
+
+.bg-secondary, .badge-secondary {
+    background-color: var(--text-muted) !important;
+}
+
+/* Cards & Tables */
+.card {
+    border-radius: 16px !important;
+    border: none !important;
+}
+
+/* --- Table Text Overflow & Layout Fixes --- */
+
+/* --- Refined Table Layout --- */
+
+.table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+    /* Default cells truncate long text cleanly */
+    .table td,
+    .table th {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+        /* Ensure the Actions cell DOES NOT cut off buttons */
+        .table td:last-child {
+            overflow: visible !important;
+        }
+
+        /* Specific Column Percentage Allocations (Sum = 100%) */
+        .table th:nth-child(1), .table td:nth-child(1) {
+            width: 5%;
+        }
+        /* ID */
+        .table th:nth-child(2), .table td:nth-child(2) {
+            width: 22%;
+        }
+        /* Title */
+        .table th:nth-child(3), .table td:nth-child(3) {
+            width: 18%;
+        }
+        /* Author */
+        .table th:nth-child(4), .table td:nth-child(4) {
+            width: 12%;
+        }
+        /* Borrower */
+        .table th:nth-child(5), .table td:nth-child(5) {
+            width: 8%;
+        }
+        /* Copies */
+        .table th:nth-child(6), .table td:nth-child(6) {
+            width: 10%;
+        }
+        /* Status */
+        .table th:nth-child(7), .table td:nth-child(7) {
+            width: 25%;
+        }
+    /* Actions */
+
+    .table thead th {
+        color: var(--text-muted) !important;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+.btn-outline-secondary,
+.btn-outline-secondary:not(:hover),
+.btn-outline-primary,
+.btn-outline-primary:not(:hover) {
+    color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+    background-color: transparent !important;
+}
+
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus,
+    .btn-outline-secondary:active,
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active {
+        background-color: var(--brand-primary) !important;
+        color: #ffffff !important;
+        border-color: var(--brand-primary) !important;
+    }

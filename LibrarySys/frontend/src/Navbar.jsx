@@ -4,46 +4,63 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Navbar({ activePage }) {
     const navigate = useNavigate();
+
     const token = localStorage.getItem("token");
+    const roleString = localStorage.getItem("role")?.toUpperCase() || "";
+    const usernameString = localStorage.getItem("username")?.toUpperCase() || "";
+
+    // Look for Librarian role, Admin role, OR the explicit HMIR username
+    const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || usernameString === "HMIR";
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
+        localStorage.clear(); // Clears everything
         navigate("/login");
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm px-3">
-            <div className="container-fluid">
-                <Link className="navbar-brand fw-bold" to="/">LibrarySys</Link>
-                <div className="collapse navbar-collapse">
-                    <ul className="navbar-nav me-auto">
-                        <li className="nav-item">
-                            <Link className={`nav-link ${activePage === "dashboard" ? "active" : ""}`} to="/">Dashboard</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className={`nav-link ${activePage === "books" ? "active" : ""}`} to="/books">Books</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className={`nav-link ${activePage === "users" ? "active" : ""}`} to="/users">Users</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className={`nav-link ${activePage === "logs" ? "active" : ""}`} to="/borrowing-log">Borrowing Log</Link>
-                        </li>
-                    </ul>
-                    <div className="d-flex ms-auto align-items-center">
-                        {token ? (
-                            <button onClick={handleLogout} className="btn btn-outline-danger fw-semibold px-3">
-                                Logout
-                            </button>
-                        ) : (
-                            <>
-                                <Link className="btn btn-outline-light me-3" to="/login">Login</Link>
-                                <Link className="btn btn-primary" to="/signup">Sign Up</Link>
-                            </>
-                        )}
-                    </div>
-                </div>
+        <nav className="curved-navbar">
+            <div className="navbar-brand-container">
+                <Link className="text-white fw-bold fs-4 text-decoration-none" to="/">
+                    LibrarySys
+                </Link>
+            </div>
+
+            <ul className="nav-links mx-auto">
+                <li className={activePage === "dashboard" ? "active" : ""}>
+                    <Link to="/">Dashboard</Link>
+                </li>
+                <li className={activePage === "books" ? "active" : ""}>
+                    <Link to="/books">Books</Link>
+                </li>
+
+                {isPrivilegedUser && (
+                    <li className={activePage === "users" ? "active" : ""}>
+                        <Link to="/users">Users</Link>
+                    </li>
+                )}
+
+                <li className={activePage === "borrow" ? "active" : ""}>
+                    <Link to="/borrow">Borrow</Link>
+                </li>
+
+                {isPrivilegedUser && (
+                    <li className={activePage === "borrowing-log" || activePage === "logs" ? "active" : ""}>
+                        <Link to="/borrowing-log">Logs</Link>
+                    </li>
+                )}
+            </ul>
+
+            <div className="auth-buttons ms-auto pe-3">
+                {token ? (
+                    <button onClick={handleLogout} className="btn btn-danger fw-semibold px-4 shadow-sm">
+                        Logout
+                    </button>
+                ) : (
+                    <>
+                        <Link className="btn btn-outline-primary me-3" to="/login">Login</Link>
+                        <Link className="btn btn-primary shadow-sm" to="/signup">Sign Up</Link>
+                    </>
+                )}
             </div>
         </nav>
     );

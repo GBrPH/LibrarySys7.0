@@ -15,7 +15,7 @@ namespace LibrarySys.BackEnd.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly UserService _userService; 
+        private readonly UserService _userService;
 
         public AuthController(IConfiguration config, UserService userService)
         {
@@ -39,12 +39,14 @@ namespace LibrarySys.BackEnd.Controllers
             if (user == null)
                 return Unauthorized("Invalid credentials");
 
-            var token = GenerateJwtToken(user.Username, user.Role ?? "Borrower");
+            // FIX: Pass the user.Id into the token generator
+            var token = GenerateJwtToken(user.Username, user.Role ?? "Borrower", user.Id);
 
             return Ok(new { token });
         }
 
-        private string GenerateJwtToken(string username, string role)
+        // FIX: Add int userId to the parameters
+        private string GenerateJwtToken(string username, string role, int userId)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -53,6 +55,11 @@ namespace LibrarySys.BackEnd.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
                 new Claim(ClaimTypes.Role, role),
+                
+                // --- THE CRITICAL FIX: Stamp the User ID into the token ---
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim("id", userId.ToString()),
+
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

@@ -97,23 +97,32 @@ function BorrowLog() {
 
                 {/* Main Content Area */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    <div className="d-flex align-items-center justify-content-between mb-4">
-                        <h5 className="fw-bold mb-0">
-                            Borrowing Logs <span className="text-muted fw-normal">({filteredLogs.length} total)</span>
-                        </h5>
+                    {/* Replace your current BorrowingLog header with this: */}
 
-                        <div className="input-group w-50">
-                            <input
-                                type="text"
-                                className="form-control shadow-none"
-                                placeholder="Search by borrower or book title..."
-                                value={filters.search}
-                                onChange={e => setFilters({ ...filters, search: e.target.value })}
-                            />
+                    <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+
+                        {/* Left Side: Title and Search locked together */}
+                        <div className="d-flex align-items-center flex-grow-1 gap-3">
+                            <div style={{ minWidth: "220px" }}>
+                                <h5 className="fw-bold mb-0 text-nowrap">
+                                    Borrowing Logs <span className="text-muted fw-normal">({logs.length} total)</span>
+                                </h5>
+                            </div>
+
+                            <div className="input-group" style={{ maxWidth: "400px" }}>
+                                <input
+                                    type="text"
+                                    className="form-control shadow-none"
+                                    placeholder="Search by borrower or book title..."
+                                    value={filters.search}
+                                    onChange={e => setFilters(e.target.value)}
+                                />
+                            </div>
                         </div>
 
-                        <div className="d-flex align-items-center">
-                            <div className="btn-group me-2" role="group">
+                        {/* Right Side: View Controls & Settings */}
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="btn-group" role="group">
                                 <button className="btn btn-outline-secondary" title="Grid View">
                                     <span>&#9632;</span>
                                 </button>
