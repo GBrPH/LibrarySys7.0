@@ -1,13 +1,12 @@
 ﻿import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
-    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -16,9 +15,14 @@ function Login() {
                 username,
                 password
             });
+
+            // 1. Save token to localStorage
             localStorage.setItem("token", res.data.token);
+
             setMessage("Login successful!");
-            navigate("/");
+
+            // 2. Refresh page and redirect to home so the Navbar immediately updates state
+            window.location.href = "/";
         } catch (err) {
             console.error("Login failed:", err.response || err);
             setMessage("Login failed. Check your credentials.");

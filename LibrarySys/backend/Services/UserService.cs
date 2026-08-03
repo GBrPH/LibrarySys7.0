@@ -20,9 +20,11 @@ namespace LibrarySys.BackEnd.Services
             {
                 Id = user.Id,
                 Username = user.Username,
+                Password = user.Password,
                 FullName = user.FullName,
                 Role = user.Role,
-                IsActive = user.IsActive
+                IsActive = user.IsActive,
+                IsLoggedIn = user.IsLoggedIn
             };
 
         private User ToModel(UserDto dto) =>
@@ -30,9 +32,11 @@ namespace LibrarySys.BackEnd.Services
             {
                 Id = dto.Id,
                 Username = dto.Username,
+                Password = dto.Password,
                 FullName = dto.FullName,
                 Role = dto.Role,
-                IsActive = dto.IsActive
+                IsActive = dto.IsActive,
+                IsLoggedIn = dto.IsLoggedIn
             };
 
         public IEnumerable<UserDto> GetAll()
@@ -60,9 +64,19 @@ namespace LibrarySys.BackEnd.Services
             return ToDto(saved);
         }
 
-        public UserDto RegisterBorrower(string username, string fullName)
+        public UserDto RegisterBorrower(string username, string fullName, string password)
         {
-            var saved = _repo.RegisterBorrower(username, fullName);
+            var newUser = new User
+            {
+                Username = username,
+                FullName = fullName,
+                Password = password,
+                Role = "Borrower",
+                IsActive = true,
+                IsLoggedIn = false
+            };
+
+            var saved = _repo.Insert(newUser);
             return ToDto(saved);
         }
 

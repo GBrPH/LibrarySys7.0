@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Dashboard() {
@@ -47,27 +48,11 @@ function Dashboard() {
 
     return (
         <div className="container-fluid bg-light min-vh-100 p-0">
-            {/* Top Navbar (Original Layout) */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm px-3">
-                <div className="container-fluid">
-                    <Link className="navbar-brand fw-bold" to="/">LibrarySys</Link>
-                    <div className="collapse navbar-collapse">
-                        <ul className="navbar-nav me-auto">
-                            <li className="nav-item"><Link className="nav-link active" to="/">Dashboard</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/books">Books</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
-                        </ul>
-                        <div className="d-flex ms-auto">
-                            <Link className="btn btn-outline-light me-3" to="/login">Login</Link>
-                            <Link className="btn btn-primary" to="/signup">Sign Up</Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            {/* Dynamic Reusable Navbar */}
+            <Navbar activePage="dashboard" />
 
             <div className="row g-0">
-                {/* Filter Sidebar (Original Layout & Controls) */}
+                {/* Filter Sidebar */}
                 <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
                     <h5 className="fw-bold mb-3">Filters</h5>
                     <div className="mb-3">
@@ -94,22 +79,27 @@ function Dashboard() {
 
                 {/* Main Content Area */}
                 <div className="col-md-9 col-lg-10 p-4">
-                    <h2 className="fw-bold mb-4">Dashboard</h2>
+                    {/* Top Control Bar */}
+                    <div className="d-flex align-items-center justify-content-between mb-4">
+                        <div className="d-flex align-items-center flex-grow-1">
+                            <div style={{ minWidth: "220px" }}>
+                                <h2 className="fw-bold mb-0">Dashboard</h2>
+                            </div>
 
-                    {/* Top Control Bar: Search + Action Icons */}
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <div className="input-group w-50">
-                            <input
-                                type="text"
-                                className="form-control shadow-none"
-                                placeholder="Search books or borrowers..."
-                                value={filters.search}
-                                onChange={e => setFilters({ ...filters, search: e.target.value })}
-                            />
+                            <div className="input-group" style={{ width: "500px" }}>
+                                <input
+                                    type="text"
+                                    className="form-control shadow-none"
+                                    placeholder="Search books or borrowers..."
+                                    value={filters.search}
+                                    onChange={e => setFilters({ ...filters, search: e.target.value })}
+                                />
+                            </div>
                         </div>
 
-                        <div className="d-flex align-items-center">
-                            <div className="btn-group me-2" role="group">
+                        {/* Right Side: Action Icons */}
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="btn-group" role="group">
                                 <button className="btn btn-outline-secondary" title="Grid View">
                                     <span>&#9632;</span>
                                 </button>
@@ -121,11 +111,10 @@ function Dashboard() {
                                 <span>&#9881;</span>
                             </Link>
                         </div>
-                    </div>  
+                    </div>
 
-                    {/* Modern Card Statistics (New Styled Cards) */}
+                    {/* Card Statistics */}
                     <div className="row g-3 mb-4">
-                        {/* Blue Highlight Card */}
                         <div className="col-md-3">
                             <div className="card border-0 text-white p-3 shadow-sm"
                                 style={{ background: "linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)", borderRadius: "16px" }}>
@@ -135,7 +124,6 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Registered Users */}
                         <div className="col-md-3">
                             <div className="card border-0 bg-white p-3 shadow-sm" style={{ borderRadius: "16px" }}>
                                 <small className="text-muted text-uppercase fw-bold">Total Users</small>
@@ -144,7 +132,6 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Currently Borrowed */}
                         <div className="col-md-3">
                             <div className="card border-0 bg-white p-3 shadow-sm" style={{ borderRadius: "16px" }}>
                                 <small className="text-muted text-uppercase fw-bold">Borrowed</small>
@@ -153,7 +140,6 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Overdue Items */}
                         <div className="col-md-3">
                             <div className="card border-0 bg-white p-3 shadow-sm" style={{ borderRadius: "16px" }}>
                                 <small className="text-muted text-uppercase fw-bold">Overdue</small>
@@ -163,9 +149,8 @@ function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Bottom Split Layout: Inventory Report + Recent Activity */}
+                    {/* Bottom Split Layout */}
                     <div className="row g-4">
-                        {/* Donut Style Breakdown */}
                         <div className="col-lg-4">
                             <div className="card border-0 bg-white p-4 shadow-sm h-100" style={{ borderRadius: "16px" }}>
                                 <h5 className="fw-bold text-dark mb-4">Inventory Breakdown</h5>
@@ -197,7 +182,6 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Table (Original + Modern Avatars) */}
                         <div className="col-lg-8">
                             <div className="card border-0 bg-white p-4 shadow-sm h-100" style={{ borderRadius: "16px" }}>
                                 <div className="d-flex justify-content-between align-items-center mb-3">

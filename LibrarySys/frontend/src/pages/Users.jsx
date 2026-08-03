@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Users() {
@@ -49,31 +50,14 @@ function Users() {
 
     return (
         <div className="container-fluid p-0 bg-light min-vh-100">
-            {/* Navbar */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm px-3">
-                <div className="container-fluid">
-                    <Link className="navbar-brand fw-bold" to="/">LibrarySys</Link>
-                    <div className="collapse navbar-collapse">
-                        <ul className="navbar-nav me-auto">
-                            <li className="nav-item"><Link className="nav-link" to="/">Dashboard</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/books">Books</Link></li>
-                            <li className="nav-item"><Link className="nav-link active" to="/users">Users</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/borrowing-log">Borrowing Log</Link></li>
-                        </ul>
-                        <div className="d-flex ms-auto">
-                            <Link className="btn btn-outline-light me-3" to="/login">Login</Link>
-                            <Link className="btn btn-primary" to="/signup">Sign Up</Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            {/* Dynamic Reusable Navbar */}
+            <Navbar activePage="users" />
 
             <div className="row g-0">
                 {/* Sidebar Filters */}
                 <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
                     <h5 className="fw-bold mb-3">Filters</h5>
 
-                    {/* Role */}
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">ROLE</label>
                         <select
@@ -88,7 +72,6 @@ function Users() {
                         </select>
                     </div>
 
-                    {/* Active Status */}
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">ACTIVE STATUS</label>
                         <select
@@ -102,7 +85,6 @@ function Users() {
                         </select>
                     </div>
 
-                    {/* Logged In Status */}
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">LOGGED IN</label>
                         <select
@@ -116,7 +98,6 @@ function Users() {
                         </select>
                     </div>
 
-                    {/* Reset Filters */}
                     <button
                         className="btn btn-outline-secondary w-100 mt-2"
                         onClick={() => setFilters({ role: "All", active: "All", loggedIn: "All", username: "", fullName: "", search: "" })}
@@ -129,22 +110,26 @@ function Users() {
                 <div className="col-md-9 col-lg-10 p-4">
                     {/* Top Control Bar */}
                     <div className="d-flex align-items-center justify-content-between mb-4">
-                        <h5 className="fw-bold mb-0">
-                            Users <span className="text-muted fw-normal">({filteredUsers.length} total)</span>
-                        </h5>
+                        <div className="d-flex align-items-center flex-grow-1">
+                            <div style={{ minWidth: "220px" }}>
+                                <h5 className="fw-bold mb-0 text-nowrap">
+                                    Users <span className="text-muted fw-normal">({filteredUsers.length} total)</span>
+                                </h5>
+                            </div>
 
-                        <div className="input-group w-50">
-                            <input
-                                type="text"
-                                className="form-control shadow-none"
-                                placeholder="Search users..."
-                                value={filters.search}
-                                onChange={e => setFilters({ ...filters, search: e.target.value })}
-                            />
+                            <div className="input-group" style={{ width: "500px" }}>
+                                <input
+                                    type="text"
+                                    className="form-control shadow-none"
+                                    placeholder="Search users..."
+                                    value={filters.search}
+                                    onChange={e => setFilters({ ...filters, search: e.target.value })}
+                                />
+                            </div>
                         </div>
 
-                        <div className="d-flex align-items-center">
-                            <div className="btn-group me-2" role="group">
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="btn-group" role="group">
                                 <button className="btn btn-outline-secondary" title="Grid View">
                                     <span>&#9632;</span>
                                 </button>
@@ -152,14 +137,12 @@ function Users() {
                                     <span>&#9776;</span>
                                 </button>
                             </div>
-                            <Link to="/settings" className="btn btn-outline-secondary me-2" title="Settings">
+                            <Link to="/settings" className="btn btn-outline-secondary" title="Settings">
                                 <span>&#9881;</span>
                             </Link>
-                            <Link to="/users/add" className="btn btn-success fw-semibold">Add User</Link>
                         </div>
                     </div>
 
-                    {/* Users Table Card */}
                     <div className="card border-0 shadow-sm" style={{ borderRadius: "16px" }}>
                         <div className="card-body p-4">
                             <table className="table table-hover align-middle mb-0">

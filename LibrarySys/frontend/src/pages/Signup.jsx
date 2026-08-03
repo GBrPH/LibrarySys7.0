@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function SignUp() {
     const [fullName, setFullName] = useState("");
     const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
 
@@ -13,9 +14,13 @@ function SignUp() {
         e.preventDefault();
         try {
             await axios.post(`${process.env.REACT_APP_API_URL}/api/User/BorrowBookforUser`, {
-                username,
-                fullName,
-                role: "Borrower"
+                id: 0,
+                username: username,
+                password: password,
+                fullName: fullName,
+                role: "Borrower",
+                isActive: true,
+                isLoggedIn: false
             });
             setMessage("Account created! Redirecting to login...");
             setTimeout(() => navigate("/login"), 1500);
@@ -47,6 +52,16 @@ function SignUp() {
                             className="form-control"
                             value={username}
                             onChange={e => setUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label text-muted small fw-bold">PASSWORD</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
                             required
                         />
                     </div>

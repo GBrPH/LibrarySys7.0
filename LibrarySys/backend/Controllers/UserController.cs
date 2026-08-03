@@ -36,13 +36,17 @@ namespace LibrarySys.BackEnd.Controllers
         }
 
         [HttpPost("BorrowBookforUser")]
-        [Authorize(Roles = "Librarian")]
+        [AllowAnonymous]
         public ActionResult<UserDto> RegisterBorrower([FromBody] UserDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.FullName))
-                return BadRequest("Username and FullName are required.");
+            if (string.IsNullOrWhiteSpace(dto.Username) ||
+                string.IsNullOrWhiteSpace(dto.FullName) ||
+                string.IsNullOrWhiteSpace(dto.Password))
+            {
+                return BadRequest("Username, FullName, and Password are required.");
+            }
 
-            var user = _userService.RegisterBorrower(dto.Username, dto.FullName);
+            var user = _userService.RegisterBorrower(dto.Username, dto.FullName, dto.Password);
             return Ok(user);
         }
 

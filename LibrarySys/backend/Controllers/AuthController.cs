@@ -1,7 +1,10 @@
 ﻿using LibrarySys.BackEnd.DTOs;
+using LibrarySys.BackEnd.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -12,20 +15,33 @@ namespace LibrarySys.BackEnd.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
+        private readonly UserService _userService; 
 
-        public AuthController(IConfiguration config) => _config = config;
+        public AuthController(IConfiguration config, UserService userService)
+        {
+            _config = config;
+            _userService = userService;
+        }
 
         [HttpPost("LogIn")]
         public IActionResult Login([FromBody] LoginDto login)
         {
-            // Example hard-coded users (replace with DB/Identity later)
-            if (login.Username == "HMIR" && login.Password == "123456")
-                return Ok(new { token = GenerateJwtToken(login.Username, "Librarian") });
+            if (string.IsNullOrWhiteSpace(login.Username) || string.IsNullOrWhiteSpace(login.Password))
+                return BadRequest("Username and password are required.");
 
-            if (login.Username == "Borrower1" && login.Password == "123456")
-                return Ok(new { token = GenerateJwtToken(login.Username, "Borrower") });
+            var users = _userService.GetAll();
+            var user = users.FirstOrDefault(u =>
+                u.Username != null && u.Username.Equals(login.Username, StringComparison.OrdinalIgnoreCase) &&
+                u.Password == login.Password &&
+                u.IsActive
+            );
 
-            return Unauthorized("Invalid credentials");
+            if (user == null)
+                return Unauthorized("Invalid credentials");
+
+            var token = GenerateJwtToken(user.Username, user.Role ?? "Borrower");
+
+            return Ok(new { token });
         }
 
         private string GenerateJwtToken(string username, string role)
