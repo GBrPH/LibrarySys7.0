@@ -1,97 +1,130 @@
 ﻿import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function AddBook() {
+    const [bookData, setBookData] = useState({
+        title: "",
+        author: "",
+        copies: "",
+        type: "Physical Book" // Initial default value
+    });
+    const [message, setMessage] = useState({ text: "", type: "" });
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const [title, setTitle] = useState("");
-    const [author, setAuthor] = useState("");
-    const [copies, setCopies] = useState(1);
-    const [message, setMessage] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem("token");
+        setLoading(true);
+        setMessage({ text: "", type: "" });
+
+        const token = localStorage.getItem("token")?.trim();
+        if (!token) {
+            setMessage({ text: "Authentication token missing. Please log in again.", type: "danger" });
+            setLoading(false);
+            return;
+        }
 
         try {
-            await axios.post(`${process.env.REACT_APP_API_URL}/api/Book/CreateBook`, {
-                id: 0,
-                title: title,
-                author: author,
-                borrowerName: "",
-                copiesAvailable: parseInt(copies),
-                copies: parseInt(copies),
-                isAvailable: true,
-                borrowedByUserId: null,
-                borrowedDate: null,
-                dueDate: null
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/Book/AddBook`,
+                {
+                    title: bookData.title,
+                    author: bookData.author,
+                    copies: parseInt(bookData.copies, 10),
+                    type: bookData.type
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-            setMessage("Book added successfully!");
-            setTimeout(() => navigate("/books"), 1000);
+            setMessage({ text: "Book added successfully! Redirecting...", type: "success" });
+            setTimeout(() => navigate("/books"), 1500);
         } catch (err) {
-            console.error("Error adding book:", err);
-            setMessage("Failed to add book.");
+            setMessage({ text: err.response?.data?.message || "Failed to add book.", type: "danger" });
+            setLoading(false);
         }
     };
 
     return (
-        <div className="container-fluid p-0 bg-light min-vh-100">
+        <div className="container-fluid bg-light min-vh-100 p-0">
             <Navbar activePage="books" />
 
-            <div className="row g-0">
-                <div className="col-md-3 col-lg-2 bg-white border-end p-3 shadow-sm" style={{ minHeight: "calc(100vh - 56px)" }}>
-                    <Link to="/books" className="btn btn-outline-secondary w-100 fw-semibold">&larr; Back to Books</Link>
-                </div>
-
-                <div className="col-md-9 col-lg-10 p-4">
-                    <h3 className="fw-bold mb-4">Add Book</h3>
-
-                    <div className="card border-0 shadow-sm p-4 rounded-4" style={{ maxWidth: "600px" }}>
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-3">
-                                <label className="form-label text-muted small fw-bold">TITLE</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={title}
-                                    onChange={e => setTitle(e.target.value)}
-                                    required
-                                />
+            <div className="container py-5">
+                <div className="row justify-content-center">
+                    <div className="col-md-8 col-lg-6">
+                        <div className="card border-0 shadow-sm p-4 p-md-5" style={{ borderRadius: "16px" }}>
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h3 className="fw-bold text-dark mb-0">Add New Book</h3>
+                                <Link to="/books" className="btn btn-outline-secondary btn-sm">Back to Books</Link>
                             </div>
 
-                            <div className="mb-3">
-                                <label className="form-label text-muted small fw-bold">AUTHOR</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    maxLength={100}  /* <-- Add this */
-                                    value={title}
-                                    onChange={e => setTitle(e.target.value)}
-                                    required
-                                />
-                            </div>
+                            {message.text && (
+                                <div className={`alert alert-${message.type} alert-dismissible fade show`} role="alert">
+                                    {message.text}
+                                    <button type="button" className="btn-close" onClick={() => setMessage({ text: "", type: "" })}></button>
+                                </div>
+                            )}
 
-                            <div className="mb-4">
-                                <label className="form-label text-muted small fw-bold">NUMBER OF COPIES</label>
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    value={copies}
-                                    onChange={e => setCopies(e.target.value)}
-                                    min="1"
-                                    required
-                                />
-                            </div>
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold small text-muted">TITLE</label>
+                                    <input
+                                        type="text"
+                                        className="form-control shadow-none"
+                                        placeholder="Enter book title"
+                                        value={bookData.title}
+                                        onChange={(e) => setBookData({ ...bookData, title: e.target.value })}
+                                        required
+                                    />
+                                </div>
 
-                            <button type="submit" className="btn btn-success fw-semibold px-4">Save Book</button>
-                        </form>
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold small text-muted">AUTHOR</label>
+                                    <input
+                                        type="text"
+                                        className="form-control shadow-none"
+                                        placeholder="Enter author name"
+                                        value={bookData.author}
+                                        onChange={(e) => setBookData({ ...bookData, author: e.target.value })}
+                                        required
+                                    />
+                                </div>
 
-                        {message && <p className="mt-3 text-info mb-0">{message}</p>}
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold small text-muted">BOOK TYPE</label>
+                                    <select
+                                        className="form-select shadow-none"
+                                        value={bookData.type}
+                                        onChange={(e) => setBookData({ ...bookData, type: e.target.value })}
+                                    >
+                                        <option value="Physical Book">Physical Book</option>
+                                        <option value="eBook">eBook</option>
+                                        <option value="Journal">Journal</option>
+                                    </select>
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="form-label fw-bold small text-muted">COPIES</label>
+                                    <input
+                                        type="number"
+                                        className="form-control shadow-none"
+                                        placeholder="Number of available copies"
+                                        value={bookData.copies}
+                                        onChange={(e) => setBookData({ ...bookData, copies: e.target.value })}
+                                        min="1"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="d-grid">
+                                    <button type="submit" className="btn btn-primary btn-lg fw-bold shadow-sm" disabled={loading}>
+                                        {loading ? "Adding Book..." : "Add Book"}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

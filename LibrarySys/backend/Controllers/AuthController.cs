@@ -56,7 +56,6 @@ namespace LibrarySys.BackEnd.Controllers
                 new Claim(JwtRegisteredClaimNames.Sub, username),
                 new Claim(ClaimTypes.Role, role),
                 
-                // --- THE CRITICAL FIX: Stamp the User ID into the token ---
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim("id", userId.ToString()),
 

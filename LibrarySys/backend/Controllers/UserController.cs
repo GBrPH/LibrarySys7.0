@@ -35,6 +35,24 @@ namespace LibrarySys.BackEnd.Controllers
             return Ok(user);
         }
 
+        [HttpPut("UpdateFullName")]
+        [Authorize]
+        public IActionResult UpdateFullName([FromBody] UpdateFullNameDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.FullName))
+            {
+                return BadRequest(new { message = "Username and FullName are required." });
+            }
+
+            var updatedUser = _userService.UpdateFullName(dto.Username, dto.FullName);
+            if (updatedUser == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            return Ok(new { message = "Your Full Name has been updated successfully!" });
+        }
+
         [HttpPost("BorrowBookforUser")]
         [AllowAnonymous]
         public ActionResult<UserDto> RegisterBorrower([FromBody] UserDto dto)

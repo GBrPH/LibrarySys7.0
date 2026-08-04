@@ -86,6 +86,20 @@ namespace LibrarySys.BackEnd.Services
             var updated = _repo.Update(model);
             return ToDto(updated);
         }
+        public UserDto UpdateFullName(string username, string newFullName)
+        {
+            var updatedUser = _repo.UpdateFullName(username, newFullName);
+            if (updatedUser == null) return null;
+
+            return new UserDto
+            {
+                Id = updatedUser.Id,
+                Username = updatedUser.Username,
+                FullName = updatedUser.FullName,
+                Role = updatedUser.Role,
+                IsActive = updatedUser.IsActive
+            };
+        }
 
         public bool Delete(int id) => _repo.Delete(id);
     }

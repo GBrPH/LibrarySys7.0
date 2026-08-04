@@ -7,6 +7,7 @@
         public string Author { get; set; }
         public string? BorrowerName { get; set; }
         public int Copies { get; set; }
+        public string? Type { get; set; } = "Physical Book"; 
         public int? BorrowedByUserId { get; set; }
         public bool IsAvailable { get; set; } = true;
         public DateTime? BorrowedDate { get; set; }

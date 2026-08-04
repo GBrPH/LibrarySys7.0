@@ -19,10 +19,12 @@ function Navbar({ activePage }) {
 
     return (
         <nav className="curved-navbar">
+            {/* Brand Logo */}
             <div className="navbar-brand-container">
-                <Link className="text-white fw-bold fs-4 text-decoration-none" to="/">
-                    LibrarySys
-                </Link>
+                <Link
+                    className="text-white fw-bold fs-4 text-decoration-none"
+                    to="/"
+                    style={{ caretColor: "transparent", userSelect: "none", outline: "none" }}> LibrarySys </Link>
             </div>
 
             <ul className="nav-links mx-auto">

@@ -1,4 +1,20 @@
-/* src/index.css */
+/* Disable blinking cursor on non-editable elements globally */
+*:not(input):not(textarea):not([contenteditable="true"]) {
+    caret-color: transparent !important;
+    user-select: none; /* Prevents unwanted text highlight on click */
+}
+
+/* Ensure buttons and links never show an ugly focus outline/caret */
+button, a, .btn, .card, table {
+    caret-color: transparent !important;
+    outline: none !important;
+}
+
+/* Restore normal text input functionality so typing still works properly */
+input, textarea, [contenteditable="true"] {
+    caret-color: auto !important;
+    user-select: text !important;
+}
 
 body {
     margin: 0;

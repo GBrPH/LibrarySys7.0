@@ -10,7 +10,7 @@ function DeleteUser() {
     const [message, setMessage] = useState("");
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/User/GetUserById/${id}`, {
+        axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetUserById/${id}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         })
             .then(res => setUser(res.data))
@@ -19,7 +19,7 @@ function DeleteUser() {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${process.env.REACT_APP_API_URL}/User/DeleteUser/${id}`, {
+            axios.delete(`${process.env.REACT_APP_API_URL}/api/User/DeleteUser/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             });
             setMessage("User deleted successfully!");

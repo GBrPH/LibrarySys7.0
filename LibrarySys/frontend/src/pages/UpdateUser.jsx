@@ -63,11 +63,6 @@ function UpdateUser() {
                         <div className="card-body p-4">
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label className="form-label text-muted small fw-bold">FULL NAME</label>
-                                    <input type="text" className="form-control" value={fullName}
-                                        onChange={e => setFullName(e.target.value)} required />
-                                </div>
-                                <div className="mb-3">
                                     <label className="form-label text-muted small fw-bold">USERNAME</label>
                                     <input type="text" className="form-control" value={username}
                                         onChange={e => setUsername(e.target.value)} required />

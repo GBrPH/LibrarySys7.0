@@ -10,4 +10,9 @@
         public bool IsActive { get; set; } = true;
         public bool IsLoggedIn { get; set; }
     }
+    public class UpdateFullNameDto
+    {
+        public string? Username { get; set; }
+        public string? FullName { get; set; }
+    }
 }

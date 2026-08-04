@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import Dashboard from "./pages/Dashboard";
@@ -15,13 +15,17 @@ import BorrowingLog from "./pages/BorrowingLog";
 import BorrowBook from "./pages/BorrowBook";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-
+import Settings from "./pages/Settings"; // Import the new Settings page
 
 function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Dashboard />} />
+                {/* Redirect the root URL strictly to the versatile /dashboard route */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+                {/* The dedicated Dashboard route */}
+                <Route path="/dashboard" element={<Dashboard />} />
 
                 {/* Books Routes */}
                 <Route path="/books" element={<Books />} />
@@ -39,9 +43,15 @@ function App() {
                 <Route path="/borrowing-log" element={<BorrowingLog />} />
                 <Route path="/borrow" element={<BorrowBook />} />
 
+                {/* Settings Route */}
+                <Route path="/settings" element={<Settings />} />
+
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+
+                {/* Catch-all redirect for typed-in URLs that don't exist */}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </Router>
     );

@@ -96,16 +96,28 @@ namespace LibrarySys.BackEnd.Repositories
             return user;
         }
 
+        // 1. MODIFY THIS EXISTING METHOD
         public User Update(User user)
         {
             var existing = _db.Users.Find(user.Id);
             if (existing == null) return null;
 
             existing.Username = user.Username;
-            existing.FullName = user.FullName;
+            // REMOVED: existing.FullName = user.FullName; so admins can't change it here
             existing.Role = user.Role;
             existing.IsActive = user.IsActive;
 
+            _db.SaveChanges();
+            return existing;
+        }
+
+        // 2. ADD THIS BRAND NEW METHOD
+        public User UpdateFullName(string username, string newFullName)
+        {
+            var existing = _db.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+            if (existing == null) return null;
+
+            existing.FullName = newFullName;
             _db.SaveChanges();
             return existing;
         }
