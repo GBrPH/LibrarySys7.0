@@ -43,7 +43,7 @@ namespace LibrarySys.BackEnd.Controllers
             return Ok(books);
         }
 
-        [HttpPost("CreateBook")]
+        [HttpPost("AddBook")]
         [Authorize(Roles = "Librarian")]
         public ActionResult<BookDto> CreateBook([FromBody] BookDto book)
         {

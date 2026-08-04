@@ -11,7 +11,6 @@ function Dashboard() {
     const [returnMessage, setReturnMessage] = useState({ text: "", type: "" });
     const [processingId, setProcessingId] = useState(null);
 
-    // NEW: State for our dynamic inventory math
     const [inventory, setInventory] = useState({ physical: 0, ebook: 0, journal: 0 });
 
     const currentUsername = localStorage.getItem("username")?.trim() || "";
@@ -31,15 +30,14 @@ function Dashboard() {
             const booksRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, { headers });
             books = booksRes.data || [];
 
-            // --- DYNAMIC INVENTORY MATH ---
             let pCount = 0; let eCount = 0; let jCount = 0;
             books.forEach(b => {
                 if (b.type === "eBook") eCount++;
                 else if (b.type === "Journal") jCount++;
-                else pCount++; // Default to physical
+                else pCount++;
             });
 
-            const total = books.length || 1; // Prevent dividing by zero
+            const total = books.length || 1;
             setInventory({
                 physical: Math.round((pCount / total) * 100),
                 ebook: Math.round((eCount / total) * 100),
@@ -197,7 +195,6 @@ function Dashboard() {
                                     <div className="position-relative d-flex align-items-center justify-content-center flex-shrink-0"
                                         style={{
                                             width: "130px", height: "130px", borderRadius: "50%",
-                                            // DYNAMIC CSS CHART CALCULATION
                                             background: `conic-gradient(
                                                 #4361ee 0% ${inventory.physical}%, 
                                                 #4cc9f0 ${inventory.physical}% ${inventory.physical + inventory.ebook}%, 

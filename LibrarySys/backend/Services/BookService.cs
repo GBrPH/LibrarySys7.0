@@ -19,17 +19,21 @@ namespace LibrarySys.BackEnd.Services
         }
 
         private BookDto ToDto(Book book) =>
-            book == null ? null : new BookDto
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Author = book.Author,
-                CopiesAvailable = book.Copies,
-                IsAvailable = book.IsAvailable,
-                BorrowedByUserId = book.BorrowedByUserId,
-                BorrowedDate = book.BorrowedDate,
-                DueDate = book.DueDate
-            };
+    book == null ? null : new BookDto
+    {
+        Id = book.Id,
+        Title = book.Title,
+        Author = book.Author,
+
+        // Change CopiesAvailable to Copies
+        Copies = book.Copies,
+
+        Type = book.Type,
+        IsAvailable = book.IsAvailable,
+        BorrowedByUserId = book.BorrowedByUserId,
+        BorrowedDate = book.BorrowedDate,
+        DueDate = book.DueDate
+    };
 
         private Book ToModel(BookDto dto) =>
             dto == null ? null : new Book
@@ -38,12 +42,16 @@ namespace LibrarySys.BackEnd.Services
                 Title = dto.Title,
                 Author = dto.Author,
                 BorrowerName = dto.BorrowerName ?? "",
-                Copies = dto.CopiesAvailable,
+
+                // Change CopiesAvailable to Copies
+                Copies = dto.Copies,
+
+                Type = dto.Type,
                 IsAvailable = dto.IsAvailable,
                 BorrowedByUserId = dto.BorrowedByUserId,
                 BorrowedDate = dto.BorrowedDate,
                 DueDate = dto.DueDate
-            };
+            };  
 
         public IEnumerable<BookDto> GetAll()
         {

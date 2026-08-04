@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function BorrowBook() {
     const [books, setBooks] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const [selectedBook, setSelectedBook] = useState(null);
     const [message, setMessage] = useState("");
     const [isError, setIsError] = useState(false);
@@ -30,6 +31,11 @@ function BorrowBook() {
             console.error("Error fetching books:", err);
         }
     };
+
+    const filteredDropdownBooks = books.filter(b =>
+        b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        b.author.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleBorrowSubmit = async (e) => {
         e.preventDefault();
@@ -62,6 +68,7 @@ function BorrowBook() {
             setMessage(response.data.message || "Book successfully checked out and logged!");
             setIsError(false);
             setSelectedBook(null);
+            setSearchTerm("");
             fetchBooks();
 
         } catch (err) {
@@ -103,8 +110,18 @@ function BorrowBook() {
                             <form onSubmit={handleBorrowSubmit}>
                                 <div className="mb-4">
                                     <label className="form-label fw-bold text-dark">Select Book <span className="text-danger">*</span></label>
+
+                                    <input
+                                        type="text"
+                                        className="form-control mb-2 shadow-none"
+                                        placeholder="Search by title or author..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+
                                     <select
                                         className="form-select form-select-lg shadow-none"
+                                        size="5"
                                         value={selectedBook ? selectedBook.id : ""}
                                         onChange={(e) => {
                                             const book = books.find(b => b.id === parseInt(e.target.value));
@@ -113,11 +130,14 @@ function BorrowBook() {
                                         required
                                     >
                                         <option value="" disabled>-- Click to choose a book --</option>
-                                        {books.map((book) => (
-                                            <option key={book.id} value={book.id}>
+                                        {filteredDropdownBooks.map((book) => (
+                                            <option key={book.id} value={book.id} className="py-2 px-2 border-bottom">
                                                 {book.title} (by {book.author}) - {book.copies ?? book.copiesAvailable} left
                                             </option>
                                         ))}
+                                        {filteredDropdownBooks.length === 0 && (
+                                            <option disabled>No matching books found</option>
+                                        )}
                                     </select>
                                 </div>
 

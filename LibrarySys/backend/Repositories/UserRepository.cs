@@ -22,29 +22,10 @@ namespace LibrarySys.BackEnd.Repositories
                 _db.Users.AddRange(
                     new User
                     {
-                        Id = 1,
                         Username = "HMIR",
                         Password = "123456", 
                         FullName = "Head Librarian",
                         Role = "Librarian",
-                        IsActive = true
-                    },
-                    new User
-                    {
-                        Id = 2,
-                        Username = "B1",
-                        Password = "123456", 
-                        FullName = "John Doe",
-                        Role = "Borrower",
-                        IsActive = true
-                    },
-                    new User
-                    {
-                        Id = 3,
-                        Username = "B2",
-                        Password = "123456", 
-                        FullName = "Jane Smith",
-                        Role = "Borrower",
                         IsActive = true
                     }
                 );

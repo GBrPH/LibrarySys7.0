@@ -1,4 +1,5 @@
-﻿import React from "react";
+﻿// src/App.jsx
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -15,16 +16,18 @@ import BorrowingLog from "./pages/BorrowingLog";
 import BorrowBook from "./pages/BorrowBook";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Settings from "./pages/Settings"; // Import the new Settings page
+import Settings from "./pages/Settings";
+
+import ClassProjectNotice from "./pages/Warning";
 
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Redirect the root URL strictly to the versatile /dashboard route */}
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                {/* Show notice first when opening root */}
+                <Route path="/" element={<ClassProjectNotice />} />
 
-                {/* The dedicated Dashboard route */}
+                {/* Dashboard route */}
                 <Route path="/dashboard" element={<Dashboard />} />
 
                 {/* Books Routes */}
@@ -50,8 +53,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
-                {/* Catch-all redirect for typed-in URLs that don't exist */}
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                {/* Catch-all redirect */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>
     );

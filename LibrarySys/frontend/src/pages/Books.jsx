@@ -122,8 +122,6 @@ function Books() {
                         </select>
                     </div>
 
-
-
                     <div className="mb-3">
                         <label className="form-label text-muted small fw-bold">AUTHOR</label>
                         <input type="text" className="form-control shadow-none" placeholder="Filter by Author" value={filters.author} onChange={e => setFilters({ ...filters, author: e.target.value })} />
@@ -166,7 +164,6 @@ function Books() {
                                 </button>
                             </div>
 
-                            {/* Restored Settings Icon */}
                             <Link to="/Settings" className="btn btn-outline-secondary" title="Settings">
                                 <span>&#9881;</span>
                             </Link>

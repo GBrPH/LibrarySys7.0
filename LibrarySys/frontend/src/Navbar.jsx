@@ -5,6 +5,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Navbar({ activePage }) {
     const navigate = useNavigate();
 
+    // Grab username and initial for the avatar
+    const username = localStorage.getItem("username") || "User";
+    const userInitial = username.charAt(0).toUpperCase();
+
     const token = localStorage.getItem("token");
     const roleString = localStorage.getItem("role")?.toUpperCase() || "";
     const usernameString = localStorage.getItem("username")?.toUpperCase() || "";
@@ -54,9 +58,23 @@ function Navbar({ activePage }) {
 
             <div className="auth-buttons ms-auto pe-3">
                 {token ? (
-                    <button onClick={handleLogout} className="btn btn-danger fw-semibold px-4 shadow-sm">
-                        Logout
-                    </button>
+                    <div className="d-flex align-items-center gap-3">
+
+                        {/* 1. Logout Button First (Left) */}
+                        <button onClick={handleLogout} className="btn btn-danger fw-semibold px-4 shadow-sm">
+                            Logout
+                        </button>
+
+                        {/* 2. Account Logo Second (Right) - Text removed */}
+                        <div
+                            className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                            style={{ width: "40px", height: "40px", fontSize: "1.2rem" }}
+                            title={username}
+                        >
+                            {userInitial}
+                        </div>
+
+                    </div>
                 ) : (
                     <>
                         <Link className="btn btn-outline-primary me-3" to="/login">Login</Link>

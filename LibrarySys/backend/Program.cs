@@ -63,9 +63,11 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod());
 });
 
-// In-Memory DB setup
+
+var connectionString = "Server=LAPTOP-RICD4JTS\\SQLEXPRESS01;Database=LibrarySys;Trusted_Connection=True;TrustServerCertificate=True;";
+
 builder.Services.AddDbContext<LibraryContext>(options =>
-    options.UseInMemoryDatabase("LibrarySysDevDb"));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<BookRepository>();
 builder.Services.AddScoped<UserRepository>();
@@ -76,6 +78,13 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BorrowingLogService>();
 
 var app = builder.Build();
+
+// Automatically ensure database and tables are created on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LibraryContext>();
+    db.Database.EnsureCreated();
+}
 
 if (app.Environment.IsDevelopment())
 {

@@ -6,8 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Users() {
     const [users, setUsers] = useState([]);
-
-    // Grab current logged in username
+    const [viewMode, setViewMode] = useState("list"); 
     const currentUsername = localStorage.getItem("username");
 
     const [filters, setFilters] = useState({
