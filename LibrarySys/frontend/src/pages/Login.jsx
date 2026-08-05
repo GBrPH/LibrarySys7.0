@@ -16,7 +16,6 @@ function Login() {
                 { username, password }
             );
 
-            // FIX: Catch both camelCase and PascalCase from C# backend
             const token = res.data.token || res.data.Token;
 
             if (!token) {
@@ -25,11 +24,8 @@ function Login() {
             }
 
             localStorage.setItem("token", token);
-            localStorage.setItem("username", username); // FAILSAFE FOR NAVBAR
+            localStorage.setItem("username", username);
 
-            // Decode the JWT Token to extract the ASP.NET Role
-            // ... inside handleLogin ...
-            // Decode the JWT Token to extract the ASP.NET Role
             try {
                 const base64Url = token.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -53,8 +49,10 @@ function Login() {
             }
 
             setMessage("Login successful!");
-            // THIS LINE IS CHANGED: Route to warning instead of root
-            window.location.href = "/warning";
+
+            // UPDATED: Redirect directly to the dashboard
+            window.location.href = "/dashboard";
+
         } catch (err) {
             console.error("Login failed:", err.response || err);
             setMessage("Login failed. Check your credentials.");

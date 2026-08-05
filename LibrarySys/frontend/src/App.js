@@ -17,19 +17,16 @@ import BorrowBook from "./pages/BorrowBook";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Settings from "./pages/Settings";
-import ClassProjectNotice from "./pages/Warning";
+// You can delete the Warning import completely!
 
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Redirect root directly to login */}
+                {/* 1. Redirect anyone opening the app straight to Login */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
 
-                {/* The new Warning route */}
-                <Route path="/warning" element={<ClassProjectNotice />} />
-
-                {/* Dashboard route */}
+                {/* 2. Dashboard Route */}
                 <Route path="/dashboard" element={<Dashboard />} />
 
                 {/* Books Routes */}
@@ -56,7 +53,7 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
 
                 {/* Catch-all redirect */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>
     );
