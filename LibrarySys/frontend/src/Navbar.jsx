@@ -33,7 +33,7 @@ function Navbar({ activePage }) {
 
             <ul className="nav-links mx-auto">
                 <li className={activePage === "dashboard" ? "active" : ""}>
-                    <Link to="/">Dashboard</Link>
+                    <Link to="/dashboard">Dashboard</Link>
                 </li>
                 <li className={activePage === "books" ? "active" : ""}>
                     <Link to="/books">Books</Link>
