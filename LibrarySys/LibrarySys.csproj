@@ -1,52 +1,52 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="NewFolder1\**" />
-    <Content Remove="NewFolder1\**" />
-    <EmbeddedResource Remove="NewFolder1\**" />
-    <None Remove="NewFolder1\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="NewFolder1\**" />
+		<Content Remove="NewFolder1\**" />
+		<EmbeddedResource Remove="NewFolder1\**" />
+		<None Remove="NewFolder1\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.35" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.20" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.20" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.20">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="7.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="System.Security.Permissions" Version="7.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.35" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="System.Security.Permissions" Version="8.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="backend\Configurations\" />
-    <Folder Include="frontend\node_modules\" />
-    <Folder Include="frontend\src\assets\" />
-    <Folder Include="frontend\src\context\" />
-    <Folder Include="frontend\src\hooks\" />
-    <Folder Include="frontend\src\utils\" />
-    <Folder Include="frontend\public\" />
-    <Folder Include="test\BackEnd\" />
-    <Folder Include="test\FrontEnd\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="backend\Configurations\" />
+		<Folder Include="frontend\node_modules\" />
+		<Folder Include="frontend\src\assets\" />
+		<Folder Include="frontend\src\context\" />
+		<Folder Include="frontend\src\hooks\" />
+		<Folder Include="frontend\src\utils\" />
+		<Folder Include="frontend\public\" />
+		<Folder Include="test\BackEnd\" />
+		<Folder Include="test\FrontEnd\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Update="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
 </Project>

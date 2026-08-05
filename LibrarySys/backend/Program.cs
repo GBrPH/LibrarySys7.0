@@ -58,13 +58,12 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:3000")
+        policy => policy.WithOrigins("http://localhost:3000", "https://librarysys-dmccfi.runasp.net")
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
 
-
-var connectionString = "Server=LAPTOP-RICD4JTS\\SQLEXPRESS01;Database=LibrarySys;Trusted_Connection=True;TrustServerCertificate=True;";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<LibraryContext>(options =>
     options.UseSqlServer(connectionString));
@@ -86,11 +85,12 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "LibrarySys API v1");
+    c.RoutePrefix = "swagger"; 
+});
 
 app.UseHttpsRedirection();
 
