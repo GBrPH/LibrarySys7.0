@@ -78,7 +78,6 @@ builder.Services.AddScoped<BorrowingLogService>();
 
 var app = builder.Build();
 
-// Automatically ensure database and tables are created on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<LibraryContext>();
