@@ -1,32 +1,41 @@
 ﻿import React, { useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom"; // 1. Import useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
-    const navigate = useNavigate(); // 2. Initialize navigate
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setMessage("");
+
         try {
             const res = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Auth/Login`,
                 { username, password }
             );
 
-            const token = res.data.token || res.data.Token;
+            console.log("Server Response:", res.data); // Look at F12 console to see this!
+
+            // ROBUST TOKEN EXTRACTION: Handles objects, PascalCase, camelCase, or plain strings
+            const token = res.data?.token
+                || res.data?.Token
+                || res.data?.accessToken
+                || (typeof res.data === 'string' ? res.data : null);
 
             if (!token) {
-                setMessage("Login failed: Server did not return a valid token.");
+                setMessage("Login failed: Backend response did not contain a token.");
                 return;
             }
 
             localStorage.setItem("token", token);
             localStorage.setItem("username", username);
 
+            // Decode role safely
             try {
                 const base64Url = token.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -36,22 +45,23 @@ function Login() {
 
                 const decodedToken = JSON.parse(jsonPayload);
                 const userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
-                    || decodedToken.role || decodedToken.Role || res.data.role || res.data.Role || "Borrower";
+                    || decodedToken.role
+                    || decodedToken.Role
+                    || "Borrower";
 
                 localStorage.setItem("role", userRole);
             } catch (decodeError) {
-                console.error("Failed to decode token for role:", decodeError);
+                console.error("Failed to decode token role, defaulting to Borrower:", decodeError);
                 localStorage.setItem("role", "Borrower");
             }
 
             setMessage("Login successful!");
-
-            // 3. Navigate smoothly without breaking the path or reloading the page
-            navigate("/dashboard");
+            navigate("/dashboard"); // Smooth client-side route change
 
         } catch (err) {
-            console.error("Login failed:", err.response || err);
-            setMessage("Login failed. Check your credentials.");
+            console.error("Login API Error:", err.response || err);
+            const errorMsg = err.response?.data?.message || err.response?.data || "Login failed. Check your credentials.";
+            setMessage(typeof errorMsg === 'string' ? errorMsg : "Login failed. Check your credentials.");
         }
     };
 
