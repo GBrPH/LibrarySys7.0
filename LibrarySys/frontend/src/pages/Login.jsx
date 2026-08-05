@@ -28,6 +28,8 @@ function Login() {
             localStorage.setItem("username", username); // FAILSAFE FOR NAVBAR
 
             // Decode the JWT Token to extract the ASP.NET Role
+            // ... inside handleLogin ...
+            // Decode the JWT Token to extract the ASP.NET Role
             try {
                 const base64Url = token.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -51,7 +53,8 @@ function Login() {
             }
 
             setMessage("Login successful!");
-            window.location.href = "/";
+            // THIS LINE IS CHANGED: Route to warning instead of root
+            window.location.href = "/warning";
         } catch (err) {
             console.error("Login failed:", err.response || err);
             setMessage("Login failed. Check your credentials.");

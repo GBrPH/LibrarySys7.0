@@ -17,15 +17,17 @@ import BorrowBook from "./pages/BorrowBook";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Settings from "./pages/Settings";
-
 import ClassProjectNotice from "./pages/Warning";
 
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Show notice first when opening root */}
-                <Route path="/" element={<ClassProjectNotice />} />
+                {/* Redirect root directly to login */}
+                <Route path="/" element={<Navigate to="/login" replace />} />
+
+                {/* The new Warning route */}
+                <Route path="/warning" element={<ClassProjectNotice />} />
 
                 {/* Dashboard route */}
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -58,6 +60,6 @@ function App() {
             </Routes>
         </Router>
     );
-} 
+}
 
 export default App;

@@ -35,8 +35,8 @@ function ClassProjectNotice() {
 
                 {/* Proceed Button */}
                 <div>
-                    {/* Changed from /dashboard to /login */}
-                    <Link to="/login" className="btn btn-primary btn-lg fw-bold px-5 shadow-sm" style={{ borderRadius: "12px" }}>
+                    {/* CHANGED FROM /login TO /dashboard */}
+                    <Link to="/dashboard" className="btn btn-primary btn-lg fw-bold px-5 shadow-sm" style={{ borderRadius: "12px" }}>
                         Acknowledge & Proceed
                     </Link>
                 </div>

@@ -55,10 +55,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// UPDATED CORS POLICY TO ALLOW VERCEL ORIGINS & LOCALHOST
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:3000", "https://librarysys-dmccfi.runasp.net")
+        policy => policy.WithOrigins(
+                            "http://localhost:3000",
+                            "https://library-sys7-0.vercel.app"
+                        )
+                        .SetIsOriginAllowedToAllowWildcardSubdomains()
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
@@ -88,10 +93,9 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "LibrarySys API v1");
-    c.RoutePrefix = "swagger"; 
+    c.RoutePrefix = "swagger";
 });
 
-app.UseHttpsRedirection();
 
 app.UseCors("AllowReactApp");
 
