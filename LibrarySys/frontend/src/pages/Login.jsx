@@ -1,12 +1,13 @@
 ﻿import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // 1. Import useNavigate
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const navigate = useNavigate(); // 2. Initialize navigate
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -34,13 +35,8 @@ function Login() {
                 }).join(''));
 
                 const decodedToken = JSON.parse(jsonPayload);
-
                 const userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
-                    || decodedToken.role
-                    || decodedToken.Role
-                    || res.data.role
-                    || res.data.Role
-                    || "Borrower";
+                    || decodedToken.role || decodedToken.Role || res.data.role || res.data.Role || "Borrower";
 
                 localStorage.setItem("role", userRole);
             } catch (decodeError) {
@@ -50,8 +46,8 @@ function Login() {
 
             setMessage("Login successful!");
 
-            // UPDATED: Redirect directly to the dashboard
-            window.location.href = "/dashboard";
+            // 3. Navigate smoothly without breaking the path or reloading the page
+            navigate("/dashboard");
 
         } catch (err) {
             console.error("Login failed:", err.response || err);
