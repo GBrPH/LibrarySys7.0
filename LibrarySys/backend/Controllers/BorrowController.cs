@@ -47,6 +47,7 @@ namespace LibrarySys.BackEnd.Controllers
                 UserId = user.Id,
                 Username = user.Username,
                 BorrowDate = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow.AddDays(14),
                 IsOverdue = false
             };
             _db.BorrowingLogs.Add(log);

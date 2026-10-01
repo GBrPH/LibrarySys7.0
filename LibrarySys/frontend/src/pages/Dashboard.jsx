@@ -255,24 +255,53 @@ function Dashboard() {
                                                             <td>{log.bookTitle}</td>
                                                             <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
 
-                                                            {/* NEW DUE DATE DATA CELL */}
+                                                            {/* DUE DATE COLUMN */}
                                                             <td>
-                                                                <span className="fw-semibold text-danger">
-                                                                    {log.dueDate ? new Date(log.dueDate).toLocaleDateString() : "N/A"}
-                                                                </span>
+                                                                {(() => {
+                                                                    let dueDateObj = null;
+                                                                    if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                                                        dueDateObj = new Date(log.dueDate);
+                                                                    } else if (log.borrowDate) {
+                                                                        dueDateObj = new Date(log.borrowDate);
+                                                                        dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                                    }
+
+                                                                    const isCurrentlyOverdue = dueDateObj && new Date() > dueDateObj && !log.returnDate;
+
+                                                                    return (
+                                                                        <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
+                                                                            {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
+                                                                        </span>
+                                                                    );
+                                                                })()}
                                                             </td>
 
+                                                            {/* STATUS COLUMN */}
                                                             <td>
                                                                 {log.returnDate ? (
                                                                     <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
                                                                         {log.isOverdue ? "Returned Late" : "Returned"}
                                                                     </span>
-                                                                ) : isCurrentlyOverdue ? (
-                                                                    <span className="badge bg-danger shadow-sm">Overdue</span>
-                                                                ) : (
-                                                                    <span className="badge bg-success">Active</span>
-                                                                )}
+                                                                ) : (() => {
+                                                                    let dueDateObj = null;
+                                                                    if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                                                        dueDateObj = new Date(log.dueDate);
+                                                                    } else if (log.borrowDate) {
+                                                                        dueDateObj = new Date(log.borrowDate);
+                                                                        dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                                    }
+
+                                                                    // Checks if current date is past the calculated due date
+                                                                    const isCurrentlyOverdue = dueDateObj && new Date() > dueDateObj;
+
+                                                                    return isCurrentlyOverdue ? (
+                                                                        <span className="badge bg-danger shadow-sm">Overdue</span>
+                                                                    ) : (
+                                                                        <span className="badge bg-success">Active</span>
+                                                                    );
+                                                                })()}
                                                             </td>
+
                                                             <td>
                                                                 {!log.returnDate ? (
                                                                     <button
