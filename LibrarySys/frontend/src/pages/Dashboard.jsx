@@ -254,8 +254,7 @@ function Dashboard() {
 
                                                             <td>{log.bookTitle}</td>
                                                             <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
-
-                                                         
+                                                            
                                                             <td>
                                                                 <span className="fw-semibold text-danger">
                                                                     {log.dueDate && !log.dueDate.startsWith("0001")
@@ -264,17 +263,39 @@ function Dashboard() {
                                                                 </span>
                                                             </td>
 
-                                                            <td>
-                                                                {log.returnDate ? (
-                                                                    <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                        {log.isOverdue ? "Returned Late" : "Returned"}
-                                                                    </span>
-                                                                ) : isCurrentlyOverdue ? (
-                                                                    <span className="badge bg-danger shadow-sm">Overdue</span>
-                                                                ) : (
-                                                                    <span className="badge bg-success">Active</span>
-                                                                )}
-                                                            </td>
+                                                            {/* CALCULATE DUE DATE: Use real due date, or fallback to Borrow Date + 14 days */}
+                                                            {(() => {
+                                                                let dueDateObj = null;
+                                                                if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                                                    dueDateObj = new Date(log.dueDate);
+                                                                } else if (log.borrowDate) {
+                                                                    dueDateObj = new Date(log.borrowDate);
+                                                                    dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                                }
+
+                                                                const isOverdue = dueDateObj && new Date() > dueDateObj && !log.returnDate;
+
+                                                                return (
+                                                                    <>
+                                                                        <td>
+                                                                            <span className={`fw-semibold ${isOverdue ? "text-danger" : ""}`}>
+                                                                                {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>
+                                                                            {log.returnDate ? (
+                                                                                <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
+                                                                                    {log.isOverdue ? "Returned Late" : "Returned"}
+                                                                                </span>
+                                                                            ) : isOverdue ? (
+                                                                                <span className="badge bg-danger shadow-sm">Overdue</span>
+                                                                            ) : (
+                                                                                <span className="badge bg-success">Active</span>
+                                                                            )}
+                                                                        </td>
+                                                                    </>
+                                                                );
+                                                            })()}
 
                                                             <td>
                                                                 {!log.returnDate ? (
