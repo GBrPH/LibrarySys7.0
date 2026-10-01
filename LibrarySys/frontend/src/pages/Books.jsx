@@ -224,12 +224,13 @@ function Books() {
                                                 </span>
 
                                                 <div className="d-flex align-items-center gap-2">
-                                                    <button
-                                                        onClick={() => handleOpenDetails(book)}
-                                                        className="btn btn-outline-info btn-sm"
+                                                    <Link
+                                                        to={`/books/details/${book.id}`}
+                                                        className="btn btn-outline-primary btn-sm px-3"
+                                                        style={{ borderRadius: "8px" }}
                                                     >
                                                         Details
-                                                    </button>
+                                                    </Link>
 
                                                     <button
                                                         onClick={() => handleBorrow(book.id)}
