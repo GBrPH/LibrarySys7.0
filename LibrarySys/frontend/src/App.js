@@ -34,11 +34,7 @@ function App() {
                 <Route path="/add-book" element={<AddBook />} />
                 <Route path="/books/update/:id" element={<UpdateBook />} />
                 <Route path="/books/delete/:id" element={<DeleteBook />} />
-                {/*
-
                 <Route path="/books/details/:id" element={<DetailsBook />} />
-
-                */}
 
                 {/* Users Routes */}
                 <Route path="/users" element={<Users />} />

@@ -225,16 +225,15 @@ function Books() {
 
                                                 <div className="d-flex align-items-center gap-2">
                                                     {/* Details button on the left side of borrow */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleOpenDetails(book)}
+                                                    {/* Details Link on the left of Borrow */}
+                                                    <Link
+                                                        to={`/books/details/${book.id}`}
                                                         className="btn btn-outline-primary btn-sm px-3"
                                                         style={{ borderRadius: "8px" }}
                                                     >
                                                         Details
-                                                    </button>
+                                                    </Link>
 
-                                                    {/* Existing Borrow button */}
                                                     <button
                                                         onClick={() => handleBorrow(book.id)}
                                                         disabled={borrowingId === book.id || !isBookAvailable}
