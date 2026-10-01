@@ -8,7 +8,7 @@ import Books from "./pages/Books";
 import AddBook from "./pages/AddBook";
 import UpdateBook from "./pages/UpdateBook";
 import DeleteBook from "./pages/DeleteBook";
-import DetailsBook from "/pages/DetailsBook";
+import DetailsBook from "./pages/DetailsBook";
 import Users from "./pages/Users";
 import AddUser from "./pages/AddUser";
 import UpdateUser from "./pages/UpdateUser";
