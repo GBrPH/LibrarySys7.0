@@ -135,9 +135,6 @@ function BorrowLog() {
                                                             <span className="fw-bold text-dark">{log.username}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="fw-semibold">{log.bookTitle}</td>
-
-                                                    <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
 
                                                     <td className="fw-semibold">{log.bookTitle}</td>
 
