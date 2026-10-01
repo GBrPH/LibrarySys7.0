@@ -123,6 +123,7 @@ function BorrowLog() {
                                                 <th>STATUS</th>
                                             </tr>
                                         </thead>
+
                                         <tbody>
                                             {filteredLogs.map(log => (
                                                 <tr key={log.id}>
@@ -164,8 +165,6 @@ function BorrowLog() {
 
                                                     <td>{log.returnDate ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
 
-                                                    <td>{log.returnDate ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
-
                                                     <td>
                                                         {log.returnDate ? (
                                                             <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
@@ -188,19 +187,19 @@ function BorrowLog() {
                                                                 <span className="badge bg-danger shadow-sm">Overdue</span>
                                                             ) : (
                                                                 <span className="badge bg-success">Active</span>
-                                                                );
-
+                                                            );
                                                         })()}
                                                     </td>
-
                                                 </tr>
                                             ))}
+
                                             {filteredLogs.length === 0 && (
                                                 <tr>
                                                     <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
                                                 </tr>
                                             )}
                                         </tbody>
+
                                     </table>
                                 </div>
                             </div>
