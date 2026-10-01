@@ -197,7 +197,6 @@ function Users() {
                             </div>
                         </div>
                     ) : (
-                        // NEW GRID LAYOUT FOR USERS
                         <div className="row g-4">
                             {filteredUsers.map(user => {
                                 const online = isUserOnline(user);

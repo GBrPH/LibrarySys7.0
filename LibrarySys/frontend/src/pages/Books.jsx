@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
+import DetailsBook from "./DetailsBook";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Books() {
@@ -9,6 +10,9 @@ function Books() {
     const [borrowMessage, setBorrowMessage] = useState("");
     const [borrowingId, setBorrowingId] = useState(null);
     const [viewMode, setViewMode] = useState("grid");
+    const [selectedBook, setSelectedBook] = useState(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+
     const [filters, setFilters] = useState({
         status: "All",
         author: "",
@@ -36,6 +40,16 @@ function Books() {
     useEffect(() => {
         fetchBooks();
     }, []);
+
+    const handleOpenDetails = (book) => {
+        setSelectedBook(book);
+        setShowDetailsModal(true);
+    };
+
+    const handleCloseDetails = () => {
+        setSelectedBook(null);
+        setShowDetailsModal(false);
+    };
 
     const handleBorrow = async (bookId) => {
         setBorrowingId(bookId);
@@ -186,7 +200,11 @@ function Books() {
 
                                 return (
                                     <div className="col-12 col-md-6 col-xl-4" key={book.id}>
-                                        <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: "16px" }}>
+                                        <div
+                                            className="card h-100 border-0 shadow-sm p-3 position-relative"
+                                            style={{ borderRadius: "16px", cursor: "pointer" }}
+                                            onClick={() => handleOpenDetails(book)}
+                                        >
                                             <div className="d-flex justify-content-between align-items-start mb-2">
                                                 <span className={`badge ${bookType === "eBook" ? "bg-info" : bookType === "Journal" ? "bg-danger" : "bg-primary"}`}>
                                                     {bookType}
@@ -199,12 +217,26 @@ function Books() {
                                             <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={book.title}>{book.title}</h5>
                                             <p className="text-muted small mb-3">by {book.author}</p>
 
-                                            <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                            <div
+                                                className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 <span className="fw-semibold text-secondary small">
                                                     {copyCount} {copyCount === 1 ? "copy" : "copies"} left
                                                 </span>
                                                 <div className="d-flex gap-1">
-                                                    <button onClick={() => handleBorrow(book.id)} disabled={borrowingId === book.id || !isBookAvailable} className="btn btn-primary btn-sm">
+                                                    <button
+                                                        onClick={() => handleOpenDetails(book)}
+                                                        className="btn btn-outline-info btn-sm"
+                                                    >
+                                                        Details
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => handleBorrow(book.id)}
+                                                        disabled={borrowingId === book.id || !isBookAvailable}
+                                                        className="btn btn-primary btn-sm"
+                                                    >
                                                         {borrowingId === book.id ? "..." : "Borrow"}
                                                     </button>
 
@@ -258,7 +290,17 @@ function Books() {
                                                         </td>
                                                         <td>
                                                             <div className="d-flex align-items-center gap-1">
-                                                                <button onClick={() => handleBorrow(book.id)} disabled={borrowingId === book.id || !isBookAvailable} className="btn btn-primary btn-sm">
+                                                                <button
+                                                                    onClick={() => handleOpenDetails(book)}
+                                                                    className="btn btn-outline-info btn-sm"
+                                                                >
+                                                                    Details
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleBorrow(book.id)}
+                                                                    disabled={borrowingId === book.id || !isBookAvailable}
+                                                                    className="btn btn-primary btn-sm"
+                                                                >
                                                                     Borrow
                                                                 </button>
                                                                 {isPrivilegedUser && (
@@ -283,6 +325,20 @@ function Books() {
                     )}
                 </div>
             </div>
+
+            {/* Book Details Modal */}
+            {showDetailsModal && selectedBook && (
+                <DetailsBook
+                    bookId={selectedBook.id}
+                    bookData={selectedBook}
+                    show={showDetailsModal}
+                    onClose={handleCloseDetails}
+                    onBorrow={(bookToBorrow) => {
+                        handleCloseDetails();
+                        handleBorrow(bookToBorrow.id);
+                    }}
+                />
+            )}
         </div>
     );
 }
