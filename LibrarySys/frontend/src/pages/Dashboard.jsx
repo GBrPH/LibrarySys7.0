@@ -255,10 +255,12 @@ function Dashboard() {
                                                             <td>{log.bookTitle}</td>
                                                             <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
 
-                                                            {/* NEW DUE DATE DATA CELL */}
+                                                         
                                                             <td>
                                                                 <span className="fw-semibold text-danger">
-                                                                    {log.dueDate ? new Date(log.dueDate).toLocaleDateString() : "N/A"}
+                                                                    {log.dueDate && !log.dueDate.startsWith("0001")
+                                                                        ? new Date(log.dueDate).toLocaleDateString()
+                                                                        : "N/A"}
                                                                 </span>
                                                             </td>
 
@@ -273,6 +275,7 @@ function Dashboard() {
                                                                     <span className="badge bg-success">Active</span>
                                                                 )}
                                                             </td>
+
                                                             <td>
                                                                 {!log.returnDate ? (
                                                                     <button
