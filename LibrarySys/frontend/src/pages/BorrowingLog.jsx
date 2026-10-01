@@ -136,11 +136,39 @@ function BorrowLog() {
                                                         </div>
                                                     </td>
                                                     <td className="fw-semibold">{log.bookTitle}</td>
+
                                                     <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
-                                                    <td>{log.dueDate ? new Date(log.dueDate).toLocaleDateString() : "-"}</td>
+
+                                                    <td className="fw-semibold">{log.bookTitle}</td>
+
+                                                    <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
+
+                                                    <td>
+                                                        {(() => {
+                                                            let dueDateObj = null;
+                                                            if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                                                dueDateObj = new Date(log.dueDate);
+                                                            } else if (log.borrowDate) {
+                                                                dueDateObj = new Date(log.borrowDate);
+                                                                dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                            }
+
+                                                            const today = new Date().setHours(0, 0, 0, 0);
+                                                            const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+                                                            const isCurrentlyOverdue = dueTime && today > dueTime && !log.returnDate;
+
+                                                            return (
+                                                                <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
+                                                                    {dueDateObj ? dueDateObj.toLocaleDateString() : "-"}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                    </td>
+
                                                     <td>{log.returnDate ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
 
-                                                    {/* STATUS COLUMN FOR LOGS */}
+                                                    <td>{log.returnDate ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
+
                                                     <td>
                                                         {log.returnDate ? (
                                                             <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
@@ -155,7 +183,6 @@ function BorrowLog() {
                                                                 dueDateObj.setDate(dueDateObj.getDate() + 14);
                                                             }
 
-                                                            // Compare calendar days using midnight timestamps
                                                             const today = new Date().setHours(0, 0, 0, 0);
                                                             const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
                                                             const isCurrentlyOverdue = dueTime && today > dueTime;
@@ -164,7 +191,8 @@ function BorrowLog() {
                                                                 <span className="badge bg-danger shadow-sm">Overdue</span>
                                                             ) : (
                                                                 <span className="badge bg-success">Active</span>
-                                                            );
+                                                                );
+
                                                         })()}
                                                     </td>
 
