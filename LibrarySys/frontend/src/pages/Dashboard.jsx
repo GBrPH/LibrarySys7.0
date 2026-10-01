@@ -290,6 +290,8 @@ function Dashboard() {
                                                                         dueDateObj = new Date(log.borrowDate);
                                                                         dueDateObj.setDate(dueDateObj.getDate() + 14);
                                                                     }
+
+                                                                    // Checks if current date is past the calculated due date
                                                                     const isCurrentlyOverdue = dueDateObj && new Date() > dueDateObj;
 
                                                                     return isCurrentlyOverdue ? (
