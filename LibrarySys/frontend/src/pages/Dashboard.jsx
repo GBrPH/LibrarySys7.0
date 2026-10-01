@@ -229,6 +229,7 @@ function Dashboard() {
                                                 <th style={{ minWidth: "150px" }}>User</th>
                                                 <th style={{ minWidth: "250px" }}>Book</th>
                                                 <th style={{ minWidth: "120px" }}>Borrow Date</th>
+                                                <th style={{ minWidth: "120px" }}>Due Date</th> 
                                                 <th style={{ minWidth: "130px" }}>Status</th>
                                                 <th style={{ minWidth: "100px" }}>Action</th>
                                             </tr>
@@ -250,8 +251,17 @@ function Dashboard() {
                                                                     </span>
                                                                 </div>
                                                             </td>
+
                                                             <td>{log.bookTitle}</td>
                                                             <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
+
+                                                            {/* NEW DUE DATE DATA CELL */}
+                                                            <td>
+                                                                <span className="fw-semibold text-danger">
+                                                                    {log.dueDate ? new Date(log.dueDate).toLocaleDateString() : "N/A"}
+                                                                </span>
+                                                            </td>
+
                                                             <td>
                                                                 {log.returnDate ? (
                                                                     <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>

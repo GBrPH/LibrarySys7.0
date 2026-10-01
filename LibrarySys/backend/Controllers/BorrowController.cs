@@ -37,7 +37,7 @@ namespace LibrarySys.BackEnd.Controllers
             book.BorrowedByUserId = user.Id;
             book.BorrowerName = string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName;
             book.BorrowedDate = DateTime.UtcNow;
-            book.DueDate = DateTime.UtcNow.AddDays(14); // 14-day limit
+            book.DueDate = DateTime.UtcNow.AddDays(14); 
             book.IsAvailable = book.Copies > 0;
 
             var log = new BorrowingLog
@@ -55,7 +55,6 @@ namespace LibrarySys.BackEnd.Controllers
             return Ok(new { message = $"You have successfully borrowed '{book.Title}'." });
         }
 
-        // --- NEW RETURN FEATURE ---
         [HttpPost("ReturnBook")]
         public IActionResult ReturnBook([FromBody] BorrowRequestDto request)
         {
@@ -68,7 +67,6 @@ namespace LibrarySys.BackEnd.Controllers
             var book = _db.Books.FirstOrDefault(b => b.Id == request.BookId);
             if (book == null) return NotFound(new { message = "Book not found." });
 
-            // Find the active borrowing log for this specific user and book
             var log = _db.BorrowingLogs.FirstOrDefault(l => l.BookId == book.Id && l.UserId == user.Id && l.ReturnDate == null);
             if (log == null) return BadRequest(new { message = "No active borrow record found for this book." });
 
@@ -92,12 +90,10 @@ namespace LibrarySys.BackEnd.Controllers
             return Ok(new { message = $"'{book.Title}' was {statusMsg}." });
         }
 
-        // --- TEMPORARY TESTING ENDPOINT: SEED OVERDUE BOOK ---
         [HttpGet("SeedOverdue")]
-        [AllowAnonymous] // So you can just type it in your browser!
+        [AllowAnonymous] 
         public IActionResult SeedOverdue()
         {
-            // 1. Grab the first available user and book from the database
             var user = _db.Users.FirstOrDefault();
             var book = _db.Books.FirstOrDefault(b => b.Copies > 0);
 
@@ -106,34 +102,33 @@ namespace LibrarySys.BackEnd.Controllers
                 return BadRequest("Make sure you have at least one user and one available book in the database first.");
             }
 
-            // 2. Modify the book as if it was borrowed 15 days ago
+            // ... (keep the existing validation above)
             book.Copies--;
             book.BorrowedByUserId = user.Id;
             book.BorrowerName = string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName;
+            book.BorrowedDate = DateTime.UtcNow;
 
-            // THE TIME TRAVEL MAGIC: Set dates to the past
-            book.BorrowedDate = DateTime.UtcNow.AddDays(-15);
-            book.DueDate = DateTime.UtcNow.AddDays(-1); // Due yesterday!
+            // Calculate Due Date
+            DateTime calculatedDueDate = DateTime.UtcNow.AddDays(14);
+            book.DueDate = calculatedDueDate;
             book.IsAvailable = book.Copies > 0;
 
-            // 3. Create the log entry from 15 days ago
             var log = new BorrowingLog
             {
                 BookId = book.Id,
                 BookTitle = book.Title,
                 UserId = user.Id,
                 Username = user.Username,
-                BorrowDate = DateTime.UtcNow.AddDays(-15),
-                IsOverdue = false // It hasn't been returned yet!
+                BorrowDate = DateTime.UtcNow,
+                DueDate = calculatedDueDate, // Save to log
+                IsOverdue = false
             };
-
             _db.BorrowingLogs.Add(log);
             _db.SaveChanges();
 
-            return Ok(new
-            {
-                message = $"SUCCESS! Created a fake overdue record. '{book.Title}' was 'borrowed' 15 days ago by {user.Username}."
-            });
+            // Format the date for the success popup
+            string formattedDueDate = calculatedDueDate.ToString("MMM dd, yyyy");
+            return Ok(new { message = $"You have successfully borrowed '{book.Title}'. Please return by {formattedDueDate}." });
         }
     }
 }
