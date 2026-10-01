@@ -139,17 +139,35 @@ function BorrowLog() {
                                                     <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
                                                     <td>{log.dueDate ? new Date(log.dueDate).toLocaleDateString() : "-"}</td>
                                                     <td>{log.returnDate ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
+
+                                                    {/* STATUS COLUMN FOR LOGS */}
                                                     <td>
                                                         {log.returnDate ? (
                                                             <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                {log.isOverdue ? "Returned (Overdue)" : "Returned"}
+                                                                {log.isOverdue ? "Returned Late" : "Returned"}
                                                             </span>
-                                                        ) : log.isOverdue ? (
-                                                            <span className="badge bg-danger">Overdue</span>
-                                                        ) : (
-                                                            <span className="badge bg-success">Active</span>
-                                                        )}
+                                                        ) : (() => {
+                                                            let dueDateObj = null;
+                                                            if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                                                dueDateObj = new Date(log.dueDate);
+                                                            } else if (log.borrowDate) {
+                                                                dueDateObj = new Date(log.borrowDate);
+                                                                dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                            }
+
+                                                            // Compare calendar days using midnight timestamps
+                                                            const today = new Date().setHours(0, 0, 0, 0);
+                                                            const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+                                                            const isCurrentlyOverdue = dueTime && today > dueTime;
+
+                                                            return isCurrentlyOverdue ? (
+                                                                <span className="badge bg-danger shadow-sm">Overdue</span>
+                                                            ) : (
+                                                                <span className="badge bg-success">Active</span>
+                                                            );
+                                                        })()}
                                                     </td>
+
                                                 </tr>
                                             ))}
                                             {filteredLogs.length === 0 && (
