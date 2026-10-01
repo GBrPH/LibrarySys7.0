@@ -217,34 +217,39 @@ function Books() {
                                             <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={book.title}>{book.title}</h5>
                                             <p className="text-muted small mb-3">by {book.author}</p>
 
-                                            <div
-                                                className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
+                                            {/* Inside the Grid View return inside Books.jsx */}
+                                            <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
                                                 <span className="fw-semibold text-secondary small">
                                                     {copyCount} {copyCount === 1 ? "copy" : "copies"} left
                                                 </span>
-                                                <div className="d-flex gap-1">
+
+                                                <div className="d-flex align-items-center gap-2">
+                                                    {/* Details button on the left side of borrow */}
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleOpenDetails(book)}
-                                                        className="btn btn-outline-info btn-sm"
+                                                        className="btn btn-outline-primary btn-sm px-3"
+                                                        style={{ borderRadius: "8px" }}
                                                     >
                                                         Details
                                                     </button>
 
+                                                    {/* Existing Borrow button */}
                                                     <button
                                                         onClick={() => handleBorrow(book.id)}
                                                         disabled={borrowingId === book.id || !isBookAvailable}
-                                                        className="btn btn-primary btn-sm"
+                                                        className="btn btn-primary btn-sm px-3"
+                                                        style={{ borderRadius: "8px" }}
                                                     >
                                                         {borrowingId === book.id ? "..." : "Borrow"}
                                                     </button>
 
+                                                    {/* Admin/Librarian tools if privileged */}
                                                     {isPrivilegedUser && (
-                                                        <>
+                                                        <div className="ms-1 d-flex gap-1">
                                                             <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm">✎</Link>
                                                             <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm">🗑</Link>
-                                                        </>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
