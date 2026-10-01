@@ -301,18 +301,6 @@ function Dashboard() {
                                                             </td>
 
                                                             <td>
-                                                                {log.returnDate ? (
-                                                                    <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                        {log.isOverdue ? "Returned Late" : "Returned"}
-                                                                    </span>
-                                                                ) : isCurrentlyOverdue ? (
-                                                                    <span className="badge bg-danger shadow-sm">Overdue</span>
-                                                                ) : (
-                                                                    <span className="badge bg-success">Active</span>
-                                                                )}
-                                                            </td>
-
-                                                            <td>
                                                                 {!log.returnDate ? (
                                                                     <button
                                                                         onClick={() => handleReturn(log.bookId, log.username)}
