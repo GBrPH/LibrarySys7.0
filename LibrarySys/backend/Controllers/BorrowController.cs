@@ -37,7 +37,7 @@ namespace LibrarySys.BackEnd.Controllers
             book.BorrowedByUserId = user.Id;
             book.BorrowerName = string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName;
             book.BorrowedDate = DateTime.UtcNow;
-            book.DueDate = DateTime.UtcNow.AddDays(14); 
+            book.DueDate = DateTime.UtcNow.AddDays(14);
             book.IsAvailable = book.Copies > 0;
 
             var log = new BorrowingLog
@@ -50,6 +50,7 @@ namespace LibrarySys.BackEnd.Controllers
                 DueDate = DateTime.UtcNow.AddDays(14),
                 IsOverdue = false
             };
+
             _db.BorrowingLogs.Add(log);
             _db.SaveChanges();
 
@@ -68,16 +69,29 @@ namespace LibrarySys.BackEnd.Controllers
             var book = _db.Books.FirstOrDefault(b => b.Id == request.BookId);
             if (book == null) return NotFound(new { message = "Book not found." });
 
-            var log = _db.BorrowingLogs.FirstOrDefault(l => l.BookId == book.Id && l.UserId == user.Id && l.ReturnDate == null);
+            // FIX 1: Check for both null and DateTime.MinValue to prevent the DB search from failing
+            var log = _db.BorrowingLogs.FirstOrDefault(l =>
+                l.BookId == book.Id &&
+                l.UserId == user.Id &&
+                (l.ReturnDate == null || l.ReturnDate == DateTime.MinValue));
+
             if (log == null) return BadRequest(new { message = "No active borrow record found for this book." });
 
             log.ReturnDate = DateTime.UtcNow;
-            log.IsOverdue = (DateTime.UtcNow - log.BorrowDate).TotalDays > 21;
+
+            // FIX 2: Set the overdue threshold to 14 days to match the borrowing period
+            log.IsOverdue = (DateTime.UtcNow - log.BorrowDate).TotalDays > 14;
 
             book.Copies++;
             book.IsAvailable = true;
 
-            if (book.BorrowedByUserId == user.Id)
+            // FIX 3: Check if anyone ELSE is still borrowing a copy of this book before clearing the main Book record
+            var hasOtherActiveBorrows = _db.BorrowingLogs.Any(l =>
+                l.BookId == book.Id &&
+                l.UserId != user.Id &&
+                (l.ReturnDate == null || l.ReturnDate == DateTime.MinValue));
+
+            if (!hasOtherActiveBorrows)
             {
                 book.BorrowedByUserId = null;
                 book.BorrowerName = null;
@@ -92,7 +106,7 @@ namespace LibrarySys.BackEnd.Controllers
         }
 
         [HttpGet("SeedOverdue")]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         public IActionResult SeedOverdue()
         {
             var user = _db.Users.FirstOrDefault();
@@ -103,15 +117,15 @@ namespace LibrarySys.BackEnd.Controllers
                 return BadRequest("Make sure you have at least one user and one available book in the database first.");
             }
 
-            // ... (keep the existing validation above)
+            // FIX 4: Actually generate past-due dates for testing (BorrowDate 20 days ago, DueDate 6 days ago)
+            DateTime pastBorrowDate = DateTime.UtcNow.AddDays(-20);
+            DateTime pastDueDate = pastBorrowDate.AddDays(14);
+
             book.Copies--;
             book.BorrowedByUserId = user.Id;
             book.BorrowerName = string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName;
-            book.BorrowedDate = DateTime.UtcNow;
-
-            // Calculate Due Date
-            DateTime calculatedDueDate = DateTime.UtcNow.AddDays(14);
-            book.DueDate = calculatedDueDate;
+            book.BorrowedDate = pastBorrowDate;
+            book.DueDate = pastDueDate;
             book.IsAvailable = book.Copies > 0;
 
             var log = new BorrowingLog
@@ -120,16 +134,16 @@ namespace LibrarySys.BackEnd.Controllers
                 BookTitle = book.Title,
                 UserId = user.Id,
                 Username = user.Username,
-                BorrowDate = DateTime.UtcNow,
-                DueDate = calculatedDueDate, // Save to log
-                IsOverdue = false
+                BorrowDate = pastBorrowDate,
+                DueDate = pastDueDate,
+                IsOverdue = true // Explicitly marking it as overdue for testing
             };
+
             _db.BorrowingLogs.Add(log);
             _db.SaveChanges();
 
-            // Format the date for the success popup
-            string formattedDueDate = calculatedDueDate.ToString("MMM dd, yyyy");
-            return Ok(new { message = $"You have successfully borrowed '{book.Title}'. Please return by {formattedDueDate}." });
+            string formattedDueDate = pastDueDate.ToString("MMM dd, yyyy");
+            return Ok(new { message = $"Successfully seeded an OVERDUE borrow for '{book.Title}'. It was due on {formattedDueDate}." });
         }
     }
 }
