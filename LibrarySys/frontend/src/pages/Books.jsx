@@ -1,11 +1,12 @@
-﻿import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+﻿import React, { useEffect, useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
 import DetailsBook from "./DetailsBook";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Books() {
+    const navigate = useNavigate();
     const [books, setBooks] = useState([]);
     const [borrowMessage, setBorrowMessage] = useState("");
     const [borrowingId, setBorrowingId] = useState(null);
@@ -26,20 +27,23 @@ function Books() {
     const usernameString = localStorage.getItem("username")?.toUpperCase() || "";
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || usernameString === "HMIR";
 
-    const fetchBooks = () => {
+    const fetchBooks = useCallback(() => {
         const token = localStorage.getItem("token")?.trim();
-        if (!token) return;
+        if (!token) {
+            navigate("/login"); // Redirects user if their session token is missing
+            return;
+        }
 
         axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setBooks(res.data || []))
             .catch(err => console.error("Error fetching books:", err));
-    };
+    }, [navigate]);
 
     useEffect(() => {
         fetchBooks();
-    }, []);
+    }, [fetchBooks]);
 
     const handleOpenDetails = (book) => {
         setSelectedBook(book);
@@ -83,31 +87,40 @@ function Books() {
     let filteredBooks = books.filter(book => {
         const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
         const isAvailable = copyCount > 0;
-
         const bookType = book.type || "Physical Book";
 
         if (filters.status === "Available" && !isAvailable) return false;
         if (filters.status === "Borrowed" && isAvailable) return false;
-
         if (filters.type !== "All" && bookType !== filters.type) return false;
 
-        if (filters.author && !book.author.toLowerCase().includes(filters.author.toLowerCase())) return false;
+        // Null-safe author check
+        if (filters.author && !(book.author || "").toLowerCase().includes(filters.author.toLowerCase())) return false;
+
         if (filters.copies === "Low Stock (1–9)" && (copyCount < 1 || copyCount > 9)) return false;
         if (filters.copies === "High Stock (≥10)" && copyCount < 10) return false;
         if (filters.copies === "Out of Stock (0)" && copyCount !== 0) return false;
 
-        if (filters.search && !(
-            book.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-            book.author.toLowerCase().includes(filters.search.toLowerCase())
-        )) return false;
+        // Null-safe search check
+        if (filters.search) {
+            const searchLower = filters.search.toLowerCase();
+            const titleMatch = (book.title || "").toLowerCase().includes(searchLower);
+            const authorMatch = (book.author || "").toLowerCase().includes(searchLower);
+            if (!titleMatch && !authorMatch) return false;
+        }
 
         return true;
     });
 
-    if (filters.az === "Title (A–Z)") filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
-    if (filters.az === "Title (Z–A)") filteredBooks.sort((a, b) => b.title.localeCompare(a.title));
-    if (filters.az === "Author (A–Z)") filteredBooks.sort((a, b) => a.author.localeCompare(b.author));
-    if (filters.az === "Author (Z–A)") filteredBooks.sort((a, b) => b.author.localeCompare(a.author));
+    // Null-safe sorting logic
+    if (filters.az === "Title (A–Z)") {
+        filteredBooks.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    } else if (filters.az === "Title (Z–A)") {
+        filteredBooks.sort((a, b) => (b.title || "").localeCompare(a.title || ""));
+    } else if (filters.az === "Author (A–Z)") {
+        filteredBooks.sort((a, b) => (a.author || "").localeCompare(b.author || ""));
+    } else if (filters.az === "Author (Z–A)") {
+        filteredBooks.sort((a, b) => (b.author || "").localeCompare(a.author || ""));
+    }
 
     return (
         <div className="container-fluid p-0 bg-light min-vh-100">
@@ -217,7 +230,6 @@ function Books() {
                                             <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={book.title}>{book.title}</h5>
                                             <p className="text-muted small mb-3">by {book.author}</p>
 
-                                            {/* Inside the Grid View return inside Books.jsx */}
                                             <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
                                                 <span className="fw-semibold text-secondary small">
                                                     {copyCount} {copyCount === 1 ? "copy" : "copies"} left
@@ -233,7 +245,10 @@ function Books() {
                                                     </Link>
 
                                                     <button
-                                                        onClick={() => handleBorrow(book.id)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Prevents card click event from firing
+                                                            handleBorrow(book.id);
+                                                        }}
                                                         disabled={borrowingId === book.id || !isBookAvailable}
                                                         className="btn btn-primary btn-sm px-3"
                                                         style={{ borderRadius: "8px" }}
@@ -241,11 +256,10 @@ function Books() {
                                                         {borrowingId === book.id ? "..." : "Borrow"}
                                                     </button>
 
-                                                    {/* Admin/Librarian tools if privileged */}
                                                     {isPrivilegedUser && (
                                                         <div className="ms-1 d-flex gap-1">
-                                                            <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm">✎</Link>
-                                                            <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm">🗑</Link>
+                                                            <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm" onClick={e => e.stopPropagation()}>✎</Link>
+                                                            <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm" onClick={e => e.stopPropagation()}>🗑</Link>
                                                         </div>
                                                     )}
                                                 </div>
