@@ -1,15 +1,17 @@
-﻿import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+﻿import React, { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Dashboard() {
+    const navigate = useNavigate();
     const [stats, setStats] = useState({ books: 0, users: 0, borrowed: 0, overdue: 0 });
     const [recentLogs, setRecentLogs] = useState([]);
     const [filters, setFilters] = useState({ status: "All", search: "" });
     const [returnMessage, setReturnMessage] = useState({ text: "", type: "" });
     const [processingId, setProcessingId] = useState(null);
+    const [allBooks, setAllBooks] = useState([]); // Added to lookup missing bookIds
 
     const [inventory, setInventory] = useState({ physical: 0, ebook: 0, journal: 0 });
 
@@ -17,9 +19,12 @@ function Dashboard() {
     const roleString = localStorage.getItem("role")?.toUpperCase() || "";
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || currentUsername.toUpperCase() === "HMIR";
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = useCallback(async () => {
         const token = localStorage.getItem("token")?.trim();
-        if (!token) return;
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
         const headers = { Authorization: `Bearer ${token}` };
         let books = [];
@@ -29,6 +34,7 @@ function Dashboard() {
         try {
             const booksRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, { headers });
             books = booksRes.data || [];
+            setAllBooks(books);
 
             let pCount = 0; let eCount = 0; let jCount = 0;
             books.forEach(b => {
@@ -43,7 +49,6 @@ function Dashboard() {
                 ebook: Math.round((eCount / total) * 100),
                 journal: Math.round((jCount / total) * 100)
             });
-
         } catch (err) { console.error("Books fetch failed:", err); }
 
         if (isPrivilegedUser) {
@@ -58,13 +63,16 @@ function Dashboard() {
             let fetchedLogs = logsRes.data || [];
 
             if (!isPrivilegedUser) {
-                fetchedLogs = fetchedLogs.filter(log => log.username?.toLowerCase() === currentUsername.toLowerCase());
+                fetchedLogs = fetchedLogs.filter(log => (log.username || "").toLowerCase() === currentUsername.toLowerCase());
             }
-            logs = fetchedLogs.sort((a, b) => new Date(b.borrowDate) - new Date(a.borrowDate));
+
+            // Fix: Added [...fetchedLogs] to prevent mutating the original array
+            logs = [...fetchedLogs].sort((a, b) => new Date(b.borrowDate || Date.now()) - new Date(a.borrowDate || Date.now()));
         } catch (err) { console.error("Logs fetch failed:", err); }
 
         const calculateActiveOverdue = (log) => {
             if (log.returnDate) return log.isOverdue;
+            if (!log.borrowDate) return false;
             const daysBorrowed = (new Date() - new Date(log.borrowDate)) / (1000 * 60 * 60 * 24);
             return daysBorrowed > 14;
         };
@@ -77,21 +85,29 @@ function Dashboard() {
         });
 
         setRecentLogs(logs.slice(0, 15));
-    };
+    }, [currentUsername, isPrivilegedUser, navigate]);
 
     useEffect(() => {
         fetchDashboardData();
-    }, [currentUsername, isPrivilegedUser]);
+    }, [fetchDashboardData]);
 
-    const handleReturn = async (bookId, logUsername) => {
-        setProcessingId(bookId);
+    const handleReturn = async (log) => {
+        // Fix: Fallback lookup if backend DTO omitted the bookId
+        const targetBookId = log.bookId || allBooks.find(b => b.title === log.bookTitle)?.id;
+
+        setProcessingId(log.id); // Use log.id for processing state to prevent UI freezing on multiple copies
         setReturnMessage({ text: "", type: "" });
+
         const token = localStorage.getItem("token")?.trim();
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
         try {
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Borrow/ReturnBook`,
-                { bookId: bookId, username: logUsername },
+                { bookId: targetBookId, username: log.username },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -105,21 +121,23 @@ function Dashboard() {
     };
 
     const filteredLogs = recentLogs.filter(log => {
-        const isCurrentlyOverdue = !log.returnDate && ((new Date() - new Date(log.borrowDate)) / (1000 * 60 * 60 * 24)) > 14;
+        const isCurrentlyOverdue = !log.returnDate && log.borrowDate && ((new Date() - new Date(log.borrowDate)) / (1000 * 60 * 60 * 24)) > 14;
         if (filters.status === "Active" && log.returnDate) return false;
         if (filters.status === "Returned" && !log.returnDate) return false;
         if (filters.status === "Overdue" && !log.isOverdue && !isCurrentlyOverdue) return false;
+
+        // Fix: Null-safe string searches
         if (filters.search && !(
-            (log.username && log.username.toLowerCase().includes(filters.search.toLowerCase())) ||
-            (log.bookTitle && log.bookTitle.toLowerCase().includes(filters.search.toLowerCase()))
+            (log.username || "").toLowerCase().includes(filters.search.toLowerCase()) ||
+            (log.bookTitle || "").toLowerCase().includes(filters.search.toLowerCase())
         )) return false;
+
         return true;
     });
 
     return (
         <div className="container-fluid bg-light min-vh-100 p-0">
             <Navbar activePage="dashboard" />
-
             <div className="row g-0">
                 <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
                     <h5 className="fw-bold mb-3">Filters</h5>
@@ -229,7 +247,7 @@ function Dashboard() {
                                                 <th style={{ minWidth: "150px" }}>User</th>
                                                 <th style={{ minWidth: "250px" }}>Book</th>
                                                 <th style={{ minWidth: "120px" }}>Borrow Date</th>
-                                                <th style={{ minWidth: "120px" }}>Due Date</th> 
+                                                <th style={{ minWidth: "120px" }}>Due Date</th>
                                                 <th style={{ minWidth: "130px" }}>Status</th>
                                                 <th style={{ minWidth: "100px" }}>Action</th>
                                             </tr>
@@ -237,7 +255,15 @@ function Dashboard() {
                                         <tbody>
                                             {filteredLogs.length > 0 ? (
                                                 filteredLogs.map(log => {
-                                                    const isCurrentlyOverdue = !log.returnDate && ((new Date() - new Date(log.borrowDate)) / (1000 * 60 * 60 * 24)) > 14;
+                                                    let dueDateObj = null;
+                                                    if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                                        dueDateObj = new Date(log.dueDate);
+                                                    } else if (log.borrowDate) {
+                                                        dueDateObj = new Date(log.borrowDate);
+                                                        dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                    }
+
+                                                    const isCurrentlyOverdue = dueDateObj && new Date() > dueDateObj && !log.returnDate;
 
                                                     return (
                                                         <tr key={log.id}>
@@ -251,65 +277,34 @@ function Dashboard() {
                                                                     </span>
                                                                 </div>
                                                             </td>
-
                                                             <td>{log.bookTitle}</td>
-                                                            <td>{new Date(log.borrowDate).toLocaleDateString()}</td>
-
-                                                            {/* DUE DATE COLUMN */}
+                                                            <td>{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "N/A"}</td>
                                                             <td>
-                                                                {(() => {
-                                                                    let dueDateObj = null;
-                                                                    if (log.dueDate && !log.dueDate.startsWith("0001")) {
-                                                                        dueDateObj = new Date(log.dueDate);
-                                                                    } else if (log.borrowDate) {
-                                                                        dueDateObj = new Date(log.borrowDate);
-                                                                        dueDateObj.setDate(dueDateObj.getDate() + 14);
-                                                                    }
-
-                                                                    const isCurrentlyOverdue = dueDateObj && new Date() > dueDateObj && !log.returnDate;
-
-                                                                    return (
-                                                                        <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
-                                                                            {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
-                                                                        </span>
-                                                                    );
-                                                                })()}
+                                                                <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
+                                                                    {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
+                                                                </span>
                                                             </td>
-
-                                                            {/* STATUS COLUMN */}
                                                             <td>
-                                                                {log.returnDate ? (
+                                                                {log.returnDate && !log.returnDate.startsWith("0001") ? (
                                                                     <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
                                                                         {log.isOverdue ? "Returned Late" : "Returned"}
                                                                     </span>
-                                                                ) : (() => {
-                                                                    let dueDateObj = null;
-                                                                    if (log.dueDate && !log.dueDate.startsWith("0001")) {
-                                                                        dueDateObj = new Date(log.dueDate);
-                                                                    } else if (log.borrowDate) {
-                                                                        dueDateObj = new Date(log.borrowDate);
-                                                                        dueDateObj.setDate(dueDateObj.getDate() + 14);
-                                                                    }
-
-                                                                    // Checks if current date is past the calculated due date
-                                                                    const isCurrentlyOverdue = dueDateObj && new Date() > dueDateObj;
-
-                                                                    return isCurrentlyOverdue ? (
+                                                                ) : (
+                                                                    isCurrentlyOverdue ? (
                                                                         <span className="badge bg-danger shadow-sm">Overdue</span>
                                                                     ) : (
                                                                         <span className="badge bg-success">Active</span>
-                                                                    );
-                                                                })()}
+                                                                    )
+                                                                )}
                                                             </td>
-
                                                             <td>
-                                                                {!log.returnDate ? (
+                                                                {(!log.returnDate || log.returnDate.startsWith("0001")) ? (
                                                                     <button
-                                                                        onClick={() => handleReturn(log.bookId, log.username)}
-                                                                        disabled={processingId === log.bookId}
+                                                                        onClick={() => handleReturn(log)} // Pass entire object now
+                                                                        disabled={processingId === log.id}
                                                                         className={`btn btn-sm fw-bold ${isCurrentlyOverdue ? 'btn-danger' : 'btn-outline-primary'}`}
                                                                     >
-                                                                        {processingId === log.bookId ? "..." : "Return"}
+                                                                        {processingId === log.id ? "..." : "Return"}
                                                                     </button>
                                                                 ) : (
                                                                     <span className="text-muted small">—</span>
@@ -319,7 +314,7 @@ function Dashboard() {
                                                     );
                                                 })
                                             ) : (
-                                                <tr><td colSpan="5" className="text-center text-muted py-4">No borrowing activity found.</td></tr>
+                                                <tr><td colSpan="6" className="text-center text-muted py-4">No borrowing activity found.</td></tr>
                                             )}
                                         </tbody>
                                     </table>
