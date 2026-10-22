@@ -7,6 +7,8 @@ function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
@@ -16,12 +18,12 @@ function Login() {
         try {
             const res = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Auth/Login`,
-                { username, password }
+                // Passing rememberMe to backend in case you want to extend token lifespan there
+                { username, password, rememberMe }
             );
 
-            console.log("Server Response:", res.data); // Look at F12 console to see this!
+            console.log("Server Response:", res.data);
 
-            // ROBUST TOKEN EXTRACTION: Handles objects, PascalCase, camelCase, or plain strings
             const token = res.data?.token
                 || res.data?.Token
                 || res.data?.accessToken
@@ -32,10 +34,15 @@ function Login() {
                 return;
             }
 
-            localStorage.setItem("token", token);
-            localStorage.setItem("username", username);
+            // Route storage based on "Remember Me" toggle
+            const storage = rememberMe ? localStorage : sessionStorage;
 
-            // Decode role safely
+            // Clear the other storage just in case old tokens exist
+            (rememberMe ? sessionStorage : localStorage).clear();
+
+            storage.setItem("token", token);
+            storage.setItem("username", username);
+
             try {
                 const base64Url = token.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -49,14 +56,14 @@ function Login() {
                     || decodedToken.Role
                     || "Borrower";
 
-                localStorage.setItem("role", userRole);
+                storage.setItem("role", userRole);
             } catch (decodeError) {
                 console.error("Failed to decode token role, defaulting to Borrower:", decodeError);
-                localStorage.setItem("role", "Borrower");
+                storage.setItem("role", "Borrower");
             }
 
             setMessage("Login successful!");
-            navigate("/dashboard"); // Smooth client-side route change
+            navigate("/dashboard");
 
         } catch (err) {
             console.error("Login API Error:", err.response || err);
@@ -67,7 +74,6 @@ function Login() {
 
     return (
         <div className="position-relative vh-100 w-100 overflow-hidden bg-white d-flex align-items-center justify-content-center">
-            {/* Top Waves */}
             <div className="position-absolute top-0 start-0 w-100" style={{ height: "45vh", zIndex: 1 }}>
                 <svg viewBox="0 0 1440 320" className="w-100 h-100" preserveAspectRatio="none">
                     <path fill="#8ebafd" d="M0,192L80,181.3C160,171,320,149,480,165.3C640,181,800,235,960,240C1120,245,1280,203,1360,181.3L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"></path>
@@ -75,14 +81,12 @@ function Login() {
                 </svg>
             </div>
 
-            {/* Bottom Wave */}
             <div className="position-absolute bottom-0 start-0 w-100" style={{ height: "30vh", zIndex: 1 }}>
                 <svg viewBox="0 0 1440 320" className="w-100 h-100" preserveAspectRatio="none">
                     <path fill="#2575fc" d="M0,192L80,202.7C160,213,320,235,480,213.3C640,192,800,128,960,122.7C1120,117,1280,171,1360,197.3L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
                 </svg>
             </div>
 
-            {/* Login Card Container */}
             <div className="card shadow-lg p-4 rounded-4 border-0 position-relative" style={{ maxWidth: "420px", width: "90%", zIndex: 2 }}>
                 <h2 className="text-center mb-4 fw-bold" style={{ color: "#2575fc" }}>Login</h2>
 
@@ -98,17 +102,42 @@ function Login() {
                             required
                         />
                     </div>
-                    <div className="mb-4">
+
+                    <div className="mb-2">
                         <label className="form-label text-secondary fw-semibold">Password</label>
-                        <input
-                            type="password"
-                            className="form-control form-control-lg fs-6 shadow-none"
-                            value={password}
-                            maxLength={50}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                        <div className="input-group">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                className="form-control form-control-lg fs-6 shadow-none border-end-0"
+                                value={password}
+                                maxLength={50}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary bg-white border-start-0"
+                                style={{ borderColor: "#dee2e6" }}
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
                     </div>
+
+                    <div className="form-check mb-4 mt-2">
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="rememberMe"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                        />
+                        <label className="form-check-label text-secondary small" htmlFor="rememberMe">
+                            Remember Me
+                        </label>
+                    </div>
+
                     <button type="submit" className="btn btn-primary w-100 btn-lg fs-6 shadow-sm">
                         Login
                     </button>
