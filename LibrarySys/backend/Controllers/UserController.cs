@@ -64,6 +64,9 @@ namespace LibrarySys.BackEnd.Controllers
                 return BadRequest("Username, Full Name, and Password are required.");
             }
 
+            dto.Username = dto.Username.Trim();
+            dto.FullName = dto.FullName.Trim();
+
             if (dto.Username.Length > 20)
             {
                 return BadRequest("Username cannot be longer than 20 characters.");
@@ -81,7 +84,7 @@ namespace LibrarySys.BackEnd.Controllers
 
             var existingUser = _userService.GetAll().FirstOrDefault(u =>
                 u.Username != null &&
-                u.Username.Equals(dto.Username, StringComparison.OrdinalIgnoreCase));
+                u.Username.Trim().Equals(dto.Username, StringComparison.OrdinalIgnoreCase));
 
             if (existingUser != null)
             {
