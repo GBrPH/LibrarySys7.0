@@ -76,7 +76,7 @@ namespace LibrarySys.BackEnd.Controllers
 
             if (dto.Password.Length < 6 || dto.Password.Length > 24)
             {
-                return BadRequest("Password must be between 6 and 50 characters.");
+                return BadRequest("Password must be between 6 and 24 characters.");
             }
 
             var existingUser = _userService.GetAll().FirstOrDefault(u =>
