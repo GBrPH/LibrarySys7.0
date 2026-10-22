@@ -31,6 +31,7 @@ function SignUp() {
             setIsSuccess(true);
             setMessage("Account created! Redirecting to login...");
             setTimeout(() => navigate("/login"), 1500);
+
         } catch (err) {
             console.error("Sign up failed:", err);
             setIsSuccess(false);
@@ -62,15 +63,15 @@ function SignUp() {
 
             {/* Sign Up Card */}
             <div className="card shadow-lg p-4 rounded-4 border-0 position-relative" style={{ maxWidth: "420px", width: "90%", zIndex: 2 }}>
-                <h2 className="text-center mb-4 fw-bold" style={{ color: "#2575fc" }}>Sign Up</h2>
+                <h2 className="text-center mb-4 fw-bold" style={{ color: "#2575fc" }}>SIGN UP</h2>
 
                 <form onSubmit={handleSignUp}>
                     <div className="mb-3">
-                        <label className="form-label text-secondary fw-semibold small">FULL NAME</label>
+                        <label className="form-label text-secondary fw-semibold small">NAME (What should we call you?)</label>
                         <input type="text" className="form-control form-control-lg fs-6" value={fullName} maxLength={50} onChange={(e) => setFullName(e.target.value)} required />
                     </div>
 
-                    <div className="mb-3">
+                    <div className="mb-3">  
                         <label className="form-label text-secondary fw-semibold small">USERNAME</label>
                         <input type="text" className="form-control form-control-lg fs-6" value={username} maxLength={20} onChange={(e) => setUsername(e.target.value)} required />
                     </div>
