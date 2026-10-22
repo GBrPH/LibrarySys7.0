@@ -61,7 +61,31 @@ namespace LibrarySys.BackEnd.Controllers
                 string.IsNullOrWhiteSpace(dto.FullName) ||
                 string.IsNullOrWhiteSpace(dto.Password))
             {
-                return BadRequest("Username, FullName, and Password are required.");
+                return BadRequest("Username, Full Name, and Password are required.");
+            }
+
+            if (dto.Username.Length > 20)
+            {
+                return BadRequest("Username cannot be longer than 20 characters.");
+            }
+
+            if (dto.FullName.Length > 50)
+            {
+                return BadRequest("Full Name cannot be longer than 50 characters.");
+            }
+
+            if (dto.Password.Length < 6 || dto.Password.Length > 24)
+            {
+                return BadRequest("Password must be between 6 and 50 characters.");
+            }
+
+            var existingUser = _userService.GetAll().FirstOrDefault(u =>
+                u.Username != null &&
+                u.Username.Equals(dto.Username, StringComparison.OrdinalIgnoreCase));
+
+            if (existingUser != null)
+            {
+                return BadRequest("That username is already taken. Please choose another.");
             }
 
             var user = _userService.RegisterBorrower(dto.Username, dto.FullName, dto.Password);
@@ -72,6 +96,15 @@ namespace LibrarySys.BackEnd.Controllers
         [Authorize(Roles = "Librarian")]
         public ActionResult<UserDto> RegisterUser([FromBody] UserDto user)
         {
+            var existingUser = _userService.GetAll().FirstOrDefault(u =>
+                u.Username != null &&
+                u.Username.Equals(user.Username, StringComparison.OrdinalIgnoreCase));
+
+            if (existingUser != null)
+            {
+                return BadRequest("That username is already taken. Please choose another.");
+            }
+
             var created = _userService.Register(user);
             return CreatedAtAction(nameof(GetUserById), new { id = created.Id }, created);
         }

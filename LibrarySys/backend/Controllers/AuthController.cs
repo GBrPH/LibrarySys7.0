@@ -30,8 +30,10 @@ namespace LibrarySys.BackEnd.Controllers
                 return BadRequest("Username and password are required.");
 
             var users = _userService.GetAll();
+
             var user = users.FirstOrDefault(u =>
-                u.Username != null && u.Username.Equals(login.Username, StringComparison.OrdinalIgnoreCase) &&
+                u.Username != null &&
+                u.Username == login.Username &&
                 u.Password == login.Password &&
                 u.IsActive
             );
@@ -39,13 +41,11 @@ namespace LibrarySys.BackEnd.Controllers
             if (user == null)
                 return Unauthorized("Invalid credentials");
 
-            // FIX: Pass the user.Id into the token generator
             var token = GenerateJwtToken(user.Username, user.Role ?? "Borrower", user.Id);
 
             return Ok(new { token });
         }
 
-        // FIX: Add int userId to the parameters
         private string GenerateJwtToken(string username, string role, int userId)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
