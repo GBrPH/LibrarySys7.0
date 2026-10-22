@@ -63,7 +63,8 @@ function SignUp() {
 
             {/* Sign Up Card */}
             <div className="card shadow-lg p-4 rounded-4 border-0 position-relative" style={{ maxWidth: "420px", width: "90%", zIndex: 2 }}>
-                <h2 className="text-center mb-4 fw-bold" style={{ color: "#2575fc" }}>SIGN UP</h2>
+                <h2 className="text-center mb-4 fw-bold" style={{ color: "#2575fc" }}>Create your</h2>
+                <h2 className="text-center mb-4 fw-bold" style={{ color: "#2575fc" }}>Account</h2>
 
                 <form onSubmit={handleSignUp}>
                     <div className="mb-3">
