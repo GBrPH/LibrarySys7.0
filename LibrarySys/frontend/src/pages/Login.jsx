@@ -93,6 +93,7 @@ function Login() {
                             type="text"
                             className="form-control form-control-lg fs-6 shadow-none"
                             value={username}
+                            maxLength={20}
                             onChange={(e) => setUsername(e.target.value)}
                             required
                         />
@@ -103,6 +104,7 @@ function Login() {
                             type="password"
                             className="form-control form-control-lg fs-6 shadow-none"
                             value={password}
+                            maxLength={50}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
