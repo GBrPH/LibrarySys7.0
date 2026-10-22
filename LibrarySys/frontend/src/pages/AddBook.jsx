@@ -9,7 +9,7 @@ function AddBook() {
         title: "",
         author: "",
         copies: "",
-        type: "Physical Book" // Initial default value
+        type: "Physical Book" 
     });
     const [message, setMessage] = useState({ text: "", type: "" });
     const [loading, setLoading] = useState(false);

@@ -69,7 +69,6 @@ namespace LibrarySys.BackEnd.Controllers
             var book = _db.Books.FirstOrDefault(b => b.Id == request.BookId);
             if (book == null) return NotFound(new { message = "Book not found." });
 
-            // FIX 1: Check for both null and DateTime.MinValue to prevent the DB search from failing
             var log = _db.BorrowingLogs.FirstOrDefault(l =>
                 l.BookId == book.Id &&
                 l.UserId == user.Id &&
@@ -79,13 +78,11 @@ namespace LibrarySys.BackEnd.Controllers
 
             log.ReturnDate = DateTime.UtcNow;
 
-            // FIX 2: Set the overdue threshold to 14 days to match the borrowing period
             log.IsOverdue = (DateTime.UtcNow - log.BorrowDate).TotalDays > 14;
 
             book.Copies++;
             book.IsAvailable = true;
 
-            // FIX 3: Check if anyone ELSE is still borrowing a copy of this book before clearing the main Book record
             var hasOtherActiveBorrows = _db.BorrowingLogs.Any(l =>
                 l.BookId == book.Id &&
                 l.UserId != user.Id &&
@@ -117,7 +114,6 @@ namespace LibrarySys.BackEnd.Controllers
                 return BadRequest("Make sure you have at least one user and one available book in the database first.");
             }
 
-            // FIX 4: Actually generate past-due dates for testing (BorrowDate 20 days ago, DueDate 6 days ago)
             DateTime pastBorrowDate = DateTime.UtcNow.AddDays(-20);
             DateTime pastDueDate = pastBorrowDate.AddDays(14);
 
@@ -136,7 +132,7 @@ namespace LibrarySys.BackEnd.Controllers
                 Username = user.Username,
                 BorrowDate = pastBorrowDate,
                 DueDate = pastDueDate,
-                IsOverdue = true // Explicitly marking it as overdue for testing
+                IsOverdue = true 
             };
 
             _db.BorrowingLogs.Add(log);
