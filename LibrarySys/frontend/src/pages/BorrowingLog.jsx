@@ -15,10 +15,14 @@ function BorrowLog() {
         search: ""
     });
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
+
     const fetchLogs = useCallback(() => {
         const token = localStorage.getItem("token")?.trim();
         if (!token) {
-            navigate("/login"); 
+            navigate("/login");
             return;
         }
 
@@ -32,6 +36,11 @@ function BorrowLog() {
     useEffect(() => {
         fetchLogs();
     }, [fetchLogs]);
+
+    // Reset to page 1 whenever a filter changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters]);
 
     const filteredLogs = logs.filter(log => {
         const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
@@ -50,6 +59,10 @@ function BorrowLog() {
 
         return true;
     });
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredLogs.length / pageSize);
+    const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
         <div className="container-fluid p-0 bg-light min-vh-100">
@@ -132,7 +145,7 @@ function BorrowLog() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {filteredLogs.map(log => {
+                                            {paginatedLogs.map(log => {
                                                 const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
                                                 let dueDateObj = null;
                                                 if (log.dueDate && !log.dueDate.startsWith("0001")) {
@@ -192,7 +205,7 @@ function BorrowLog() {
                         </div>
                     ) : (
                         <div className="row g-4">
-                            {filteredLogs.map(log => {
+                            {paginatedLogs.map(log => {
                                 const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
                                 let dueDateObj = null;
                                 if (log.dueDate && !log.dueDate.startsWith("0001")) {
@@ -251,6 +264,37 @@ function BorrowLog() {
                                 );
                             })}
                             {filteredLogs.length === 0 && <div className="col-12 text-center text-muted py-5">No logs found.</div>}
+                        </div>
+                    )}
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="d-flex justify-content-center mt-4 mb-4">
+                            <nav>
+                                <ul className="pagination shadow-sm">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <button
+                                            className="page-link"
+                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        >
+                                            Previous
+                                        </button>
+                                    </li>
+                                    <li className="page-item disabled">
+                                        <span className="page-link text-dark fw-semibold px-4">
+                                            Page {currentPage} of {totalPages}
+                                        </span>
+                                    </li>
+                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                        <button
+                                            className="page-link"
+                                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        >
+                                            Next
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     )}
                 </div>
