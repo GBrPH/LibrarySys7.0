@@ -33,6 +33,18 @@ namespace LibrarySys.BackEnd.Controllers
             if (book == null) return NotFound(new { message = "Book not found." });
             if (book.Copies <= 0) return BadRequest(new { message = "Book is out of stock." });
 
+            int maxCopiesOfSameBook = 1;
+
+            var activeBorrowsForThisBook = _db.BorrowingLogs.Count(l =>
+                l.UserId == user.Id &&
+                l.BookId == book.Id &&
+                (l.ReturnDate == null || l.ReturnDate == DateTime.MinValue));
+
+            if (activeBorrowsForThisBook >= maxCopiesOfSameBook)
+            {
+                return BadRequest(new { message = $"You have reached the limit of {maxCopiesOfSameBook} active borrow(s) for this specific title. Please return a copy before borrowing it again." });
+            }
+
             book.Copies--;
             book.BorrowedByUserId = user.Id;
             book.BorrowerName = string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName;
