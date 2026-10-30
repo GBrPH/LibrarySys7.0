@@ -24,10 +24,10 @@ function App() {
     return (
         <Router>
             <Routes>
-                {/* 1. Redirect anyone opening the app straight to Login */}
+                {/*Login */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
 
-                {/* 2. Dashboard Route */}
+                {/*Dashboard Route */}
                 <Route path="/dashboard" element={<Dashboard />} />
 
                 {/* Books Routes */}

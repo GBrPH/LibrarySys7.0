@@ -30,7 +30,7 @@ function Books() {
     const fetchBooks = useCallback(() => {
         const token = localStorage.getItem("token")?.trim();
         if (!token) {
-            navigate("/login"); // Redirects user if their session token is missing
+            navigate("/login"); 
             return;
         }
 
@@ -310,8 +310,7 @@ function Books() {
                                                                     to={`/books/details/${book.id}`}
                                                                     className="btn btn-outline-primary btn-sm px-3"
                                                                     style={{ borderRadius: "8px" }}
-                                                                >
-                                                                    Details
+                                                                > Details
                                                                 </Link>
 
                                                                 <button

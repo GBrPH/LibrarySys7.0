@@ -18,7 +18,7 @@ function BorrowLog() {
     const fetchLogs = useCallback(() => {
         const token = localStorage.getItem("token")?.trim();
         if (!token) {
-            navigate("/login"); // Prevents silent fail
+            navigate("/login"); 
             return;
         }
 
@@ -40,7 +40,6 @@ function BorrowLog() {
         if (filters.status === "Returned" && !isReturned) return false;
         if (filters.status === "Overdue" && !log.isOverdue) return false;
 
-        // Fix: Added safety null-checks (|| "") to prevent .toLowerCase() crashes
         if (filters.username && !(log.username || "").toLowerCase().includes(filters.username.toLowerCase())) return false;
         if (filters.bookTitle && !(log.bookTitle || "").toLowerCase().includes(filters.bookTitle.toLowerCase())) return false;
 

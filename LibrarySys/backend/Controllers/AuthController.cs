@@ -41,12 +41,12 @@ namespace LibrarySys.BackEnd.Controllers
             if (user == null)
                 return Unauthorized("Invalid credentials");
 
-            var token = GenerateJwtToken(user.Username, user.Role ?? "Borrower", user.Id);
+            var token = GenerateJwtToken(user.Username, user.Role ?? "Borrower", user.Id, login.RememberMe);
 
             return Ok(new { token });
         }
 
-        private string GenerateJwtToken(string username, string role, int userId)
+        private string GenerateJwtToken(string username, string role, int userId, bool rememberMe)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -55,18 +55,18 @@ namespace LibrarySys.BackEnd.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
                 new Claim(ClaimTypes.Role, role),
-                
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim("id", userId.ToString()),
-
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            var expiration = rememberMe ? DateTime.UtcNow.AddDays(30) : DateTime.UtcNow.AddHours(1);
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: expiration, 
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

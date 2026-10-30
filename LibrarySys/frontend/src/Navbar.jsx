@@ -5,19 +5,18 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Navbar({ activePage }) {
     const navigate = useNavigate();
 
-    // Grab username and initial for the avatar
-    const username = localStorage.getItem("username") || "User";
+    const username = localStorage.getItem("username") || sessionStorage.getItem("username") || "User";
     const userInitial = username.charAt(0).toUpperCase();
 
-    const token = localStorage.getItem("token");
-    const roleString = localStorage.getItem("role")?.toUpperCase() || "";
-    const usernameString = localStorage.getItem("username")?.toUpperCase() || "";
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const roleString = (localStorage.getItem("role") || sessionStorage.getItem("role"))?.toUpperCase() || "";
+    const usernameString = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.toUpperCase() || "";
 
-    // Look for Librarian role, Admin role, OR the explicit HMIR username
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || usernameString === "HMIR";
 
     const handleLogout = () => {
-        localStorage.clear(); // Clears everything
+        localStorage.clear();
+        sessionStorage.clear(); 
         navigate("/login");
     };
 
@@ -59,13 +58,10 @@ function Navbar({ activePage }) {
             <div className="auth-buttons ms-auto pe-3">
                 {token ? (
                     <div className="d-flex align-items-center gap-3">
-
-                        {/* 1. Logout Button First (Left) */}
                         <button onClick={handleLogout} className="btn btn-danger fw-semibold px-4 shadow-sm">
                             Logout
                         </button>
 
-                        {/* 2. Account Logo Second (Right) - Text removed */}
                         <div
                             className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center shadow-sm"
                             style={{ width: "40px", height: "40px", fontSize: "1.2rem" }}

@@ -15,8 +15,7 @@ function ClassProjectNotice() {
                     <div
                         className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm"
                         style={{ width: "90px", height: "90px", fontSize: "2.5rem" }}
-                    >
-                        🎓
+                    > 🎓
                     </div>
                 </div>
 
@@ -35,7 +34,6 @@ function ClassProjectNotice() {
 
                 {/* Proceed Button */}
                 <div>
-                    {/* CHANGED FROM /login TO /dashboard */}
                     <Link to="/dashboard" className="btn btn-primary btn-lg fw-bold px-5 shadow-sm" style={{ borderRadius: "12px" }}>
                         Acknowledge & Proceed
                     </Link>
