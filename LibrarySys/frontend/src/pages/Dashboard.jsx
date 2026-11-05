@@ -17,12 +17,16 @@ function Dashboard() {
 
     const [borrowData, setBorrowData] = useState({ activeBorrows: 0, maxLimit: 5 });
 
-    const currentUsername = localStorage.getItem("username")?.trim() || "";
-    const roleString = localStorage.getItem("role")?.toUpperCase() || "";
+    const currentUsername = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.trim() || "";
+    const roleString = (localStorage.getItem("role") || sessionStorage.getItem("role"))?.toUpperCase() || "";
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || currentUsername.toUpperCase() === "HMIR";
 
     const fetchDashboardData = useCallback(async () => {
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
         const headers = { Authorization: `Bearer ${token}` };
         let books = [];

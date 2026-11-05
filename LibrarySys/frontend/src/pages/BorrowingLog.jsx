@@ -54,7 +54,6 @@ function BorrowLog() {
         return true;
     });
 
-    // Pagination Logic
     const totalPages = Math.ceil(filteredLogs.length / pageSize);
     const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 

@@ -23,12 +23,12 @@ function Books() {
         type: "All"
     });
 
-    const roleString = localStorage.getItem("role")?.toUpperCase() || "";
-    const usernameString = localStorage.getItem("username")?.toUpperCase() || "";
+    const roleString = (localStorage.getItem("role") || sessionStorage.getItem("role"))?.toUpperCase() || "";
+    const usernameString = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.toUpperCase() || "";
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || usernameString === "HMIR";
 
     const fetchBooks = useCallback(() => {
-        const token = localStorage.getItem("token")?.trim();
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         if (!token) {
             navigate("/login"); 
             return;
@@ -59,8 +59,8 @@ function Books() {
         setBorrowingId(bookId);
         setBorrowMessage("");
 
-        const token = localStorage.getItem("token")?.trim();
-        const storedUsername = localStorage.getItem("username")?.trim();
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
+        const storedUsername = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.trim();
 
         if (!token || !storedUsername) {
             setBorrowMessage("Session missing. Please log in again.");
