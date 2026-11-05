@@ -14,8 +14,11 @@ function Dashboard() {
     const [allBooks, setAllBooks] = useState([]);
 
     const [inventory, setInventory] = useState({ physical: 0, ebook: 0, journal: 0 });
-
     const [borrowData, setBorrowData] = useState({ activeBorrows: 0, maxLimit: 5 });
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const logsPerPage = 5;
 
     const currentUsername = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.trim() || "";
     const roleString = (localStorage.getItem("role") || sessionStorage.getItem("role"))?.toUpperCase() || "";
@@ -87,7 +90,6 @@ function Dashboard() {
 
         setRecentLogs(logs.slice(0, 15));
 
-        // NEW: Fetch Borrowing Limit Data for standard users
         if (!isPrivilegedUser && currentUsername) {
             try {
                 const countRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/Borrow/ActiveCount/${currentUsername}`, { headers });
@@ -96,12 +98,16 @@ function Dashboard() {
                 console.error("Failed to fetch borrow count", err);
             }
         }
-
     }, [currentUsername, isPrivilegedUser, navigate]);
 
     useEffect(() => {
         fetchDashboardData();
     }, [fetchDashboardData]);
+
+    // Reset pagination to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters]);
 
     const handleReturn = async (log) => {
         const targetBookId = log.bookId || allBooks.find(b => b.title === log.bookTitle)?.id;
@@ -145,7 +151,10 @@ function Dashboard() {
         return true;
     });
 
-    // Calculate the progress bar percentage
+    // Pagination Math
+    const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+    const paginatedLogs = filteredLogs.slice((currentPage - 1) * logsPerPage, currentPage * logsPerPage);
+
     const progressPercentage = (borrowData.activeBorrows / borrowData.maxLimit) * 100;
 
     return (
@@ -167,7 +176,6 @@ function Dashboard() {
                         Reset Filters
                     </button>
 
-                    {/* NEW: Display Borrowing Limit below filters for standard users */}
                     {!isPrivilegedUser && (
                         <div className="mt-4 pt-4 border-top">
                             <h6 className="text-muted fw-bold mb-3 small">MY BORROWING LIMIT</h6>
@@ -293,8 +301,8 @@ function Dashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {filteredLogs.length > 0 ? (
-                                                filteredLogs.map(log => {
+                                            {paginatedLogs.length > 0 ? (
+                                                paginatedLogs.map(log => {
                                                     let dueDateObj = null;
                                                     if (log.dueDate && !log.dueDate.startsWith("0001")) {
                                                         dueDateObj = new Date(log.dueDate);
@@ -359,6 +367,34 @@ function Dashboard() {
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {/* Pagination UI */}
+                                {totalPages > 1 && (
+                                    <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                        <span className="small text-muted fw-semibold">
+                                            Showing {((currentPage - 1) * logsPerPage) + 1} to {Math.min(currentPage * logsPerPage, filteredLogs.length)} of {filteredLogs.length} recent logs
+                                        </span>
+                                        <div className="btn-group shadow-sm">
+                                            <button
+                                                className="btn btn-outline-primary btn-sm px-3"
+                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentPage === 1}
+                                            >
+                                                Previous
+                                            </button>
+                                            <button className="btn btn-primary btn-sm px-4 fw-bold" disabled>
+                                                {currentPage} / {totalPages}
+                                            </button>
+                                            <button
+                                                className="btn btn-outline-primary btn-sm px-3"
+                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                disabled={currentPage === totalPages}
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

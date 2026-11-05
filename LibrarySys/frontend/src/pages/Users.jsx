@@ -18,6 +18,9 @@ function Users() {
         search: ""
     });
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
+
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -28,6 +31,10 @@ function Users() {
             .then(res => setUsers(res.data || []))
             .catch(err => console.error("Error fetching users:", err));
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters]);
 
     const isUserOnline = (user) => {
         if (!user) return false;
@@ -56,6 +63,9 @@ function Users() {
 
         return true;
     });
+
+    const totalPages = Math.ceil(filteredUsers.length / pageSize);
+    const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
         <div className="container-fluid p-0 bg-light min-vh-100">
@@ -101,7 +111,7 @@ function Users() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="col-md-9 col-lg-10 p-4">
+                <div className="col-md-9 col-lg-10 p-4 d-flex flex-column">
                     {/* Top Control Bar */}
                     <div className="d-flex align-items-center justify-content-between mb-4">
                         <div className="d-flex align-items-center flex-grow-1">
@@ -118,7 +128,6 @@ function Users() {
 
                         <div className="d-flex align-items-center gap-2">
                             <div className="btn-group" role="group">
-                                {/* FIXED BUTTONS */}
                                 <button className={`btn ${viewMode === "grid" ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => setViewMode("grid")} title="Grid View">
                                     <span>&#9632;</span>
                                 </button>
@@ -133,109 +142,142 @@ function Users() {
                     </div>
 
                     {/* DYNAMIC RENDERING BLOCK */}
-                    {viewMode === "list" ? (
-                        <div className="card border-0 shadow-sm" style={{ borderRadius: "16px" }}>
-                            <div className="card-body p-4">
-                                <table className="table table-hover align-middle mb-0">
-                                    <thead>
-                                        <tr className="text-muted small">
-                                            <th>ID</th>
-                                            <th>FULL NAME</th>
-                                            <th>USERNAME</th>
-                                            <th>ROLE</th>
-                                            <th>ACTIVE</th>
-                                            <th>LOGGED IN</th>
-                                            <th>ACTIONS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredUsers.map(user => {
-                                            const online = isUserOnline(user);
-                                            return (
-                                                <tr key={user.id}>
-                                                    <td className="fw-semibold">{user.id}</td>
-                                                    <td>
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
-                                                                {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
-                                                            </div>
-                                                            <span className="text-truncate d-inline-block" style={{ maxWidth: "200px" }}>
-                                                                {user.fullName}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td>{user.username}</td>
-                                                    <td>
-                                                        <span className="badge bg-light text-dark border px-2 py-1">
-                                                            {user.role}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
-                                                            {user.isActive ? "Active" : "Inactive"}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
-                                                            {online ? "Online" : "Offline"}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm me-2">Update</Link>
-                                                        <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">Delete</Link>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                        {filteredUsers.length === 0 && (
-                                            <tr>
-                                                <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
+                    <div className="flex-grow-1 d-flex flex-column">
+                        {viewMode === "list" ? (
+                            <div className="card border-0 shadow-sm flex-grow-1" style={{ borderRadius: "16px" }}>
+                                <div className="card-body p-4">
+                                    <table className="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr className="text-muted small">
+                                                <th>ID</th>
+                                                <th>FULL NAME</th>
+                                                <th>USERNAME</th>
+                                                <th>ROLE</th>
+                                                <th>ACTIVE</th>
+                                                <th>LOGGED IN</th>
+                                                <th>ACTIONS</th>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {paginatedUsers.map(user => {
+                                                const online = isUserOnline(user);
+                                                return (
+                                                    <tr key={user.id}>
+                                                        <td className="fw-semibold">{user.id}</td>
+                                                        <td>
+                                                            <div className="d-flex align-items-center">
+                                                                <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
+                                                                    {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
+                                                                </div>
+                                                                <span className="text-truncate d-inline-block" style={{ maxWidth: "200px" }}>
+                                                                    {user.fullName}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td>{user.username}</td>
+                                                        <td>
+                                                            <span className="badge bg-light text-dark border px-2 py-1">
+                                                                {user.role}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
+                                                                {user.isActive ? "Active" : "Inactive"}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
+                                                                {online ? "Online" : "Offline"}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm me-2">Update</Link>
+                                                            <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">Delete</Link>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            {filteredUsers.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="row g-4">
-                            {filteredUsers.map(user => {
-                                const online = isUserOnline(user);
-                                return (
-                                    <div className="col-12 col-md-6 col-xl-4" key={user.id}>
-                                        <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: "16px" }}>
-                                            <div className="d-flex justify-content-between align-items-start mb-3">
-                                                <div className="d-flex align-items-center">
-                                                    <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: "50px", height: "50px", fontSize: "1.2rem" }}>
-                                                        {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
+                        ) : (
+                            <div className="row g-4 align-content-start flex-grow-1">
+                                {paginatedUsers.map(user => {
+                                    const online = isUserOnline(user);
+                                    return (
+                                        <div className="col-12 col-md-6 col-xl-4" key={user.id}>
+                                            <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: "16px" }}>
+                                                <div className="d-flex justify-content-between align-items-start mb-3">
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: "50px", height: "50px", fontSize: "1.2rem" }}>
+                                                            {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
+                                                        </div>
+                                                        <div>
+                                                            <h5 className="fw-bold text-dark mb-0 text-truncate" style={{ maxWidth: "150px" }} title={user.fullName}>{user.fullName}</h5>
+                                                            <p className="text-muted small mb-0">@{user.username}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h5 className="fw-bold text-dark mb-0 text-truncate" style={{ maxWidth: "150px" }} title={user.fullName}>{user.fullName}</h5>
-                                                        <p className="text-muted small mb-0">@{user.username}</p>
-                                                    </div>
+                                                    <span className="badge bg-light text-dark border">{user.role}</span>
                                                 </div>
-                                                <span className="badge bg-light text-dark border">{user.role}</span>
-                                            </div>
 
-                                            <div className="d-flex gap-2 mb-4">
-                                                <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
-                                                    {user.isActive ? "Active" : "Inactive"}
-                                                </span>
-                                                <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
-                                                    {online ? "Online" : "Offline"}
-                                                </span>
-                                            </div>
+                                                <div className="d-flex gap-2 mb-4">
+                                                    <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
+                                                        {user.isActive ? "Active" : "Inactive"}
+                                                    </span>
+                                                    <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
+                                                        {online ? "Online" : "Offline"}
+                                                    </span>
+                                                </div>
 
-                                            <div className="d-flex justify-content-end align-items-center mt-auto pt-3 border-top">
-                                                <div className="d-flex gap-2">
-                                                    <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm">✎</Link>
-                                                    <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">🗑</Link>
+                                                <div className="d-flex justify-content-end align-items-center mt-auto pt-3 border-top">
+                                                    <div className="d-flex gap-2">
+                                                        <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm">✎</Link>
+                                                        <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">🗑</Link>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                            {filteredUsers.length === 0 && <div className="col-12 text-center text-muted py-5">No users found.</div>}
+                                    );
+                                })}
+                                {filteredUsers.length === 0 && <div className="col-12 text-center text-muted py-5">No users found.</div>}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="d-flex justify-content-center mt-auto pt-4 mb-2">
+                            <nav>
+                                <ul className="pagination shadow-sm mb-0">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <button
+                                            className="page-link"
+                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        >
+                                            Previous
+                                        </button>
+                                    </li>
+                                    <li className="page-item disabled">
+                                        <span className="page-link text-dark fw-semibold px-4">
+                                            Page {currentPage} of {totalPages}
+                                        </span>
+                                    </li>
+                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                        <button
+                                            className="page-link"
+                                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        >
+                                            Next
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     )}
                 </div>
