@@ -15,7 +15,6 @@ function Dashboard() {
 
     const [inventory, setInventory] = useState({ physical: 0, ebook: 0, journal: 0 });
 
-    // NEW: State for borrowing limit progress bar
     const [borrowData, setBorrowData] = useState({ activeBorrows: 0, maxLimit: 5 });
 
     const currentUsername = localStorage.getItem("username")?.trim() || "";
@@ -23,11 +22,7 @@ function Dashboard() {
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || currentUsername.toUpperCase() === "HMIR";
 
     const fetchDashboardData = useCallback(async () => {
-        const token = localStorage.getItem("token")?.trim();
-        if (!token) {
-            navigate("/login");
-            return;
-        }
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
 
         const headers = { Authorization: `Bearer ${token}` };
         let books = [];
@@ -110,11 +105,7 @@ function Dashboard() {
         setProcessingId(log.id);
         setReturnMessage({ text: "", type: "" });
 
-        const token = localStorage.getItem("token")?.trim();
-        if (!token) {
-            navigate("/login");
-            return;
-        }
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
 
         try {
             const response = await axios.post(

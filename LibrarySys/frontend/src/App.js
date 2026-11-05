@@ -1,7 +1,8 @@
-﻿// src/App.jsx
-import React from "react";
+﻿import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+
+import PrivateRoute from "./components/PrivateRoute"; 
 
 import Dashboard from "./pages/Dashboard";
 import Books from "./pages/Books";
@@ -18,43 +19,35 @@ import BorrowBook from "./pages/BorrowBook";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Settings from "./pages/Settings";
-// You can delete the Warning import completely!
 
 function App() {
     return (
         <Router>
             <Routes>
-                {/*Login */}
+                {/* Public Routes - No Protection Needed */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
-
-                {/*Dashboard Route */}
-                <Route path="/dashboard" element={<Dashboard />} />
-
-                {/* Books Routes */}
-                <Route path="/books" element={<Books />} />
-                <Route path="/add-book" element={<AddBook />} />
-                <Route path="/books/update/:id" element={<UpdateBook />} />
-                <Route path="/books/delete/:id" element={<DeleteBook />} />
-                <Route path="/books/details/:id" element={<DetailsBook />} />
-
-                {/* Users Routes */}
-                <Route path="/users" element={<Users />} />
-                <Route path="/add-user" element={<AddUser />} />
-                <Route path="/users/update/:id" element={<UpdateUser />} />
-                <Route path="/users/delete/:id" element={<DeleteUser />} />
-
-                {/* Borrowing Routes */}
-                <Route path="/borrowing-log" element={<BorrowingLog />} />
-                <Route path="/borrow" element={<BorrowBook />} />
-
-                {/* Settings Route */}
-                <Route path="/settings" element={<Settings />} />
-
-                {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
-                {/* Catch-all redirect */}
+                {/* Protected Routes - Wrapped in PrivateRoute */}
+                <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+
+                <Route path="/books" element={<PrivateRoute><Books /></PrivateRoute>} />
+                <Route path="/add-book" element={<PrivateRoute><AddBook /></PrivateRoute>} />
+                <Route path="/books/update/:id" element={<PrivateRoute><UpdateBook /></PrivateRoute>} />
+                <Route path="/books/delete/:id" element={<PrivateRoute><DeleteBook /></PrivateRoute>} />
+                <Route path="/books/details/:id" element={<PrivateRoute><DetailsBook /></PrivateRoute>} />
+
+                <Route path="/users" element={<PrivateRoute><Users /></PrivateRoute>} />
+                <Route path="/add-user" element={<PrivateRoute><AddUser /></PrivateRoute>} />
+                <Route path="/users/update/:id" element={<PrivateRoute><UpdateUser /></PrivateRoute>} />
+                <Route path="/users/delete/:id" element={<PrivateRoute><DeleteUser /></PrivateRoute>} />
+
+                <Route path="/borrowing-log" element={<PrivateRoute><BorrowingLog /></PrivateRoute>} />
+                <Route path="/borrow" element={<PrivateRoute><BorrowBook /></PrivateRoute>} />
+
+                <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>

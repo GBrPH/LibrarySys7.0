@@ -15,16 +15,11 @@ function BorrowLog() {
         search: ""
     });
 
-    // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 
     const fetchLogs = useCallback(() => {
-        const token = localStorage.getItem("token")?.trim();
-        if (!token) {
-            navigate("/login");
-            return;
-        }
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
 
         axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/GetAllLog`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -37,7 +32,6 @@ function BorrowLog() {
         fetchLogs();
     }, [fetchLogs]);
 
-    // Reset to page 1 whenever a filter changes
     useEffect(() => {
         setCurrentPage(1);
     }, [filters]);
