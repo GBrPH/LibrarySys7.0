@@ -11,9 +11,12 @@ function Dashboard() {
     const [filters, setFilters] = useState({ status: "All", search: "" });
     const [returnMessage, setReturnMessage] = useState({ text: "", type: "" });
     const [processingId, setProcessingId] = useState(null);
-    const [allBooks, setAllBooks] = useState([]); // Added to lookup missing bookIds
+    const [allBooks, setAllBooks] = useState([]);
 
     const [inventory, setInventory] = useState({ physical: 0, ebook: 0, journal: 0 });
+
+    // NEW: State for borrowing limit progress bar
+    const [borrowData, setBorrowData] = useState({ activeBorrows: 0, maxLimit: 5 });
 
     const currentUsername = localStorage.getItem("username")?.trim() || "";
     const roleString = localStorage.getItem("role")?.toUpperCase() || "";
@@ -66,7 +69,6 @@ function Dashboard() {
                 fetchedLogs = fetchedLogs.filter(log => (log.username || "").toLowerCase() === currentUsername.toLowerCase());
             }
 
-            // Fix: Added [...fetchedLogs] to prevent mutating the original array
             logs = [...fetchedLogs].sort((a, b) => new Date(b.borrowDate || Date.now()) - new Date(a.borrowDate || Date.now()));
         } catch (err) { console.error("Logs fetch failed:", err); }
 
@@ -85,6 +87,17 @@ function Dashboard() {
         });
 
         setRecentLogs(logs.slice(0, 15));
+
+        // NEW: Fetch Borrowing Limit Data for standard users
+        if (!isPrivilegedUser && currentUsername) {
+            try {
+                const countRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/Borrow/ActiveCount/${currentUsername}`, { headers });
+                setBorrowData(countRes.data);
+            } catch (err) {
+                console.error("Failed to fetch borrow count", err);
+            }
+        }
+
     }, [currentUsername, isPrivilegedUser, navigate]);
 
     useEffect(() => {
@@ -92,10 +105,9 @@ function Dashboard() {
     }, [fetchDashboardData]);
 
     const handleReturn = async (log) => {
-        // Fix: Fallback lookup if backend DTO omitted the bookId
         const targetBookId = log.bookId || allBooks.find(b => b.title === log.bookTitle)?.id;
 
-        setProcessingId(log.id); // Use log.id for processing state to prevent UI freezing on multiple copies
+        setProcessingId(log.id);
         setReturnMessage({ text: "", type: "" });
 
         const token = localStorage.getItem("token")?.trim();
@@ -126,7 +138,6 @@ function Dashboard() {
         if (filters.status === "Returned" && !log.returnDate) return false;
         if (filters.status === "Overdue" && !log.isOverdue && !isCurrentlyOverdue) return false;
 
-        // Fix: Null-safe string searches
         if (filters.search && !(
             (log.username || "").toLowerCase().includes(filters.search.toLowerCase()) ||
             (log.bookTitle || "").toLowerCase().includes(filters.search.toLowerCase())
@@ -134,6 +145,9 @@ function Dashboard() {
 
         return true;
     });
+
+    // Calculate the progress bar percentage
+    const progressPercentage = (borrowData.activeBorrows / borrowData.maxLimit) * 100;
 
     return (
         <div className="container-fluid bg-light min-vh-100 p-0">
@@ -153,6 +167,33 @@ function Dashboard() {
                     <button className="btn btn-outline-secondary w-100 mt-2" onClick={() => setFilters({ status: "All", search: "" })}>
                         Reset Filters
                     </button>
+
+                    {/* NEW: Display Borrowing Limit below filters for standard users */}
+                    {!isPrivilegedUser && (
+                        <div className="mt-4 pt-4 border-top">
+                            <h6 className="text-muted fw-bold mb-3 small">MY BORROWING LIMIT</h6>
+                            <div className="d-flex justify-content-between align-items-end mb-2">
+                                <h3 className="fw-bold mb-0 text-primary">
+                                    {borrowData.activeBorrows} <span className="text-muted fs-6">/ {borrowData.maxLimit}</span>
+                                </h3>
+                            </div>
+                            <div className="progress mt-2" style={{ height: "6px", borderRadius: "10px" }}>
+                                <div
+                                    className={`progress-bar ${progressPercentage >= 100 ? 'bg-danger' : 'bg-primary'}`}
+                                    role="progressbar"
+                                    style={{ width: `${progressPercentage}%` }}
+                                    aria-valuenow={borrowData.activeBorrows}
+                                    aria-valuemin="0"
+                                    aria-valuemax={borrowData.maxLimit}
+                                ></div>
+                            </div>
+                            {progressPercentage >= 100 && (
+                                <small className="text-danger mt-2 d-block fw-semibold" style={{ fontSize: "0.75rem" }}>
+                                    Limit reached. Return a book to borrow again.
+                                </small>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="col-md-9 col-lg-10 p-4">
@@ -300,7 +341,7 @@ function Dashboard() {
                                                             <td>
                                                                 {(!log.returnDate || log.returnDate.startsWith("0001")) ? (
                                                                     <button
-                                                                        onClick={() => handleReturn(log)} // Pass entire object now
+                                                                        onClick={() => handleReturn(log)}
                                                                         disabled={processingId === log.id}
                                                                         className={`btn btn-sm fw-bold ${isCurrentlyOverdue ? 'btn-danger' : 'btn-outline-primary'}`}
                                                                     >

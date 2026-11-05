@@ -20,6 +20,66 @@ namespace LibrarySys.BackEnd.Controllers
             _db = db;
         }
 
+        [HttpGet("SeedOverdue")]
+        [AllowAnonymous]
+        public IActionResult SeedOverdue()
+        {
+            var user = _db.Users.FirstOrDefault();
+            var book = _db.Books.FirstOrDefault(b => b.Copies > 0);
+
+            if (user == null || book == null)
+            {
+                return BadRequest("Make sure you have at least one user and one available book in the database first.");
+            }
+
+            DateTime pastBorrowDate = DateTime.UtcNow.AddDays(-20);
+            DateTime pastDueDate = pastBorrowDate.AddDays(14);
+
+            book.Copies--;
+            book.BorrowedByUserId = user.Id;
+            book.BorrowerName = string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName;
+            book.BorrowedDate = pastBorrowDate;
+            book.DueDate = pastDueDate;
+            book.IsAvailable = book.Copies > 0;
+
+            var log = new BorrowingLog
+            {
+                BookId = book.Id,
+                BookTitle = book.Title,
+                UserId = user.Id,
+                Username = user.Username,
+                BorrowDate = pastBorrowDate,
+                DueDate = pastDueDate,
+                IsOverdue = true
+            };
+
+            _db.BorrowingLogs.Add(log);
+            _db.SaveChanges();
+
+            string formattedDueDate = pastDueDate.ToString("MMM dd, yyyy");
+            return Ok(new { message = $"Successfully seeded an OVERDUE borrow for '{book.Title}'. It was due on {formattedDueDate}." });
+        }
+
+        [HttpGet("ActiveCount/{username}")]
+        public IActionResult GetActiveBorrowCount(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return BadRequest("Username is required.");
+
+            var user = _db.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+            if (user == null) return NotFound("User not found.");
+
+            int activeBorrows = _db.BorrowingLogs.Count(l =>
+                l.UserId == user.Id &&
+                (l.ReturnDate == null || l.ReturnDate == DateTime.MinValue));
+
+            return Ok(new
+            {
+                activeBorrows = activeBorrows,
+                maxLimit = 5
+            });
+        }
+
         [HttpPost("BorrowBook")]
         public IActionResult BorrowBook([FromBody] BorrowRequestDto request)
         {
@@ -124,44 +184,6 @@ namespace LibrarySys.BackEnd.Controllers
             return Ok(new { message = $"'{book.Title}' was {statusMsg}." });
         }
 
-        [HttpGet("SeedOverdue")]
-        [AllowAnonymous]
-        public IActionResult SeedOverdue()
-        {
-            var user = _db.Users.FirstOrDefault();
-            var book = _db.Books.FirstOrDefault(b => b.Copies > 0);
-
-            if (user == null || book == null)
-            {
-                return BadRequest("Make sure you have at least one user and one available book in the database first.");
-            }
-
-            DateTime pastBorrowDate = DateTime.UtcNow.AddDays(-20);
-            DateTime pastDueDate = pastBorrowDate.AddDays(14);
-
-            book.Copies--;
-            book.BorrowedByUserId = user.Id;
-            book.BorrowerName = string.IsNullOrEmpty(user.FullName) ? user.Username : user.FullName;
-            book.BorrowedDate = pastBorrowDate;
-            book.DueDate = pastDueDate;
-            book.IsAvailable = book.Copies > 0;
-
-            var log = new BorrowingLog
-            {
-                BookId = book.Id,
-                BookTitle = book.Title,
-                UserId = user.Id,
-                Username = user.Username,
-                BorrowDate = pastBorrowDate,
-                DueDate = pastDueDate,
-                IsOverdue = true 
-            };
-
-            _db.BorrowingLogs.Add(log);
-            _db.SaveChanges();
-
-            string formattedDueDate = pastDueDate.ToString("MMM dd, yyyy");
-            return Ok(new { message = $"Successfully seeded an OVERDUE borrow for '{book.Title}'. It was due on {formattedDueDate}." });
-        }
+        
     }
 }
