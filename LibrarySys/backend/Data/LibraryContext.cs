@@ -3,7 +3,7 @@ using LibrarySys.BackEnd.Models;
 
 namespace LibrarySys.BackEnd.Data
 {
-    public class LibraryContext : DbContext
+    public class LibraryContext : DbContext 
     {
         public LibraryContext(DbContextOptions<LibraryContext> options) : base(options) { }
 
