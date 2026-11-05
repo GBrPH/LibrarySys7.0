@@ -110,6 +110,10 @@ function Dashboard() {
         setReturnMessage({ text: "", type: "" });
 
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
         try {
             const response = await axios.post(
