@@ -120,7 +120,7 @@ function Login() {
                                 style={{ borderColor: "#dee2e6" }}
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? "-" : "👁"}
+                                {showPassword ? "🔒︎" : "⚿"}
                             </button>
                         </div>
                     </div>
