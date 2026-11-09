@@ -68,18 +68,18 @@ function Users() {
     const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
-        <div className="app-wrapper p-0 min-vh-100" style={{ backgroundColor: "#0099ff" }}>
+        <div className="p-0 min-vh-100">
             <Navbar activePage="users" />
 
             <div className="container-fluid py-4 px-4">
                 <div className="row g-4">
-                    {/* Sidebar Filters */}
+                    {/* Sidebar Filters - Frosted Glass Panel */}
                     <div className="col-md-3 col-lg-2">
                         <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
-                            <h5 className="fw-bold mb-3 text-dark">Filters</h5>
+                            <h5 className="fw-bold mb-3">Filters</h5>
 
                             <div className="mb-3">
-                                <label className="form-label text-dark small fw-bold">ROLE</label>
+                                <label className="form-label small fw-bold">ROLE</label>
                                 <select className="form-select shadow-none" value={filters.role} onChange={e => setFilters({ ...filters, role: e.target.value })}>
                                     <option>All</option>
                                     <option>Librarian</option>
@@ -90,7 +90,7 @@ function Users() {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label text-dark small fw-bold">ACTIVE STATUS</label>
+                                <label className="form-label small fw-bold">ACTIVE STATUS</label>
                                 <select className="form-select shadow-none" value={filters.active} onChange={e => setFilters({ ...filters, active: e.target.value })}>
                                     <option>All</option>
                                     <option>Active</option>
@@ -99,7 +99,7 @@ function Users() {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label text-dark small fw-bold">LOGGED IN</label>
+                                <label className="form-label small fw-bold">LOGGED IN</label>
                                 <select className="form-select shadow-none" value={filters.loggedIn} onChange={e => setFilters({ ...filters, loggedIn: e.target.value })}>
                                     <option>All</option>
                                     <option>Online</option>
@@ -107,7 +107,7 @@ function Users() {
                                 </select>
                             </div>
 
-                            <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ role: "All", active: "All", loggedIn: "All", username: "", fullName: "", search: "" })} style={{ border: "1px solid rgba(255,255,255,0.4)" }}>
+                            <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ role: "All", active: "All", loggedIn: "All", username: "", fullName: "", search: "" })}>
                                 Reset Filters
                             </button>
                         </div>
@@ -125,7 +125,7 @@ function Users() {
                                 </div>
 
                                 <div className="input-group" style={{ width: "500px" }}>
-                                    <input type="text" className="form-control shadow-none" placeholder="Search users..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
+                                    <input type="text" className="form-control shadow-none bg-white text-dark border-0" placeholder="Search users..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
                                 </div>
                             </div>
 
@@ -151,7 +151,7 @@ function Users() {
                                     <div className="card-body p-4">
                                         <table className="table table-hover align-middle mb-0">
                                             <thead>
-                                                <tr className="text-dark small fw-bold">
+                                                <tr className="small fw-bold">
                                                     <th>ID</th>
                                                     <th>FULL NAME</th>
                                                     <th>USERNAME</th>
@@ -166,18 +166,18 @@ function Users() {
                                                     const online = isUserOnline(user);
                                                     return (
                                                         <tr key={user.id}>
-                                                            <td className="fw-semibold text-dark">{user.id}</td>
+                                                            <td className="fw-semibold">{user.id}</td>
                                                             <td>
                                                                 <div className="d-flex align-items-center">
                                                                     <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
                                                                         {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
                                                                     </div>
-                                                                    <span className="text-truncate d-inline-block text-dark fw-bold" style={{ maxWidth: "200px" }}>
+                                                                    <span className="text-truncate d-inline-block fw-bold" style={{ maxWidth: "200px" }}>
                                                                         {user.fullName}
                                                                     </span>
                                                                 </div>
                                                             </td>
-                                                            <td className="text-dark">{user.username}</td>
+                                                            <td>{user.username}</td>
                                                             <td>
                                                                 <span className="badge bg-light text-dark border px-2 py-1">
                                                                     {user.role}
@@ -222,8 +222,8 @@ function Users() {
                                                                 {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
                                                             </div>
                                                             <div>
-                                                                <h5 className="fw-bold text-dark mb-0 text-truncate" style={{ maxWidth: "150px" }} title={user.fullName}>{user.fullName}</h5>
-                                                                <p className="text-dark small mb-0 opacity-75">@{user.username}</p>
+                                                                <h5 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={user.fullName}>{user.fullName}</h5>
+                                                                <p className="small mb-0 opacity-75">@{user.username}</p>
                                                             </div>
                                                         </div>
                                                         <span className="badge bg-light text-dark border">{user.role}</span>
@@ -238,7 +238,7 @@ function Users() {
                                                         </span>
                                                     </div>
 
-                                                    <div className="d-flex justify-content-end align-items-center mt-auto pt-3 border-top" style={{ borderColor: "rgba(0,0,0,0.15) !important" }}>
+                                                    <div className="d-flex justify-content-end align-items-center mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
                                                         <div className="d-flex gap-2">
                                                             <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm">✎</Link>
                                                             <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">🗑</Link>
@@ -260,20 +260,20 @@ function Users() {
                                     <ul className="pagination shadow-sm mb-0">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                             <button
-                                                className="page-link bg-light text-dark border-0"
+                                                className="page-link bg-white text-dark border-0 shadow-sm"
                                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                             >
                                                 Previous
                                             </button>
                                         </li>
                                         <li className="page-item disabled">
-                                            <span className="page-link text-dark bg-light fw-semibold px-4 border-0">
+                                            <span className="page-link text-dark bg-white fw-semibold px-4 border-0 shadow-sm">
                                                 Page {currentPage} of {totalPages}
                                             </span>
                                         </li>
                                         <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                                             <button
-                                                className="page-link bg-light text-dark border-0"
+                                                className="page-link bg-white text-dark border-0 shadow-sm"
                                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                             >
                                                 Next

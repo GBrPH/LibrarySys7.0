@@ -58,18 +58,18 @@ function BorrowLog() {
     const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
-        <div className="app-wrapper p-0 min-vh-100" style={{ backgroundColor: "#0099ff" }}>
+        <div className="p-0 min-vh-100">
             <Navbar activePage="logs" />
 
             <div className="container-fluid py-4 px-4">
                 <div className="row g-4">
-                    {/* Log Filters Sidebar - targeted glass card */}
+                    {/* Log Filters Sidebar - Frosted Glass Panel */}
                     <div className="col-md-3 col-lg-2">
                         <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
-                            <h5 className="fw-bold mb-3 text-dark">Log Filters</h5>
+                            <h5 className="fw-bold mb-3">Log Filters</h5>
 
                             <div className="mb-3">
-                                <label className="form-label text-dark small fw-bold">STATUS</label>
+                                <label className="form-label small fw-bold">STATUS</label>
                                 <select className="form-select shadow-none" value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
                                     <option>All</option>
                                     <option>Active</option>
@@ -79,16 +79,16 @@ function BorrowLog() {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label text-dark small fw-bold">BORROWER</label>
+                                <label className="form-label small fw-bold">BORROWER</label>
                                 <input type="text" className="form-control shadow-none" placeholder="Filter by Borrower" value={filters.username} onChange={e => setFilters({ ...filters, username: e.target.value })} />
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label text-dark small fw-bold">BOOK TITLE</label>
+                                <label className="form-label small fw-bold">BOOK TITLE</label>
                                 <input type="text" className="form-control shadow-none" placeholder="Filter by Book Title" value={filters.bookTitle} onChange={e => setFilters({ ...filters, bookTitle: e.target.value })} />
                             </div>
 
-                            <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ status: "All", username: "", bookTitle: "", search: "" })} style={{ border: "1px solid rgba(255,255,255,0.4)" }}>
+                            <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ status: "All", username: "", bookTitle: "", search: "" })}>
                                 Reset Filters
                             </button>
                         </div>
@@ -104,7 +104,7 @@ function BorrowLog() {
                                     </h5>
                                 </div>
                                 <div className="input-group" style={{ maxWidth: "400px" }}>
-                                    <input type="text" className="form-control shadow-none" placeholder="Search by borrower or book title..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
+                                    <input type="text" className="form-control shadow-none bg-white text-dark border-0" placeholder="Search by borrower or book title..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
                                 </div>
                             </div>
 
@@ -131,7 +131,7 @@ function BorrowLog() {
                                         <div className="table-responsive">
                                             <table className="table table-hover align-middle mb-0">
                                                 <thead>
-                                                    <tr className="text-dark small fw-bold">
+                                                    <tr className="small fw-bold">
                                                         <th>ID</th>
                                                         <th>BORROWER</th>
                                                         <th>BOOK TITLE</th>
@@ -158,30 +158,30 @@ function BorrowLog() {
 
                                                         return (
                                                             <tr key={log.id}>
-                                                                <td className="fw-semibold text-dark">{log.id}</td>
+                                                                <td className="fw-semibold">{log.id}</td>
                                                                 <td>
                                                                     <div className="d-flex align-items-center">
                                                                         <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
                                                                             {log.username ? log.username.charAt(0).toUpperCase() : "U"}
                                                                         </div>
-                                                                        <span className="fw-bold text-dark">{log.username}</span>
+                                                                        <span className="fw-bold">{log.username}</span>
                                                                     </div>
                                                                 </td>
-                                                                <td className="fw-semibold text-dark">{log.bookTitle}</td>
-                                                                <td className="text-dark">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</td>
+                                                                <td className="fw-semibold">{log.bookTitle}</td>
+                                                                <td>{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</td>
                                                                 <td>
-                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : "text-dark"}`}>
+                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
                                                                         {dueDateObj ? dueDateObj.toLocaleDateString() : "-"}
                                                                     </span>
                                                                 </td>
-                                                                <td className="text-dark">{isReturned ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
+                                                                <td>{isReturned ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
                                                                 <td>
                                                                     {isReturned ? (
                                                                         <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
                                                                             {log.isOverdue ? "Returned Late" : "Returned"}
                                                                         </span>
                                                                     ) : isCurrentlyOverdue ? (
-                                                                        <span className="badge bg-danger shadow-sm animate-pulse">Overdue</span>
+                                                                        <span className="badge bg-danger shadow-sm">Overdue</span>
                                                                     ) : (
                                                                         <span className="badge bg-success">Active</span>
                                                                     )}
@@ -225,8 +225,8 @@ function BorrowLog() {
                                                                 {log.username ? log.username.charAt(0).toUpperCase() : "U"}
                                                             </div>
                                                             <div>
-                                                                <h6 className="fw-bold text-dark mb-0 text-truncate" style={{ maxWidth: "150px" }} title={log.username}>{log.username}</h6>
-                                                                <small className="text-dark opacity-70">ID: {log.id}</small>
+                                                                <h6 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={log.username}>{log.username}</h6>
+                                                                <small className="opacity-75">ID: {log.id}</small>
                                                             </div>
                                                         </div>
                                                         {isReturned ? (
@@ -239,20 +239,20 @@ function BorrowLog() {
                                                             <span className="badge bg-success">Active</span>
                                                         )}
                                                     </div>
-                                                    <h5 className="fw-bold text-dark mb-3 mt-1">{log.bookTitle}</h5>
-                                                    <div className="d-flex flex-column gap-2 mt-auto pt-3 border-top" style={{ borderColor: "rgba(0,0,0,0.15) !important" }}>
+                                                    <h5 className="fw-bold mb-3 mt-1">{log.bookTitle}</h5>
+                                                    <div className="d-flex flex-column gap-2 mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
                                                         <div className="d-flex justify-content-between small">
-                                                            <span className="text-dark fw-bold opacity-75">Borrowed:</span>
-                                                            <span className="fw-semibold text-dark">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</span>
+                                                            <span className="fw-bold opacity-75">Borrowed:</span>
+                                                            <span className="fw-semibold">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</span>
                                                         </div>
                                                         <div className="d-flex justify-content-between small">
-                                                            <span className="text-dark fw-bold opacity-75">Due Date:</span>
-                                                            <span className="fw-semibold text-dark">{dueDateObj ? dueDateObj.toLocaleDateString() : "-"}</span>
+                                                            <span className="fw-bold opacity-75">Due Date:</span>
+                                                            <span className="fw-semibold">{dueDateObj ? dueDateObj.toLocaleDateString() : "-"}</span>
                                                         </div>
                                                         {isReturned && (
                                                             <div className="d-flex justify-content-between small">
-                                                                <span className="text-dark fw-bold opacity-75">Returned:</span>
-                                                                <span className="fw-semibold text-dark">{new Date(log.returnDate).toLocaleDateString()}</span>
+                                                                <span className="fw-bold opacity-75">Returned:</span>
+                                                                <span className="fw-semibold">{new Date(log.returnDate).toLocaleDateString()}</span>
                                                             </div>
                                                         )}
                                                     </div>
@@ -272,20 +272,20 @@ function BorrowLog() {
                                     <ul className="pagination shadow-sm mb-0">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                             <button
-                                                className="page-link bg-light text-dark border-0"
+                                                className="page-link bg-white text-dark border-0 shadow-sm"
                                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                             >
                                                 Previous
                                             </button>
                                         </li>
                                         <li className="page-item disabled">
-                                            <span className="page-link text-dark bg-light fw-semibold px-4 border-0">
+                                            <span className="page-link text-dark bg-white fw-semibold px-4 border-0 shadow-sm">
                                                 Page {currentPage} of {totalPages}
                                             </span>
                                         </li>
                                         <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                                             <button
-                                                className="page-link bg-light text-dark border-0"
+                                                className="page-link bg-white text-dark border-0 shadow-sm"
                                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                             >
                                                 Next

@@ -28,39 +28,83 @@
     }
 }
 
-/* Global Wavy Background Wrapper */
-.app-wrapper {
-    background-color: #0099ff; /* Baseline blue background */
+
+.app-wrapper.theme-midnight {
+    position: relative;
     min-height: 100vh;
+    background-color: #1A233A; 
+    overflow-x: hidden;
+    z-index: 0;
 }
 
-/* Reusable Glassmorphism Class */
-.glass-panel {
-    background: rgba(255, 255, 255, 0.45) !important; /* Raised visibility: ~45% translucent white */
-    backdrop-filter: blur(14px) saturate(120%); /* Enhanced blur to prevent text collision with background */
-    -webkit-backdrop-filter: blur(14px) saturate(120%);
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08) !important;
+.theme-midnight .glass-panel {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.3) !important;
     border-radius: 16px !important;
 }
 
-.glass-panel table {
-    background-color: transparent !important;
+    .theme-midnight .glass-panel table {
+        background-color: transparent !important;
+    }
+
+    .theme-midnight .glass-panel,
+    .theme-midnight .glass-panel h5,
+    .theme-midnight .glass-panel label,
+    .theme-midnight .glass-panel span.text-dark {
+        color: #1E293B !important;
+    }
+
+        .theme-midnight .glass-panel thead tr th {
+            color: #1E293B !important;
+            border-bottom: 2px solid rgba(30, 41, 59, 0.25) !important;
+        }
+
+        .theme-midnight .glass-panel tbody tr td {
+            color: #1E293B !important;
+            border-bottom: 1px solid rgba(30, 41, 59, 0.15) !important;
+        }
+
+        .theme-midnight .glass-panel .form-control,
+        .theme-midnight .glass-panel .form-select {
+            background: rgba(255, 255, 255, 0.8) !important;
+            border: 1px solid rgba(30, 41, 59, 0.3) !important;
+            color: #1E293B !important;
+        }
+
+
+.app-wrapper::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('./assets/midnight-waves.jpg');
+    background-repeat: no-repeat;
+    z-index: -1; /* Pushes the image behind your app */
+    transition: all 0.5s ease-in-out; 
 }
 
-.glass-panel thead tr th {
-    color: #333333 !important; /* Darker header font for better legibility on blue/white blur */
-    border-bottom: 2px solid rgba(255, 255, 255, 0.25) !important;
+.layout-auth::before {
+    background-position: center bottom;
+    background-size: cover;
 }
 
-.glass-panel tbody tr td {
-    color: #1a1a1a !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+.layout-logs::before {
+    background-position: top center;
+    background-size: cover;
+    transform: rotate(180deg); 
 }
 
-/* Input adjustment to ensure users can clearly see filters */
-.glass-panel .form-control, 
-.glass-panel .form-select {
-    background: rgba(255, 255, 255, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+.layout-users::before {
+    background-position: right center;
+    background-size: 150% 150%; 
+
+.layout-default::before {
+    background-position: center center;
+    background-size: cover;
+    opacity: 0.5; 
 }

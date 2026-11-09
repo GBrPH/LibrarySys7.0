@@ -1,7 +1,7 @@
 ﻿import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./App.css"; 
+import "./App.css";
 
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -21,10 +21,23 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Settings from "./pages/Settings";
 
-function App() {
+function AppContent() {
+    const location = useLocation();
+
+    // Determine layout class based on the current URL
+    let layoutClass = "layout-default";
+
+    if (location.pathname === '/login' || location.pathname === '/signup') {
+        layoutClass = "layout-auth";
+    } else if (location.pathname === '/borrowing-log') {
+        layoutClass = "layout-logs";
+    } else if (location.pathname === '/users') {
+        layoutClass = "layout-users";
+    }
+
     return (
-        <div className="app-wrapper"> {/* NEW GLOBAL WRAPPER */}
-        <Router>
+        // The base theme-midnight applies the colors, the layoutClass controls the wave placement
+        <div className={`app-wrapper theme-midnight ${layoutClass}`}>
             <Routes>
                 {/* Public Routes - No Protection Needed */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
@@ -52,10 +65,16 @@ function App() {
 
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
-        </Router>
         </div>
     );
 }
 
-export default App;
+function App() {
+    return (
+        <Router>
+            <AppContent />
+        </Router>
+    );
+}
 
+export default App;
