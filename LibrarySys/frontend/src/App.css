@@ -30,8 +30,7 @@
 
 /* Global Wavy Background Wrapper */
 .app-wrapper {
-    /* REPLACE THIS with your actual wave background URL or gradient */
-    background-image: url('/path/to/your/wavy-background.svg');
+    background: linear-gradient(135deg, #007bff 0%, #00d2ff 100%);
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
