@@ -24,7 +24,6 @@ import Settings from "./pages/Settings";
 function AppContent() {
     const location = useLocation();
 
-    // Determine layout class based on the current URL
     let layoutClass = "layout-default";
 
     if (location.pathname === '/login' || location.pathname === '/signup') {
@@ -33,18 +32,17 @@ function AppContent() {
         layoutClass = "layout-logs";
     } else if (location.pathname === '/users') {
         layoutClass = "layout-users";
+    } else {
+        layoutClass = "layout-default";
     }
 
     return (
-        // The base theme-midnight applies the colors, the layoutClass controls the wave placement
         <div className={`app-wrapper theme-midnight ${layoutClass}`}>
             <Routes>
-                {/* Public Routes - No Protection Needed */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
-                {/* Protected Routes - Wrapped in PrivateRoute */}
                 <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
                 <Route path="/books" element={<PrivateRoute><Books /></PrivateRoute>} />

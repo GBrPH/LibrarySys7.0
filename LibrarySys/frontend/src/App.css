@@ -30,7 +30,7 @@
 .app-wrapper.theme-midnight {
     position: relative;
     min-height: 100vh;
-    background-color: #1A233A; 
+    background-color: #1A233A;
     overflow-x: hidden;
     z-index: 0;
 }
@@ -72,6 +72,20 @@
             color: #1E293B !important;
         }
 
+@keyframes slideBackground {
+    0% {
+        background-position: 0% center;
+    }
+
+    50% {
+        background-position: 100% center;
+    }
+
+    100% {
+        background-position: 0% center;
+    }
+}
+
 .app-wrapper::before {
     content: "";
     position: fixed;
@@ -81,27 +95,24 @@
     bottom: 0;
     background-image: url('./assets/midnight-waves.jpg');
     background-repeat: no-repeat;
+    background-size: 200% 100%;
     z-index: -1;
     transition: all 0.5s ease-in-out;
 }
 
 .layout-auth::before {
-    background-position: center bottom;
-    background-size: cover;
+    animation: slideBackground 25s ease-in-out infinite;
 }
 
 .layout-logs::before {
-    background-position: top center;
-    background-size: cover;
+    animation: slideBackground 30s ease-in-out infinite;
 }
 
 .layout-users::before {
-    background-position: right center;
-    background-size: 150% 150%;
+    animation: slideBackground 20s ease-in-out infinite;
 }
 
 .layout-default::before {
-    background-position: center center;
-    background-size: cover;
-    opacity: 0.5;
+    animation: slideBackground 35s ease-in-out infinite;
+    opacity: 0.85;
 }
