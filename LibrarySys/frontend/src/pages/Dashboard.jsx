@@ -158,59 +158,63 @@ function Dashboard() {
     const progressPercentage = (borrowData.activeBorrows / borrowData.maxLimit) * 100;
 
     return (
-        <div className="container-fluid bg-light min-vh-100 p-0">
+        <div className="p-0 min-vh-100">
             <Navbar activePage="dashboard" />
             <div className="row g-0">
-                <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
-                    <h5 className="fw-bold mb-3">Filters</h5>
-                    <div className="mb-3">
-                        <label className="form-label text-muted small fw-bold">STATUS</label>
-                        <select className="form-select shadow-none" value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
-                            <option>All</option>
-                            <option>Active</option>
-                            <option>Returned</option>
-                            <option>Overdue</option>
-                        </select>
-                    </div>
-                    <button className="btn btn-outline-secondary w-100 mt-2" onClick={() => setFilters({ status: "All", search: "" })}>
-                        Reset Filters
-                    </button>
-
-                    {!isPrivilegedUser && (
-                        <div className="mt-4 pt-4 border-top">
-                            <h6 className="text-muted fw-bold mb-3 small">MY BORROWING LIMIT</h6>
-                            <div className="d-flex justify-content-between align-items-end mb-2">
-                                <h3 className="fw-bold mb-0 text-primary">
-                                    {borrowData.activeBorrows} <span className="text-muted fs-6">/ {borrowData.maxLimit}</span>
-                                </h3>
-                            </div>
-                            <div className="progress mt-2" style={{ height: "6px", borderRadius: "10px" }}>
-                                <div
-                                    className={`progress-bar ${progressPercentage >= 100 ? 'bg-danger' : 'bg-primary'}`}
-                                    role="progressbar"
-                                    style={{ width: `${progressPercentage}%` }}
-                                    aria-valuenow={borrowData.activeBorrows}
-                                    aria-valuemin="0"
-                                    aria-valuemax={borrowData.maxLimit}
-                                ></div>
-                            </div>
-                            {progressPercentage >= 100 && (
-                                <small className="text-danger mt-2 d-block fw-semibold" style={{ fontSize: "0.75rem" }}>
-                                    Limit reached. Return a book to borrow again.
-                                </small>
-                            )}
+                {/* Sidebar Filters - Frosted Glass Panel */}
+                <div className="col-md-3 col-lg-2 p-3">
+                    <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
+                        <h5 className="fw-bold mb-3">Filters</h5>
+                        <div className="mb-3">
+                            <label className="form-label small fw-bold">STATUS</label>
+                            <select className="form-select shadow-none" value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
+                                <option>All</option>
+                                <option>Active</option>
+                                <option>Returned</option>
+                                <option>Overdue</option>
+                            </select>
                         </div>
-                    )}
+                        <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ status: "All", search: "" })}>
+                            Reset Filters
+                        </button>
+
+                        {!isPrivilegedUser && (
+                            <div className="mt-4 pt-4 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
+                                <h6 className="fw-bold mb-3 small">MY BORROWING LIMIT</h6>
+                                <div className="d-flex justify-content-between align-items-end mb-2">
+                                    <h3 className="fw-bold mb-0 text-primary">
+                                        {borrowData.activeBorrows} <span className="fs-6 opacity-75">/ {borrowData.maxLimit}</span>
+                                    </h3>
+                                </div>
+                                <div className="progress mt-2" style={{ height: "6px", borderRadius: "10px", backgroundColor: "rgba(0,0,0,0.1)" }}>
+                                    <div
+                                        className={`progress-bar ${progressPercentage >= 100 ? 'bg-danger' : 'bg-primary'}`}
+                                        role="progressbar"
+                                        style={{ width: `${progressPercentage}%` }}
+                                        aria-valuenow={borrowData.activeBorrows}
+                                        aria-valuemin="0"
+                                        aria-valuemax={borrowData.maxLimit}
+                                    ></div>
+                                </div>
+                                {progressPercentage >= 100 && (
+                                    <small className="text-danger mt-2 d-block fw-semibold" style={{ fontSize: "0.75rem" }}>
+                                        Limit reached. Return a book to borrow again.
+                                    </small>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <div className="col-md-9 col-lg-10 p-4">
+                {/* Main Content Area */}
+                <div className="col-md-9 col-lg-10 p-4 d-flex flex-column">
                     <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-                        <div className="d-flex align-items-center flex-grow-1">
+                        <div className="d-flex align-items-center flex-grow-1 gap-3">
                             <div style={{ minWidth: "220px" }}>
-                                <h2 className="fw-bold mb-0">{isPrivilegedUser ? "Dashboard" : "My Dashboard"}</h2>
+                                <h2 className="fw-bold mb-0 text-white">{isPrivilegedUser ? "Dashboard" : "My Dashboard"}</h2>
                             </div>
-                            <div className="input-group" style={{ maxWidth: "500px" }}>
-                                <input type="text" className="form-control shadow-none" placeholder="Search logs..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
+                            <div className="input-group" style={{ maxWidth: "400px" }}>
+                                <input type="text" className="form-control shadow-none bg-white text-dark border-0" placeholder="Search logs..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
                             </div>
                         </div>
                     </div>
@@ -222,6 +226,7 @@ function Dashboard() {
                         </div>
                     )}
 
+                    {/* Stat Cards */}
                     <div className="row g-3 mb-4">
                         <div className="col-md-3">
                             <div className="card border-0 text-white p-3 shadow-sm h-100" style={{ background: "linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)", borderRadius: "16px" }}>
@@ -231,22 +236,22 @@ function Dashboard() {
                             </div>
                         </div>
                         <div className="col-md-3">
-                            <div className="card border-0 bg-white p-3 shadow-sm h-100" style={{ borderRadius: "16px" }}>
-                                <small className="text-muted text-uppercase fw-bold">Total Users</small>
+                            <div className="card border-0 p-3 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
+                                <small className="text-uppercase fw-bold opacity-75">Total Users</small>
                                 <h2 className="fw-bold my-2 text-dark">{isPrivilegedUser ? stats.users : "—"}</h2>
                                 <small className="text-success fw-bold">{isPrivilegedUser ? "Active Members" : "Restricted Access"}</small>
                             </div>
                         </div>
                         <div className="col-md-3">
-                            <div className="card border-0 bg-white p-3 shadow-sm h-100" style={{ borderRadius: "16px" }}>
-                                <small className="text-muted text-uppercase fw-bold">Borrowed</small>
+                            <div className="card border-0 p-3 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
+                                <small className="text-uppercase fw-bold opacity-75">Borrowed</small>
                                 <h2 className="fw-bold my-2 text-warning">{stats.borrowed}</h2>
-                                <small className="text-muted">{isPrivilegedUser ? "Out for Reading" : "My Active Borrows"}</small>
+                                <small className="opacity-75">{isPrivilegedUser ? "Out for Reading" : "My Active Borrows"}</small>
                             </div>
                         </div>
                         <div className="col-md-3">
-                            <div className="card border-0 bg-white p-3 shadow-sm h-100" style={{ borderRadius: "16px" }}>
-                                <small className="text-muted text-uppercase fw-bold">Overdue</small>
+                            <div className="card border-0 p-3 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
+                                <small className="text-uppercase fw-bold opacity-75">Overdue</small>
                                 <h2 className="fw-bold my-2 text-danger">{stats.overdue}</h2>
                                 <small className="text-danger fw-bold">{isPrivilegedUser ? "Action Needed" : "My Overdue Books"}</small>
                             </div>
@@ -254,9 +259,10 @@ function Dashboard() {
                     </div>
 
                     <div className="row g-4">
+                        {/* Inventory Breakdown Panel */}
                         <div className="col-lg-4">
-                            <div className="card border-0 bg-white p-4 shadow-sm" style={{ borderRadius: "16px" }}>
-                                <h5 className="fw-bold text-dark mb-4">Inventory Breakdown</h5>
+                            <div className="card border-0 p-4 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
+                                <h5 className="fw-bold mb-4">Inventory Breakdown</h5>
                                 <div className="d-flex align-items-center justify-content-between">
                                     <div className="position-relative d-flex align-items-center justify-content-center flex-shrink-0"
                                         style={{
@@ -268,30 +274,31 @@ function Dashboard() {
                                             )`
                                         }}>
                                         <div className="bg-white rounded-circle d-flex flex-column align-items-center justify-content-center shadow-sm" style={{ width: "90px", height: "90px" }}>
-                                            <h5 className="fw-bold mb-0">{inventory.physical}%</h5>
+                                            <h5 className="fw-bold mb-0 text-dark">{inventory.physical}%</h5>
                                             <small className="text-muted" style={{ fontSize: "0.65rem" }}>Books</small>
                                         </div>
                                     </div>
                                     <div className="d-flex flex-column gap-2 flex-grow-1 ms-3">
-                                        <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-primary rounded-circle me-1">•</span>Books</span><span className="fw-bold small">{inventory.physical}%</span></div>
-                                        <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-info rounded-circle me-1">•</span>eBooks</span><span className="fw-bold small">{inventory.ebook}%</span></div>
-                                        <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-danger rounded-circle me-1">•</span>Journals</span><span className="fw-bold small">{inventory.journal}%</span></div>
+                                        <div className="d-flex justify-content-between align-items-center"><span className="small opacity-75"><span className="badge bg-primary rounded-circle me-1">•</span>Books</span><span className="fw-bold small">{inventory.physical}%</span></div>
+                                        <div className="d-flex justify-content-between align-items-center"><span className="small opacity-75"><span className="badge bg-info rounded-circle me-1">•</span>eBooks</span><span className="fw-bold small">{inventory.ebook}%</span></div>
+                                        <div className="d-flex justify-content-between align-items-center"><span className="small opacity-75"><span className="badge bg-danger rounded-circle me-1">•</span>Journals</span><span className="fw-bold small">{inventory.journal}%</span></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Recent Activity Panel */}
                         <div className="col-lg-8">
-                            <div className="card border-0 bg-white p-4 shadow-sm h-100" style={{ borderRadius: "16px" }}>
+                            <div className="card border-0 p-4 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
                                 <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 className="fw-bold text-dark mb-0">{isPrivilegedUser ? "Recent Borrowing Activity" : "My Borrowing History"}</h5>
-                                    {isPrivilegedUser && <Link to="/borrowing-log" className="btn btn-sm btn-outline-secondary rounded-pill px-3">View All</Link>}
+                                    <h5 className="fw-bold mb-0">{isPrivilegedUser ? "Recent Borrowing Activity" : "My Borrowing History"}</h5>
+                                    {isPrivilegedUser && <Link to="/borrowing-log" className="btn btn-sm btn-outline-dark rounded-pill px-3">View All</Link>}
                                 </div>
 
-                                <div className="table-responsive">
+                                <div className="table-responsive flex-grow-1">
                                     <table className="table table-hover align-middle mb-0">
                                         <thead>
-                                            <tr>
+                                            <tr className="small fw-bold">
                                                 <th style={{ minWidth: "150px" }}>User</th>
                                                 <th style={{ minWidth: "250px" }}>Book</th>
                                                 <th style={{ minWidth: "120px" }}>Borrow Date</th>
@@ -370,13 +377,13 @@ function Dashboard() {
 
                                 {/* Pagination UI */}
                                 {totalPages > 1 && (
-                                    <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                                        <span className="small text-muted fw-semibold">
+                                    <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
+                                        <span className="small opacity-75 fw-semibold">
                                             Showing {((currentPage - 1) * logsPerPage) + 1} to {Math.min(currentPage * logsPerPage, filteredLogs.length)} of {filteredLogs.length} recent logs
                                         </span>
                                         <div className="btn-group shadow-sm">
                                             <button
-                                                className="btn btn-outline-primary btn-sm px-3"
+                                                className="btn btn-outline-primary btn-sm px-3 bg-white"
                                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                                 disabled={currentPage === 1}
                                             >
@@ -386,7 +393,7 @@ function Dashboard() {
                                                 {currentPage} / {totalPages}
                                             </button>
                                             <button
-                                                className="btn btn-outline-primary btn-sm px-3"
+                                                className="btn btn-outline-primary btn-sm px-3 bg-white"
                                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                                 disabled={currentPage === totalPages}
                                             >
