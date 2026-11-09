@@ -29,14 +29,16 @@
 }
 
 
+/* --- 1. MIDNIGHT SLATE BASE THEME --- */
 .app-wrapper.theme-midnight {
     position: relative;
     min-height: 100vh;
-    background-color: #1A233A; 
+    background-color: #1A233A; /* Deep Midnight Slate base */
     overflow-x: hidden;
     z-index: 0;
 }
 
+/* Base Frosted Card Style */
 .theme-midnight .glass-panel {
     background: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(10px);
@@ -50,6 +52,7 @@
         background-color: transparent !important;
     }
 
+    /* Ensure text on cards is dark for readability */
     .theme-midnight .glass-panel,
     .theme-midnight .glass-panel h5,
     .theme-midnight .glass-panel label,
@@ -67,6 +70,7 @@
             border-bottom: 1px solid rgba(30, 41, 59, 0.15) !important;
         }
 
+        /* Input adjustment to ensure users can clearly see filters */
         .theme-midnight .glass-panel .form-control,
         .theme-midnight .glass-panel .form-select {
             background: rgba(255, 255, 255, 0.8) !important;
@@ -75,6 +79,7 @@
         }
 
 
+/* --- 2. DYNAMIC BACKGROUND PLACEMENTS --- */
 .app-wrapper::before {
     content: "";
     position: fixed;
@@ -84,27 +89,32 @@
     bottom: 0;
     background-image: url('./assets/midnight-waves.jpg');
     background-repeat: no-repeat;
-    z-index: -1; /* Pushes the image behind your app */
-    transition: all 0.5s ease-in-out; 
+    z-index: -1;
+    transition: all 0.5s ease-in-out;
 }
 
+/* Auth Pages (Login/Signup): Waves anchored at the bottom */
 .layout-auth::before {
     background-position: center bottom;
     background-size: cover;
 }
 
+/* Logs Page: Waves flipped upside down and anchored to the top */
 .layout-logs::before {
     background-position: top center;
     background-size: cover;
-    transform: rotate(180deg); 
+    transform: rotate(180deg);
 }
 
+/* Users Page: Waves zoomed in heavily and shifted to the right */
 .layout-users::before {
     background-position: right center;
-    background-size: 150% 150%; 
+    background-size: 150% 150%;
+}
 
+/* Default fallback for any other pages (Settings, Dashboard, Books) */
 .layout-default::before {
     background-position: center center;
     background-size: cover;
-    opacity: 0.5; 
+    opacity: 0.5;
 }
