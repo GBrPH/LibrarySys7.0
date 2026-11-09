@@ -18,7 +18,6 @@ function Login() {
         try {
             const res = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Auth/Login`,
-                // Passing rememberMe to backend in case you want to extend token lifespan there
                 { username, password, rememberMe }
             );
 
@@ -34,10 +33,8 @@ function Login() {
                 return;
             }
 
-            // Route storage based on "Remember Me" toggle
             const storage = rememberMe ? localStorage : sessionStorage;
 
-            // Clear the other storage just in case old tokens exist
             (rememberMe ? sessionStorage : localStorage).clear();
 
             storage.setItem("token", token);

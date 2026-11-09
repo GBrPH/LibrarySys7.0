@@ -68,12 +68,12 @@ function Users() {
     const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
-        <div className="container-fluid p-0 bg-light min-vh-100">
+        <div className="container-fluid p-0 min-vh-100">
             <Navbar activePage="users" />
 
-            <div className="row g-0">
+            <div className="row g-4 p-4">
                 {/* Sidebar Filters */}
-                <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
+                <div className="col-md-3 col-lg-2 border-end p-4 shadow-sm glass-panel" style={{ borderRadius: "16px" }}>
                     <h5 className="fw-bold mb-3">Filters</h5>
 
                     <div className="mb-3">
@@ -111,7 +111,7 @@ function Users() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="col-md-9 col-lg-10 p-4 d-flex flex-column">
+                <div className="col-md-9 col-lg-10 d-flex flex-column">
                     {/* Top Control Bar */}
                     <div className="d-flex align-items-center justify-content-between mb-4">
                         <div className="d-flex align-items-center flex-grow-1">
@@ -144,7 +144,7 @@ function Users() {
                     {/* DYNAMIC RENDERING BLOCK */}
                     <div className="flex-grow-1 d-flex flex-column">
                         {viewMode === "list" ? (
-                            <div className="card border-0 shadow-sm flex-grow-1" style={{ borderRadius: "16px" }}>
+                            <div className="card border-0 shadow-sm flex-grow-1 glass-panel" style={{ borderRadius: "16px", backgroundColor: "transparent" }}>
                                 <div className="card-body p-4">
                                     <table className="table table-hover align-middle mb-0">
                                         <thead>
@@ -212,7 +212,7 @@ function Users() {
                                     const online = isUserOnline(user);
                                     return (
                                         <div className="col-12 col-md-6 col-xl-4" key={user.id}>
-                                            <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: "16px" }}>
+                                            <div className="card h-100 border-0 shadow-sm p-3 glass-panel" style={{ borderRadius: "16px", backgroundColor: "transparent" }}>
                                                 <div className="d-flex justify-content-between align-items-start mb-3">
                                                     <div className="d-flex align-items-center">
                                                         <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: "50px", height: "50px", fontSize: "1.2rem" }}>
@@ -284,6 +284,6 @@ function Users() {
             </div>
         </div>
     );
-}  
+}
 
 export default Users;

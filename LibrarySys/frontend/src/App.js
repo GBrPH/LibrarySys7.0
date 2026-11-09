@@ -1,8 +1,9 @@
 ﻿import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css"; 
 
-import PrivateRoute from "./components/PrivateRoute"; 
+import PrivateRoute from "./components/PrivateRoute";
 
 import Dashboard from "./pages/Dashboard";
 import Books from "./pages/Books";
@@ -22,6 +23,7 @@ import Settings from "./pages/Settings";
 
 function App() {
     return (
+        <div className="app-wrapper"> {/* NEW GLOBAL WRAPPER */}
         <Router>
             <Routes>
                 {/* Public Routes - No Protection Needed */}
@@ -51,7 +53,9 @@ function App() {
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>
+        </div>
     );
 }
 
 export default App;
+

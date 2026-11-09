@@ -1,3 +1,4 @@
+/* App.css */
 .App {
     text-align: center;
 }
@@ -26,3 +27,32 @@
         transform: rotate(360deg);
     }
 }
+
+/* Global Wavy Background Wrapper */
+.app-wrapper {
+    /* REPLACE THIS with your actual wave background URL or gradient */
+    background-image: url('/path/to/your/wavy-background.svg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* Reusable Glassmorphism Class */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7) !important; /* 70% opacity white */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
+}
+
+    /* Specific fix for tables inside glass panels so they don't break the blur */
+    .glass-panel table,
+    .glass-panel thead,
+    .glass-panel tbody,
+    .glass-panel tr,
+    .glass-panel th,
+    .glass-panel td {
+        background-color: transparent !important;
+    }

@@ -58,12 +58,12 @@ function BorrowLog() {
     const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
-        <div className="container-fluid p-0 bg-light min-vh-100">
+        <div className="container-fluid p-0 min-vh-100">
             <Navbar activePage="logs" />
 
-            <div className="row g-0">
+            <div className="row g-4 p-4">
                 {/* Sidebar Filters */}
-                <div className="col-md-3 col-lg-2 bg-white border-end vh-100 p-3 shadow-sm">
+                <div className="col-md-3 col-lg-2 border-end p-4 shadow-sm glass-panel" style={{ borderRadius: "16px" }}>
                     <h5 className="fw-bold mb-3">Log Filters</h5>
 
                     <div className="mb-3">
@@ -91,8 +91,8 @@ function BorrowLog() {
                     </button>
                 </div>
 
-                {/* Main Content Area - Added d-flex flex-column here */}
-                <div className="col-md-9 col-lg-10 p-4 d-flex flex-column">
+                {/* Main Content Area */}
+                <div className="col-md-9 col-lg-10 d-flex flex-column">
                     <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
                         <div className="d-flex align-items-center flex-grow-1 gap-3">
                             <div style={{ minWidth: "220px" }}>
@@ -123,7 +123,7 @@ function BorrowLog() {
                     {/* DYNAMIC RENDERING BLOCK WRAPPER */}
                     <div className="flex-grow-1 d-flex flex-column" style={{ minHeight: "650px" }}>
                         {viewMode === "list" ? (
-                            <div className="card border-0 shadow-sm flex-grow-1" style={{ borderRadius: "16px" }}>
+                            <div className="card border-0 shadow-sm flex-grow-1 glass-panel" style={{ borderRadius: "16px", backgroundColor: "transparent" }}>
                                 <div className="card-body p-4">
                                     <div className="table-responsive">
                                         <table className="table table-hover align-middle mb-0">
@@ -215,7 +215,7 @@ function BorrowLog() {
 
                                     return (
                                         <div className="col-12 col-md-6 col-xl-4" key={log.id}>
-                                            <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: "16px" }}>
+                                            <div className="card h-100 border-0 shadow-sm p-3 glass-panel" style={{ borderRadius: "16px", backgroundColor: "transparent" }}>
                                                 <div className="d-flex justify-content-between align-items-start mb-3">
                                                     <div className="d-flex align-items-center">
                                                         <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
@@ -262,7 +262,7 @@ function BorrowLog() {
                         )}
                     </div>
 
-                    {/* Pagination Controls - mt-auto keeps it at the bottom */}
+                    {/* Pagination Controls */}
                     {totalPages > 1 && (
                         <div className="d-flex justify-content-center mt-auto pt-4 mb-2">
                             <nav>
