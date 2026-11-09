@@ -88,16 +88,16 @@ function BorrowBook() {
     };
 
     return (
-        <div className="container-fluid p-0 bg-light min-vh-100">
+        <div className="p-0 min-vh-100">
             <Navbar activePage="borrow" />
 
             <div className="container py-5">
                 <div className="row justify-content-center">
                     <div className="col-md-8 col-lg-6">
-                        <div className="card shadow-sm border-0 p-5" style={{ borderRadius: "16px" }}>
+                        <div className="card shadow-sm border-0 p-5 glass-panel" style={{ borderRadius: "16px" }}>
                             <div className="text-center mb-4">
-                                <h3 className="fw-bold" style={{ color: "#2575fc" }}>Borrowing Form</h3>
-                                <p className="text-muted small">Select an available book to check out</p>
+                                <h3 className="fw-bold text-dark">Borrowing Form</h3>
+                                <p className="opacity-75 small text-dark">Select an available book to check out</p>
                             </div>
 
                             {message && (
@@ -113,14 +113,14 @@ function BorrowBook() {
 
                                     <input
                                         type="text"
-                                        className="form-control mb-2 shadow-none"
+                                        className="form-control mb-2 shadow-none bg-white text-dark border-0"
                                         placeholder="Search by title or author..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
 
                                     <select
-                                        className="form-select form-select-lg shadow-none"
+                                        className="form-select form-select-lg shadow-none bg-white text-dark border-0"
                                         size="5"
                                         value={selectedBook ? selectedBook.id : ""}
                                         onChange={(e) => {
@@ -143,16 +143,16 @@ function BorrowBook() {
 
                                 <div className="row mb-4">
                                     <div className="col-md-6 mb-3 mb-md-0">
-                                        <label className="form-label fw-semibold text-secondary small">AUTHOR</label>
-                                        <input type="text" className="form-control bg-light" value={selectedBook ? selectedBook.author : ""} disabled />
+                                        <label className="form-label fw-semibold text-dark small opacity-75">AUTHOR</label>
+                                        <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? selectedBook.author : ""} disabled />
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label fw-semibold text-secondary small">STOCK REMAINING</label>
-                                        <input type="text" className="form-control bg-light fw-bold text-primary" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable) : ""} disabled />
+                                        <label className="form-label fw-semibold text-dark small opacity-75">STOCK REMAINING</label>
+                                        <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable) : ""} disabled />
                                     </div>
                                 </div>
 
-                                <hr className="text-muted mb-4" />
+                                <hr className="mb-4" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }} />
 
                                 <div className="d-grid gap-2">
                                     <button type="submit" className="btn btn-primary btn-lg fw-bold shadow-sm" disabled={loading || !selectedBook}>
