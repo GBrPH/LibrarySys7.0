@@ -58,240 +58,244 @@ function BorrowLog() {
     const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
-        <div className="container-fluid p-0 min-vh-100">
+        <div className="app-wrapper p-0 min-vh-100" style={{ backgroundColor: "#0099ff" }}>
             <Navbar activePage="logs" />
 
-            <div className="row g-4 p-4">
-                {/* Sidebar Filters */}
-                <div className="col-md-3 col-lg-2 border-end p-4 shadow-sm glass-panel" style={{ borderRadius: "16px" }}>
-                    <h5 className="fw-bold mb-3">Log Filters</h5>
+            <div className="container-fluid py-4 px-4">
+                <div className="row g-4">
+                    {/* Log Filters Sidebar - targeted glass card */}
+                    <div className="col-md-3 col-lg-2">
+                        <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
+                            <h5 className="fw-bold mb-3 text-dark">Log Filters</h5>
 
-                    <div className="mb-3">
-                        <label className="form-label text-muted small fw-bold">STATUS</label>
-                        <select className="form-select shadow-none" value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
-                            <option>All</option>
-                            <option>Active</option>
-                            <option>Returned</option>
-                            <option>Overdue</option>
-                        </select>
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label text-muted small fw-bold">BORROWER</label>
-                        <input type="text" className="form-control shadow-none" placeholder="Filter by Borrower" value={filters.username} onChange={e => setFilters({ ...filters, username: e.target.value })} />
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label text-muted small fw-bold">BOOK TITLE</label>
-                        <input type="text" className="form-control shadow-none" placeholder="Filter by Book Title" value={filters.bookTitle} onChange={e => setFilters({ ...filters, bookTitle: e.target.value })} />
-                    </div>
-
-                    <button className="btn btn-outline-secondary w-100 mt-2" onClick={() => setFilters({ status: "All", username: "", bookTitle: "", search: "" })}>
-                        Reset Filters
-                    </button>
-                </div>
-
-                {/* Main Content Area */}
-                <div className="col-md-9 col-lg-10 d-flex flex-column">
-                    <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-                        <div className="d-flex align-items-center flex-grow-1 gap-3">
-                            <div style={{ minWidth: "220px" }}>
-                                <h5 className="fw-bold mb-0 text-nowrap">
-                                    Borrowing Logs <span className="text-muted fw-normal">({filteredLogs.length} total)</span>
-                                </h5>
+                            <div className="mb-3">
+                                <label className="form-label text-dark small fw-bold">STATUS</label>
+                                <select className="form-select shadow-none" value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
+                                    <option>All</option>
+                                    <option>Active</option>
+                                    <option>Returned</option>
+                                    <option>Overdue</option>
+                                </select>
                             </div>
-                            <div className="input-group" style={{ maxWidth: "400px" }}>
-                                <input type="text" className="form-control shadow-none" placeholder="Search by borrower or book title..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
-                            </div>
-                        </div>
 
-                        <div className="d-flex align-items-center gap-2">
-                            <div className="btn-group" role="group">
-                                <button className={`btn ${viewMode === "grid" ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => setViewMode("grid")} title="Grid View">
-                                    <span>&#9632;</span>
-                                </button>
-                                <button className={`btn ${viewMode === "list" ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => setViewMode("list")} title="List View">
-                                    <span>&#9776;</span>
-                                </button>
+                            <div className="mb-3">
+                                <label className="form-label text-dark small fw-bold">BORROWER</label>
+                                <input type="text" className="form-control shadow-none" placeholder="Filter by Borrower" value={filters.username} onChange={e => setFilters({ ...filters, username: e.target.value })} />
                             </div>
-                            <Link to="/settings" className="btn btn-outline-secondary" title="Settings">
-                                <span>&#9881;</span>
-                            </Link>
+
+                            <div className="mb-3">
+                                <label className="form-label text-dark small fw-bold">BOOK TITLE</label>
+                                <input type="text" className="form-control shadow-none" placeholder="Filter by Book Title" value={filters.bookTitle} onChange={e => setFilters({ ...filters, bookTitle: e.target.value })} />
+                            </div>
+
+                            <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ status: "All", username: "", bookTitle: "", search: "" })} style={{ border: "1px solid rgba(255,255,255,0.4)" }}>
+                                Reset Filters
+                            </button>
                         </div>
                     </div>
 
-                    {/* DYNAMIC RENDERING BLOCK WRAPPER */}
-                    <div className="flex-grow-1 d-flex flex-column" style={{ minHeight: "650px" }}>
-                        {viewMode === "list" ? (
-                            <div className="card border-0 shadow-sm flex-grow-1 glass-panel" style={{ borderRadius: "16px", backgroundColor: "transparent" }}>
-                                <div className="card-body p-4">
-                                    <div className="table-responsive">
-                                        <table className="table table-hover align-middle mb-0">
-                                            <thead>
-                                                <tr className="text-muted small">
-                                                    <th>ID</th>
-                                                    <th>BORROWER</th>
-                                                    <th>BOOK TITLE</th>
-                                                    <th>BORROW DATE</th>
-                                                    <th>DUE DATE</th>
-                                                    <th>RETURN DATE</th>
-                                                    <th>STATUS</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {paginatedLogs.map(log => {
-                                                    const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
-                                                    let dueDateObj = null;
-                                                    if (log.dueDate && !log.dueDate.startsWith("0001")) {
-                                                        dueDateObj = new Date(log.dueDate);
-                                                    } else if (log.borrowDate) {
-                                                        dueDateObj = new Date(log.borrowDate);
-                                                        dueDateObj.setDate(dueDateObj.getDate() + 14);
-                                                    }
-
-                                                    const today = new Date().setHours(0, 0, 0, 0);
-                                                    const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
-                                                    const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
-
-                                                    return (
-                                                        <tr key={log.id}>
-                                                            <td className="fw-semibold">{log.id}</td>
-                                                            <td>
-                                                                <div className="d-flex align-items-center">
-                                                                    <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
-                                                                        {log.username ? log.username.charAt(0).toUpperCase() : "U"}
-                                                                    </div>
-                                                                    <span className="fw-bold text-dark">{log.username}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="fw-semibold">{log.bookTitle}</td>
-                                                            <td>{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</td>
-                                                            <td>
-                                                                <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
-                                                                    {dueDateObj ? dueDateObj.toLocaleDateString() : "-"}
-                                                                </span>
-                                                            </td>
-                                                            <td>{isReturned ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
-                                                            <td>
-                                                                {isReturned ? (
-                                                                    <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                        {log.isOverdue ? "Returned Late" : "Returned"}
-                                                                    </span>
-                                                                ) : isCurrentlyOverdue ? (
-                                                                    <span className="badge bg-danger shadow-sm">Overdue</span>
-                                                                ) : (
-                                                                    <span className="badge bg-success">Active</span>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-
-                                                {filteredLogs.length === 0 && (
-                                                    <tr>
-                                                        <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                    {/* Main Content Area */}
+                    <div className="col-md-9 col-lg-10 d-flex flex-column">
+                        <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+                            <div className="d-flex align-items-center flex-grow-1 gap-3">
+                                <div style={{ minWidth: "220px" }}>
+                                    <h5 className="fw-bold mb-0 text-nowrap text-white">
+                                        Borrowing Logs <span className="text-white-50 fw-normal">({filteredLogs.length} total)</span>
+                                    </h5>
+                                </div>
+                                <div className="input-group" style={{ maxWidth: "400px" }}>
+                                    <input type="text" className="form-control shadow-none" placeholder="Search by borrower or book title..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
                                 </div>
                             </div>
-                        ) : (
-                            <div className="row g-4 align-content-start flex-grow-1">
-                                {paginatedLogs.map(log => {
-                                    const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
-                                    let dueDateObj = null;
-                                    if (log.dueDate && !log.dueDate.startsWith("0001")) {
-                                        dueDateObj = new Date(log.dueDate);
-                                    } else if (log.borrowDate) {
-                                        dueDateObj = new Date(log.borrowDate);
-                                        dueDateObj.setDate(dueDateObj.getDate() + 14);
-                                    }
 
-                                    const today = new Date().setHours(0, 0, 0, 0);
-                                    const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
-                                    const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
+                            <div className="d-flex align-items-center gap-2">
+                                <div className="btn-group" role="group">
+                                    <button className={`btn ${viewMode === "grid" ? "btn-light" : "btn-outline-light"}`} onClick={() => setViewMode("grid")} title="Grid View">
+                                        <span>&#9632;</span>
+                                    </button>
+                                    <button className={`btn ${viewMode === "list" ? "btn-light" : "btn-outline-light"}`} onClick={() => setViewMode("list")} title="List View">
+                                        <span>&#9776;</span>
+                                    </button>
+                                </div>
+                                <Link to="/settings" className="btn btn-outline-light" title="Settings">
+                                    <span>&#9881;</span>
+                                </Link>
+                            </div>
+                        </div>
 
-                                    return (
-                                        <div className="col-12 col-md-6 col-xl-4" key={log.id}>
-                                            <div className="card h-100 border-0 shadow-sm p-3 glass-panel" style={{ borderRadius: "16px", backgroundColor: "transparent" }}>
-                                                <div className="d-flex justify-content-between align-items-start mb-3">
-                                                    <div className="d-flex align-items-center">
-                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
-                                                            {log.username ? log.username.charAt(0).toUpperCase() : "U"}
-                                                        </div>
-                                                        <div>
-                                                            <h6 className="fw-bold text-dark mb-0 text-truncate" style={{ maxWidth: "150px" }} title={log.username}>{log.username}</h6>
-                                                            <small className="text-muted">ID: {log.id}</small>
-                                                        </div>
-                                                    </div>
-                                                    {isReturned ? (
-                                                        <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                            {log.isOverdue ? "Returned (Late)" : "Returned"}
-                                                        </span>
-                                                    ) : isCurrentlyOverdue ? (
-                                                        <span className="badge bg-danger">Overdue</span>
-                                                    ) : (
-                                                        <span className="badge bg-success">Active</span>
+                        {/* DYNAMIC RENDERING BLOCK WRAPPER */}
+                        <div className="flex-grow-1 d-flex flex-column" style={{ minHeight: "650px" }}>
+                            {viewMode === "list" ? (
+                                <div className="card border-0 shadow flex-grow-1 glass-panel">
+                                    <div className="card-body p-4">
+                                        <div className="table-responsive">
+                                            <table className="table table-hover align-middle mb-0">
+                                                <thead>
+                                                    <tr className="text-dark small fw-bold">
+                                                        <th>ID</th>
+                                                        <th>BORROWER</th>
+                                                        <th>BOOK TITLE</th>
+                                                        <th>BORROW DATE</th>
+                                                        <th>DUE DATE</th>
+                                                        <th>RETURN DATE</th>
+                                                        <th>STATUS</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {paginatedLogs.map(log => {
+                                                        const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
+                                                        let dueDateObj = null;
+                                                        if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                                            dueDateObj = new Date(log.dueDate);
+                                                        } else if (log.borrowDate) {
+                                                            dueDateObj = new Date(log.borrowDate);
+                                                            dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                        }
+
+                                                        const today = new Date().setHours(0, 0, 0, 0);
+                                                        const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+                                                        const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
+
+                                                        return (
+                                                            <tr key={log.id}>
+                                                                <td className="fw-semibold text-dark">{log.id}</td>
+                                                                <td>
+                                                                    <div className="d-flex align-items-center">
+                                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
+                                                                            {log.username ? log.username.charAt(0).toUpperCase() : "U"}
+                                                                        </div>
+                                                                        <span className="fw-bold text-dark">{log.username}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="fw-semibold text-dark">{log.bookTitle}</td>
+                                                                <td className="text-dark">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</td>
+                                                                <td>
+                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : "text-dark"}`}>
+                                                                        {dueDateObj ? dueDateObj.toLocaleDateString() : "-"}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="text-dark">{isReturned ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
+                                                                <td>
+                                                                    {isReturned ? (
+                                                                        <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
+                                                                            {log.isOverdue ? "Returned Late" : "Returned"}
+                                                                        </span>
+                                                                    ) : isCurrentlyOverdue ? (
+                                                                        <span className="badge bg-danger shadow-sm animate-pulse">Overdue</span>
+                                                                    ) : (
+                                                                        <span className="badge bg-success">Active</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+
+                                                    {filteredLogs.length === 0 && (
+                                                        <tr>
+                                                            <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
+                                                        </tr>
                                                     )}
-                                                </div>
-                                                <h5 className="fw-bold text-dark mb-3 mt-1">{log.bookTitle}</h5>
-                                                <div className="d-flex flex-column gap-2 mt-auto pt-3 border-top">
-                                                    <div className="d-flex justify-content-between small">
-                                                        <span className="text-muted fw-bold">Borrowed:</span>
-                                                        <span className="fw-semibold">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</span>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="row g-4 align-content-start flex-grow-1">
+                                    {paginatedLogs.map(log => {
+                                        const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
+                                        let dueDateObj = null;
+                                        if (log.dueDate && !log.dueDate.startsWith("0001")) {
+                                            dueDateObj = new Date(log.dueDate);
+                                        } else if (log.borrowDate) {
+                                            dueDateObj = new Date(log.borrowDate);
+                                            dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                        }
+
+                                        const today = new Date().setHours(0, 0, 0, 0);
+                                        const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+                                        const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
+
+                                        return (
+                                            <div className="col-12 col-md-6 col-xl-4" key={log.id}>
+                                                <div className="card h-100 border-0 shadow-sm p-3 glass-panel">
+                                                    <div className="d-flex justify-content-between align-items-start mb-3">
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
+                                                                {log.username ? log.username.charAt(0).toUpperCase() : "U"}
+                                                            </div>
+                                                            <div>
+                                                                <h6 className="fw-bold text-dark mb-0 text-truncate" style={{ maxWidth: "150px" }} title={log.username}>{log.username}</h6>
+                                                                <small className="text-dark opacity-70">ID: {log.id}</small>
+                                                            </div>
+                                                        </div>
+                                                        {isReturned ? (
+                                                            <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
+                                                                {log.isOverdue ? "Returned (Late)" : "Returned"}
+                                                            </span>
+                                                        ) : isCurrentlyOverdue ? (
+                                                            <span className="badge bg-danger">Overdue</span>
+                                                        ) : (
+                                                            <span className="badge bg-success">Active</span>
+                                                        )}
                                                     </div>
-                                                    <div className="d-flex justify-content-between small">
-                                                        <span className="text-muted fw-bold">Due Date:</span>
-                                                        <span className="fw-semibold">{dueDateObj ? dueDateObj.toLocaleDateString() : "-"}</span>
-                                                    </div>
-                                                    {isReturned && (
+                                                    <h5 className="fw-bold text-dark mb-3 mt-1">{log.bookTitle}</h5>
+                                                    <div className="d-flex flex-column gap-2 mt-auto pt-3 border-top" style={{ borderColor: "rgba(0,0,0,0.15) !important" }}>
                                                         <div className="d-flex justify-content-between small">
-                                                            <span className="text-muted fw-bold">Returned:</span>
-                                                            <span className="fw-semibold">{new Date(log.returnDate).toLocaleDateString()}</span>
+                                                            <span className="text-dark fw-bold opacity-75">Borrowed:</span>
+                                                            <span className="fw-semibold text-dark">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</span>
                                                         </div>
-                                                    )}
+                                                        <div className="d-flex justify-content-between small">
+                                                            <span className="text-dark fw-bold opacity-75">Due Date:</span>
+                                                            <span className="fw-semibold text-dark">{dueDateObj ? dueDateObj.toLocaleDateString() : "-"}</span>
+                                                        </div>
+                                                        {isReturned && (
+                                                            <div className="d-flex justify-content-between small">
+                                                                <span className="text-dark fw-bold opacity-75">Returned:</span>
+                                                                <span className="fw-semibold text-dark">{new Date(log.returnDate).toLocaleDateString()}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                                {filteredLogs.length === 0 && <div className="col-12 text-center text-muted py-5">No logs found.</div>}
+                                        );
+                                    })}
+                                    {filteredLogs.length === 0 && <div className="col-12 text-center text-white py-5">No logs found.</div>}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="d-flex justify-content-center mt-auto pt-4 mb-2">
+                                <nav>
+                                    <ul className="pagination shadow-sm mb-0">
+                                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                            <button
+                                                className="page-link bg-light text-dark border-0"
+                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                            >
+                                                Previous
+                                            </button>
+                                        </li>
+                                        <li className="page-item disabled">
+                                            <span className="page-link text-dark bg-light fw-semibold px-4 border-0">
+                                                Page {currentPage} of {totalPages}
+                                            </span>
+                                        </li>
+                                        <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                            <button
+                                                className="page-link bg-light text-dark border-0"
+                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                            >
+                                                Next
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
                         )}
                     </div>
-
-                    {/* Pagination Controls */}
-                    {totalPages > 1 && (
-                        <div className="d-flex justify-content-center mt-auto pt-4 mb-2">
-                            <nav>
-                                <ul className="pagination shadow-sm mb-0">
-                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                        <button
-                                            className="page-link"
-                                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        >
-                                            Previous
-                                        </button>
-                                    </li>
-                                    <li className="page-item disabled">
-                                        <span className="page-link text-dark fw-semibold px-4">
-                                            Page {currentPage} of {totalPages}
-                                        </span>
-                                    </li>
-                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                        <button
-                                            className="page-link"
-                                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        >
-                                            Next
-                                        </button>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

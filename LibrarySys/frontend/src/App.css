@@ -30,28 +30,37 @@
 
 /* Global Wavy Background Wrapper */
 .app-wrapper {
-    background: linear-gradient(135deg, #007bff 0%, #00d2ff 100%);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-color: #0099ff; /* Baseline blue background */
     min-height: 100vh;
 }
 
 /* Reusable Glassmorphism Class */
 .glass-panel {
-    background: rgba(255, 255, 255, 0.7) !important; /* 70% opacity white */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
+    background: rgba(255, 255, 255, 0.45) !important; /* Raised visibility: ~45% translucent white */
+    backdrop-filter: blur(14px) saturate(120%); /* Enhanced blur to prevent text collision with background */
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08) !important;
+    border-radius: 16px !important;
 }
 
-    /* Specific fix for tables inside glass panels so they don't break the blur */
-    .glass-panel table,
-    .glass-panel thead,
-    .glass-panel tbody,
-    .glass-panel tr,
-    .glass-panel th,
-    .glass-panel td {
-        background-color: transparent !important;
-    }
+.glass-panel table {
+    background-color: transparent !important;
+}
+
+.glass-panel thead tr th {
+    color: #333333 !important; /* Darker header font for better legibility on blue/white blur */
+    border-bottom: 2px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.glass-panel tbody tr td {
+    color: #1a1a1a !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Input adjustment to ensure users can clearly see filters */
+.glass-panel .form-control, 
+.glass-panel .form-select {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
