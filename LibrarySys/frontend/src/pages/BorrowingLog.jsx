@@ -55,14 +55,27 @@ function BorrowingLog() {
     const filteredLogs = logs.filter(log => {
         const returnDateVal = log.returnDate || log.ReturnDate;
         const isReturned = returnDateVal && !String(returnDateVal).startsWith("0001");
-        const rawStatus = String(log.status || log.Status || "").toLowerCase();
+        const borrowDate = log.borrowDate || log.BorrowDate;
+        const dueDate = log.dueDate || log.DueDate;
         const isOverdueVal = log.isOverdue ?? log.IsOverdue ?? false;
+
+        let dueDateObj = null;
+        if (dueDate && !String(dueDate).startsWith("0001")) {
+            dueDateObj = new Date(dueDate);
+        } else if (borrowDate) {
+            dueDateObj = new Date(borrowDate);
+            dueDateObj.setDate(dueDateObj.getDate() + 14);
+        }
+
+        const today = new Date().setHours(0, 0, 0, 0);
+        const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+        const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
         if (filters.status !== "All") {
             const targetStatus = filters.status.toLowerCase();
-            if (targetStatus === "active" && (isReturned || rawStatus.includes("returned") || rawStatus.includes("overdue"))) return false;
-            if (targetStatus === "returned" && !isReturned && !rawStatus.includes("returned")) return false;
-            if (targetStatus === "overdue" && !isOverdueVal && !rawStatus.includes("overdue") && !rawStatus.includes("late")) return false;
+            if (targetStatus === "active" && (isReturned || isCurrentlyOverdue || isOverdueVal)) return false;
+            if (targetStatus === "returned" && !isReturned) return false;
+            if (targetStatus === "overdue" && !isOverdueVal && !isCurrentlyOverdue) return false;
         }
 
         const uName = String(log.username || log.Username || "");
