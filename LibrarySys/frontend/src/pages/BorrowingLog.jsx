@@ -25,14 +25,21 @@ function BorrowingLog() {
             return;
         }
 
-        axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/GetAllLog`, {
+        const baseUrl = process.env.REACT_APP_API_URL || "";
+
+        axios.get(`${baseUrl}/api/BorrowingLog/GetAllLog`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => {
-                const rawData = Array.isArray(res.data)
-                    ? res.data
-                    : (res.data?.$values || res.data?.logs || res.data?.data || []);
-                setLogs(rawData);
+                console.log("Logs API response:", res.data);
+                if (Array.isArray(res.data)) {
+                    setLogs(res.data);
+                } else if (res.data && typeof res.data === "object") {
+                    const firstArray = Object.values(res.data).find(val => Array.isArray(val));
+                    setLogs(firstArray || []);
+                } else {
+                    setLogs([]);
+                }
             })
             .catch(err => console.error("Error fetching borrowing logs:", err));
     }, [navigate]);
