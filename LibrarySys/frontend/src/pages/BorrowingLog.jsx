@@ -20,6 +20,10 @@ function BorrowLog() {
 
     const fetchLogs = useCallback(() => {
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
         axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/GetAllLog`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -62,10 +66,9 @@ function BorrowLog() {
             <Navbar activePage="logs" />
 
             <div className="container-fluid py-4 px-4">
-                <div className="row g-4">
-                    {/* Log Filters Sidebar - Frosted Glass Panel */}
+                <div className="row g-4 align-items-start">
                     <div className="col-md-3 col-lg-2">
-                        <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
+                        <div className="p-4 glass-panel border-0 shadow">
                             <h5 className="fw-bold mb-3">Log Filters</h5>
 
                             <div className="mb-3">
@@ -94,7 +97,6 @@ function BorrowLog() {
                         </div>
                     </div>
 
-                    {/* Main Content Area */}
                     <div className="col-md-9 col-lg-10 d-flex flex-column">
                         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
                             <div className="d-flex align-items-center flex-grow-1 gap-3">
@@ -123,10 +125,9 @@ function BorrowLog() {
                             </div>
                         </div>
 
-                        {/* DYNAMIC RENDERING BLOCK WRAPPER */}
-                        <div className="flex-grow-1 d-flex flex-column" style={{ minHeight: "650px" }}>
+                        <div className="d-flex flex-column">
                             {viewMode === "list" ? (
-                                <div className="card border-0 shadow flex-grow-1 glass-panel">
+                                <div className="card border-0 shadow glass-panel">
                                     <div className="card-body p-4">
                                         <div className="table-responsive">
                                             <table className="table table-hover align-middle mb-0">
@@ -161,7 +162,7 @@ function BorrowLog() {
                                                                 <td className="fw-semibold">{log.id}</td>
                                                                 <td>
                                                                     <div className="d-flex align-items-center">
-                                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
+                                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
                                                                             {log.username ? log.username.charAt(0).toUpperCase() : "U"}
                                                                         </div>
                                                                         <span className="fw-bold">{log.username}</span>
@@ -201,7 +202,7 @@ function BorrowLog() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="row g-4 align-content-start flex-grow-1">
+                                <div className="row g-4">
                                     {paginatedLogs.map(log => {
                                         const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
                                         let dueDateObj = null;
@@ -217,30 +218,32 @@ function BorrowLog() {
                                         const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
                                         return (
-                                            <div className="col-12 col-md-6 col-xl-4" key={log.id}>
-                                                <div className="card h-100 border-0 shadow-sm p-3 glass-panel">
-                                                    <div className="d-flex justify-content-between align-items-start mb-3">
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
-                                                                {log.username ? log.username.charAt(0).toUpperCase() : "U"}
+                                            <div className="col-12 col-md-6 col-xl-4 d-flex" key={log.id}>
+                                                <div className="card h-100 w-100 border-0 shadow-sm p-3 glass-panel d-flex flex-column justify-content-between">
+                                                    <div>
+                                                        <div className="d-flex justify-content-between align-items-start mb-3">
+                                                            <div className="d-flex align-items-center">
+                                                                <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
+                                                                    {log.username ? log.username.charAt(0).toUpperCase() : "U"}
+                                                                </div>
+                                                                <div>
+                                                                    <h6 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={log.username}>{log.username}</h6>
+                                                                    <small className="opacity-75">ID: {log.id}</small>
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <h6 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={log.username}>{log.username}</h6>
-                                                                <small className="opacity-75">ID: {log.id}</small>
-                                                            </div>
+                                                            {isReturned ? (
+                                                                <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
+                                                                    {log.isOverdue ? "Returned (Late)" : "Returned"}
+                                                                </span>
+                                                            ) : isCurrentlyOverdue ? (
+                                                                <span className="badge bg-danger">Overdue</span>
+                                                            ) : (
+                                                                <span className="badge bg-success">Active</span>
+                                                            )}
                                                         </div>
-                                                        {isReturned ? (
-                                                            <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                {log.isOverdue ? "Returned (Late)" : "Returned"}
-                                                            </span>
-                                                        ) : isCurrentlyOverdue ? (
-                                                            <span className="badge bg-danger">Overdue</span>
-                                                        ) : (
-                                                            <span className="badge bg-success">Active</span>
-                                                        )}
+                                                        <h5 className="fw-bold mb-3 mt-1 text-truncate" title={log.bookTitle}>{log.bookTitle}</h5>
                                                     </div>
-                                                    <h5 className="fw-bold mb-3 mt-1">{log.bookTitle}</h5>
-                                                    <div className="d-flex flex-column gap-2 mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
+                                                    <div className="d-flex flex-column gap-2 mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
                                                         <div className="d-flex justify-content-between small">
                                                             <span className="fw-bold opacity-75">Borrowed:</span>
                                                             <span className="fw-semibold">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</span>
@@ -265,9 +268,8 @@ function BorrowLog() {
                             )}
                         </div>
 
-                        {/* Pagination Controls */}
                         {totalPages > 1 && (
-                            <div className="d-flex justify-content-center mt-auto pt-4 mb-2">
+                            <div className="d-flex justify-content-center mt-4 mb-2">
                                 <nav>
                                     <ul className="pagination shadow-sm mb-0">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>

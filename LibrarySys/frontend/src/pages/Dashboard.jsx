@@ -162,7 +162,7 @@ function Dashboard() {
                 <div className="row g-4">
                     {/* Sidebar Filters */}
                     <div className="col-md-3 col-lg-2">
-                        <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
+                        <div className="p-4 glass-panel border-0 shadow">
                             <h5 className="fw-bold mb-3">Filters</h5>
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">STATUS</label>

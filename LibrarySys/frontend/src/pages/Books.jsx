@@ -23,6 +23,9 @@ function Books() {
         type: "All"
     });
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 9;
+
     const roleString = (localStorage.getItem("role") || sessionStorage.getItem("role"))?.toUpperCase() || "";
     const usernameString = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.toUpperCase() || "";
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || usernameString === "HMIR";
@@ -44,6 +47,10 @@ function Books() {
     useEffect(() => {
         fetchBooks();
     }, [fetchBooks]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters]);
 
     const handleOpenDetails = (book) => {
         setSelectedBook(book);
@@ -119,15 +126,17 @@ function Books() {
         filteredBooks.sort((a, b) => (b.author || "").localeCompare(a.author || ""));
     }
 
+    const totalPages = Math.ceil(filteredBooks.length / pageSize);
+    const paginatedBooks = filteredBooks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
     return (
         <div className="p-0 min-vh-100">
             <Navbar activePage="books" />
 
             <div className="container-fluid py-4 px-4">
-                <div className="row g-4">
-                    {/* Filters Sidebar - Symmetrical height & padding */}
-                    <div className="col-md-3 col-lg-2 d-flex flex-column">
-                        <div className="p-4 glass-panel border-0 shadow flex-grow-1">
+                <div className="row g-4 align-items-start">
+                    <div className="col-md-3 col-lg-2">
+                        <div className="p-4 glass-panel border-0 shadow">
                             <h5 className="fw-bold mb-3">Book Filters</h5>
 
                             <div className="mb-3">
@@ -171,14 +180,17 @@ function Books() {
                         </div>
                     </div>
 
-                    {/* Main Content Area */}
                     <div className="col-md-9 col-lg-10 d-flex flex-column">
                         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
                             <div className="d-flex align-items-center flex-grow-1 gap-3">
-                                <h5 className="fw-bold mb-0 text-nowrap text-white">
-                                    Books <span className="text-white-50 fw-normal">({filteredBooks.length} total)</span>
-                                </h5>
-                                <input type="text" className="form-control shadow-none bg-white text-dark border-0" style={{ maxWidth: "400px" }} placeholder="Search title or author..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
+                                <div style={{ minWidth: "220px" }}>
+                                    <h5 className="fw-bold mb-0 text-nowrap text-white">
+                                        Books <span className="text-white-50 fw-normal">({filteredBooks.length} total)</span>
+                                    </h5>
+                                </div>
+                                <div className="input-group" style={{ maxWidth: "400px" }}>
+                                    <input type="text" className="form-control shadow-none bg-white text-dark border-0" placeholder="Search title or author..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
+                                </div>
                             </div>
 
                             <div className="d-flex align-items-center gap-2">
@@ -208,7 +220,7 @@ function Books() {
 
                         {viewMode === "grid" ? (
                             <div className="row g-4">
-                                {filteredBooks.map(book => {
+                                {paginatedBooks.map(book => {
                                     const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
                                     const isBookAvailable = copyCount > 0;
                                     const bookType = book.type || "Physical Book";
@@ -276,7 +288,7 @@ function Books() {
                                 {filteredBooks.length === 0 && <div className="col-12 text-center text-white py-5">No books found.</div>}
                             </div>
                         ) : (
-                            <div className="card border-0 shadow flex-grow-1 glass-panel" style={{ borderRadius: "16px" }}>
+                            <div className="card border-0 shadow glass-panel" style={{ borderRadius: "16px" }}>
                                 <div className="card-body p-4">
                                     <div className="table-responsive">
                                         <table className="table table-hover align-middle mb-0">
@@ -292,7 +304,7 @@ function Books() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {filteredBooks.map(book => {
+                                                {paginatedBooks.map(book => {
                                                     const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
                                                     const isBookAvailable = copyCount > 0;
                                                     const bookType = book.type || "Physical Book";
@@ -345,11 +357,40 @@ function Books() {
                                 </div>
                             </div>
                         )}
+
+                        {totalPages > 1 && (
+                            <div className="d-flex justify-content-center mt-4 mb-2">
+                                <nav>
+                                    <ul className="pagination shadow-sm mb-0">
+                                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                            <button
+                                                className="page-link bg-white text-dark border-0 shadow-sm"
+                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                            >
+                                                Previous
+                                            </button>
+                                        </li>
+                                        <li className="page-item disabled">
+                                            <span className="page-link text-dark bg-white fw-semibold px-4 border-0 shadow-sm">
+                                                Page {currentPage} of {totalPages}
+                                            </span>
+                                        </li>
+                                        <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                            <button
+                                                className="page-link bg-white text-dark border-0 shadow-sm"
+                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                            >
+                                                Next
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Book Details Modal */}
             {showDetailsModal && selectedBook && (
                 <DetailsBook
                     bookId={selectedBook.id}
