@@ -125,9 +125,9 @@ function Books() {
 
             <div className="container-fluid py-4 px-4">
                 <div className="row g-4">
-                    {/* Filters Sidebar - Frosted Glass Panel */}
-                    <div className="col-md-3 col-lg-2">
-                        <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
+                    {/* Filters Sidebar - Symmetrical height & padding */}
+                    <div className="col-md-3 col-lg-2 d-flex flex-column">
+                        <div className="p-4 glass-panel border-0 shadow flex-grow-1">
                             <h5 className="fw-bold mb-3">Book Filters</h5>
 
                             <div className="mb-3">
@@ -214,33 +214,35 @@ function Books() {
                                     const bookType = book.type || "Physical Book";
 
                                     return (
-                                        <div className="col-12 col-md-6 col-xl-4" key={book.id}>
+                                        <div className="col-12 col-md-6 col-xl-4 d-flex" key={book.id}>
                                             <div
-                                                className="card h-100 border-0 shadow-sm p-3 position-relative glass-panel"
+                                                className="card h-100 w-100 border-0 shadow-sm p-3 position-relative glass-panel d-flex flex-column justify-content-between"
                                                 style={{ borderRadius: "16px", cursor: "pointer" }}
                                                 onClick={() => handleOpenDetails(book)}
                                             >
-                                                <div className="d-flex justify-content-between align-items-start mb-2">
-                                                    <span className={`badge ${bookType === "eBook" ? "bg-info" : bookType === "Journal" ? "bg-danger" : "bg-primary"}`}>
-                                                        {bookType}
-                                                    </span>
-                                                    <span className={`badge ${isBookAvailable ? "bg-success" : "bg-secondary"}`}>
-                                                        {isBookAvailable ? "Available" : "Borrowed"}
-                                                    </span>
+                                                <div>
+                                                    <div className="d-flex justify-content-between align-items-start mb-2">
+                                                        <span className={`badge ${bookType === "eBook" ? "bg-info" : bookType === "Journal" ? "bg-danger" : "bg-primary"}`}>
+                                                            {bookType}
+                                                        </span>
+                                                        <span className={`badge ${isBookAvailable ? "bg-success" : "bg-secondary"}`}>
+                                                            {isBookAvailable ? "Available" : "Borrowed"}
+                                                        </span>
+                                                    </div>
+
+                                                    <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={book.title}>{book.title}</h5>
+                                                    <p className="opacity-75 small mb-3 text-truncate">by {book.author}</p>
                                                 </div>
 
-                                                <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={book.title}>{book.title}</h5>
-                                                <p className="opacity-75 small mb-3">by {book.author}</p>
-
-                                                <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
-                                                    <span className="fw-semibold small opacity-75">
+                                                <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top flex-nowrap gap-2" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
+                                                    <span className="fw-semibold small opacity-75 text-nowrap">
                                                         {copyCount} {copyCount === 1 ? "copy" : "copies"} left
                                                     </span>
 
-                                                    <div className="d-flex align-items-center gap-2">
+                                                    <div className="d-flex align-items-center gap-1 flex-nowrap">
                                                         <Link
                                                             to={`/books/details/${book.id}`}
-                                                            className="btn btn-outline-primary btn-sm px-3 bg-white"
+                                                            className="btn btn-outline-primary btn-sm px-2 bg-white text-nowrap"
                                                             style={{ borderRadius: "8px" }}
                                                             onClick={e => e.stopPropagation()}
                                                         >
@@ -253,14 +255,14 @@ function Books() {
                                                                 handleBorrow(book.id);
                                                             }}
                                                             disabled={borrowingId === book.id || !isBookAvailable}
-                                                            className="btn btn-primary btn-sm px-3"
+                                                            className="btn btn-primary btn-sm px-2 text-nowrap"
                                                             style={{ borderRadius: "8px" }}
                                                         >
                                                             {borrowingId === book.id ? "..." : "Borrow"}
                                                         </button>
 
                                                         {isPrivilegedUser && (
-                                                            <div className="ms-1 d-flex gap-1">
+                                                            <div className="d-flex gap-1 flex-nowrap">
                                                                 <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm" onClick={e => e.stopPropagation()}>✎</Link>
                                                                 <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm" onClick={e => e.stopPropagation()}>🗑</Link>
                                                             </div>
