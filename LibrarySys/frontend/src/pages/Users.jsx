@@ -1,14 +1,13 @@
 ﻿import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Users() {
-    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [viewMode, setViewMode] = useState("list");
-    const currentUsername = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.trim();
+    const currentUsername = localStorage.getItem("username");
 
     const [filters, setFilters] = useState({
         role: "All",
@@ -23,23 +22,15 @@ function Users() {
     const pageSize = 10;
 
     useEffect(() => {
-        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
-        if (!token) {
-            navigate("/login");
-            return;
-        }
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
         axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetAllUsers`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(res => {
-                const rawData = Array.isArray(res.data)
-                    ? res.data
-                    : (res.data?.$values || res.data?.users || res.data?.data || []);
-                setUsers(rawData);
-            })
+            .then(res => setUsers(res.data || []))
             .catch(err => console.error("Error fetching users:", err));
-    }, [navigate]);
+    }, []);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -47,35 +38,28 @@ function Users() {
 
     const isUserOnline = (user) => {
         if (!user) return false;
-        const isLoggedIn = user.isLoggedIn ?? user.IsLoggedIn ?? false;
-        const uName = String(user.username || user.Username || "");
         return (
-            isLoggedIn ||
-            (currentUsername && uName.toLowerCase() === currentUsername.toLowerCase())
+            user.isLoggedIn ||
+            (currentUsername && user.username?.toLowerCase() === currentUsername.toLowerCase())
         );
     };
 
     const filteredUsers = users.filter(user => {
-        const uRole = String(user.role || user.Role || "");
-        const uActive = user.isActive ?? user.IsActive ?? true;
-        const uName = String(user.username || user.Username || "");
-        const fName = String(user.fullName || user.FullName || "");
-
-        if (filters.role !== "All" && uRole.toLowerCase() !== filters.role.toLowerCase()) return false;
-        if (filters.active === "Active" && !uActive) return false;
-        if (filters.active === "Inactive" && uActive) return false;
+        if (filters.role !== "All" && user.role !== filters.role) return false;
+        if (filters.active === "Active" && !user.isActive) return false;
+        if (filters.active === "Inactive" && user.isActive) return false;
 
         const online = isUserOnline(user);
         if (filters.loggedIn === "Online" && !online) return false;
         if (filters.loggedIn === "Offline" && online) return false;
 
-        if (filters.username && !uName.toLowerCase().includes(filters.username.toLowerCase())) return false;
-        if (filters.fullName && !fName.toLowerCase().includes(filters.fullName.toLowerCase())) return false;
+        if (filters.username && !user.username.toLowerCase().includes(filters.username.toLowerCase())) return false;
+        if (filters.fullName && !user.fullName.toLowerCase().includes(filters.fullName.toLowerCase())) return false;
 
-        if (filters.search) {
-            const s = filters.search.toLowerCase();
-            if (!fName.toLowerCase().includes(s) && !uName.toLowerCase().includes(s)) return false;
-        }
+        if (filters.search && !(
+            (user.fullName && user.fullName.toLowerCase().includes(filters.search.toLowerCase())) ||
+            (user.username && user.username.toLowerCase().includes(filters.search.toLowerCase()))
+        )) return false;
 
         return true;
     });
@@ -88,9 +72,10 @@ function Users() {
             <Navbar activePage="users" />
 
             <div className="container-fluid py-4 px-4">
-                <div className="row g-4 align-items-start">
+                <div className="row g-4">
+                    {/* Sidebar Filters - Frosted Glass Panel */}
                     <div className="col-md-3 col-lg-2">
-                        <div className="p-4 glass-panel filter-sidebar border-0 shadow">
+                        <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
                             <h5 className="fw-bold mb-3">Filters</h5>
 
                             <div className="mb-3">
@@ -128,16 +113,18 @@ function Users() {
                         </div>
                     </div>
 
+                    {/* Main Content Area */}
                     <div className="col-md-9 col-lg-10 d-flex flex-column">
-                        <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-                            <div className="d-flex align-items-center flex-grow-1 gap-3">
+                        {/* Top Control Bar */}
+                        <div className="d-flex align-items-center justify-content-between mb-4">
+                            <div className="d-flex align-items-center flex-grow-1">
                                 <div style={{ minWidth: "220px" }}>
                                     <h5 className="fw-bold mb-0 text-nowrap text-white">
                                         Users <span className="text-white-50 fw-normal">({filteredUsers.length} total)</span>
                                     </h5>
                                 </div>
 
-                                <div className="input-group" style={{ maxWidth: "400px" }}>
+                                <div className="input-group" style={{ width: "500px" }}>
                                     <input type="text" className="form-control shadow-none bg-white text-dark border-0" placeholder="Search users..." value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} />
                                 </div>
                             </div>
@@ -157,119 +144,104 @@ function Users() {
                             </div>
                         </div>
 
-                        <div className="d-flex flex-column">
+                        {/* DYNAMIC RENDERING BLOCK */}
+                        <div className="flex-grow-1 d-flex flex-column">
                             {viewMode === "list" ? (
-                                <div className="card border-0 shadow glass-panel">
+                                <div className="card border-0 shadow flex-grow-1 glass-panel">
                                     <div className="card-body p-4">
-                                        <div className="table-responsive">
-                                            <table className="table table-hover align-middle mb-0">
-                                                <thead>
-                                                    <tr className="small fw-bold">
-                                                        <th>ID</th>
-                                                        <th>FULL NAME</th>
-                                                        <th>USERNAME</th>
-                                                        <th>ROLE</th>
-                                                        <th>ACTIVE</th>
-                                                        <th>LOGGED IN</th>
-                                                        <th>ACTIONS</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {paginatedUsers.map(user => {
-                                                        const userId = user.id || user.Id;
-                                                        const fullName = user.fullName || user.FullName || "User";
-                                                        const username = user.username || user.Username || "";
-                                                        const role = user.role || user.Role || "";
-                                                        const isActive = user.isActive ?? user.IsActive ?? true;
-                                                        const online = isUserOnline(user);
-
-                                                        return (
-                                                            <tr key={userId}>
-                                                                <td className="fw-semibold">{userId}</td>
-                                                                <td>
-                                                                    <div className="d-flex align-items-center">
-                                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
-                                                                            {fullName.charAt(0).toUpperCase()}
-                                                                        </div>
-                                                                        <span className="text-truncate d-inline-block fw-bold" style={{ maxWidth: "200px" }}>
-                                                                            {fullName}
-                                                                        </span>
+                                        <table className="table table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr className="small fw-bold">
+                                                    <th>ID</th>
+                                                    <th>FULL NAME</th>
+                                                    <th>USERNAME</th>
+                                                    <th>ROLE</th>
+                                                    <th>ACTIVE</th>
+                                                    <th>LOGGED IN</th>
+                                                    <th>ACTIONS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paginatedUsers.map(user => {
+                                                    const online = isUserOnline(user);
+                                                    return (
+                                                        <tr key={user.id}>
+                                                            <td className="fw-semibold">{user.id}</td>
+                                                            <td>
+                                                                <div className="d-flex align-items-center">
+                                                                    <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
+                                                                        {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
                                                                     </div>
-                                                                </td>
-                                                                <td>{username}</td>
-                                                                <td>
-                                                                    <span className="badge bg-light text-dark border px-2 py-1">
-                                                                        {role}
+                                                                    <span className="text-truncate d-inline-block fw-bold" style={{ maxWidth: "200px" }}>
+                                                                        {user.fullName}
                                                                     </span>
-                                                                </td>
-                                                                <td>
-                                                                    <span className={`badge ${isActive ? "bg-success" : "bg-secondary"}`}>
-                                                                        {isActive ? "Active" : "Inactive"}
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
-                                                                        {online ? "Online" : "Offline"}
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <Link to={`/users/update/${userId}`} className="btn btn-warning btn-sm me-2">Update</Link>
-                                                                    <Link to={`/users/delete/${userId}`} className="btn btn-danger btn-sm">Delete</Link>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                    {filteredUsers.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
+                                                                </div>
+                                                            </td>
+                                                            <td>{user.username}</td>
+                                                            <td>
+                                                                <span className="badge bg-light text-dark border px-2 py-1">
+                                                                    {user.role}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
+                                                                    {user.isActive ? "Active" : "Inactive"}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
+                                                                    {online ? "Online" : "Offline"}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm me-2">Update</Link>
+                                                                <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">Delete</Link>
+                                                            </td>
                                                         </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                    );
+                                                })}
+                                                {filteredUsers.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan="7" className="text-center text-muted py-4">No records match filters</td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="row g-4">
+                                <div className="row g-4 align-content-start flex-grow-1">
                                     {paginatedUsers.map(user => {
-                                        const userId = user.id || user.Id;
-                                        const fullName = user.fullName || user.FullName || "User";
-                                        const username = user.username || user.Username || "";
-                                        const role = user.role || user.Role || "";
-                                        const isActive = user.isActive ?? user.IsActive ?? true;
                                         const online = isUserOnline(user);
-
                                         return (
-                                            <div className="col-12 col-md-6 col-xl-4 d-flex" key={userId}>
-                                                <div className="card h-100 w-100 border-0 shadow-sm p-3 glass-panel d-flex flex-column justify-content-between">
-                                                    <div>
-                                                        <div className="d-flex justify-content-between align-items-start mb-3">
-                                                            <div className="d-flex align-items-center">
-                                                                <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style={{ width: "50px", height: "50px", fontSize: "1.2rem" }}>
-                                                                    {fullName.charAt(0).toUpperCase()}
-                                                                </div>
-                                                                <div>
-                                                                    <h5 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={fullName}>{fullName}</h5>
-                                                                    <p className="small mb-0 opacity-75">@{username}</p>
-                                                                </div>
+                                            <div className="col-12 col-md-6 col-xl-4" key={user.id}>
+                                                <div className="card h-100 border-0 shadow-sm p-3 glass-panel">
+                                                    <div className="d-flex justify-content-between align-items-start mb-3">
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: "50px", height: "50px", fontSize: "1.2rem" }}>
+                                                                {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
                                                             </div>
-                                                            <span className="badge bg-light text-dark border">{role}</span>
+                                                            <div>
+                                                                <h5 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={user.fullName}>{user.fullName}</h5>
+                                                                <p className="small mb-0 opacity-75">@{user.username}</p>
+                                                            </div>
                                                         </div>
-
-                                                        <div className="d-flex gap-2 mb-4">
-                                                            <span className={`badge ${isActive ? "bg-success" : "bg-secondary"}`}>
-                                                                {isActive ? "Active" : "Inactive"}
-                                                            </span>
-                                                            <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
-                                                                {online ? "Online" : "Offline"}
-                                                            </span>
-                                                        </div>
+                                                        <span className="badge bg-light text-dark border">{user.role}</span>
                                                     </div>
 
-                                                    <div className="d-flex justify-content-end align-items-center mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
+                                                    <div className="d-flex gap-2 mb-4">
+                                                        <span className={`badge ${user.isActive ? "bg-success" : "bg-secondary"}`}>
+                                                            {user.isActive ? "Active" : "Inactive"}
+                                                        </span>
+                                                        <span className={`badge ${online ? "bg-success" : "bg-secondary"}`}>
+                                                            {online ? "Online" : "Offline"}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="d-flex justify-content-end align-items-center mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
                                                         <div className="d-flex gap-2">
-                                                            <Link to={`/users/update/${userId}`} className="btn btn-warning btn-sm">✎</Link>
-                                                            <Link to={`/users/delete/${userId}`} className="btn btn-danger btn-sm">🗑</Link>
+                                                            <Link to={`/users/update/${user.id}`} className="btn btn-warning btn-sm">✎</Link>
+                                                            <Link to={`/users/delete/${user.id}`} className="btn btn-danger btn-sm">🗑</Link>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -281,8 +253,9 @@ function Users() {
                             )}
                         </div>
 
+                        {/* Pagination Controls */}
                         {totalPages > 1 && (
-                            <div className="d-flex justify-content-center mt-4 mb-2">
+                            <div className="d-flex justify-content-center mt-auto pt-4 mb-2">
                                 <nav>
                                     <ul className="pagination shadow-sm mb-0">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>

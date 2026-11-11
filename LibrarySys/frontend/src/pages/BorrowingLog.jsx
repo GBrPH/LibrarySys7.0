@@ -48,12 +48,15 @@ function BorrowingLog() {
     const filteredLogs = logs.filter(log => {
         const returnDateVal = log.returnDate || log.ReturnDate;
         const isReturned = returnDateVal && !String(returnDateVal).startsWith("0001");
-
+        const rawStatus = String(log.status || log.Status || "").toLowerCase();
         const isOverdueVal = log.isOverdue ?? log.IsOverdue ?? false;
 
-        if (filters.status === "Active" && isReturned) return false;
-        if (filters.status === "Returned" && !isReturned) return false;
-        if (filters.status === "Overdue" && !isOverdueVal) return false;
+        if (filters.status !== "All") {
+            const targetStatus = filters.status.toLowerCase();
+            if (targetStatus === "active" && (isReturned || rawStatus.includes("returned") || rawStatus.includes("overdue"))) return false;
+            if (targetStatus === "returned" && !isReturned && !rawStatus.includes("returned")) return false;
+            if (targetStatus === "overdue" && !isOverdueVal && !rawStatus.includes("overdue") && !rawStatus.includes("late")) return false;
+        }
 
         const uName = String(log.username || log.Username || "");
         const bTitle = String(log.bookTitle || log.BookTitle || "");
