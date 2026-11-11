@@ -40,7 +40,10 @@ function Books() {
         axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(res => setBooks(res.data || []))
+            .then(res => {
+                const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || res.data?.data || []);
+                setBooks(rawData);
+            })
             .catch(err => console.error("Error fetching books:", err));
     }, [navigate]);
 
@@ -92,24 +95,23 @@ function Books() {
     };
 
     let filteredBooks = books.filter(book => {
-        const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
+        const copies = book.copies ?? book.copiesAvailable ?? book.Copies ?? book.CopiesAvailable ?? 0;
+        const copyCount = Number(copies);
         const isAvailable = copyCount > 0;
-        const bookType = book.type || "Physical Book";
+        const bookType = book.type || book.Type || "Physical Book";
+        const bAuthor = String(book.author || book.Author || "");
+        const bTitle = String(book.title || book.Title || "");
 
         if (filters.status === "Available" && !isAvailable) return false;
         if (filters.status === "Borrowed" && isAvailable) return false;
         if (filters.type !== "All" && bookType !== filters.type) return false;
 
-        if (filters.author && !(book.author || "").toLowerCase().includes(filters.author.toLowerCase())) return false;
-
-        if (filters.copies === "Low Stock (1–9)" && (copyCount < 1 || copyCount > 9)) return false;
-        if (filters.copies === "High Stock (≥10)" && copyCount < 10) return false;
-        if (filters.copies === "Out of Stock (0)" && copyCount !== 0) return false;
+        if (filters.author && !bAuthor.toLowerCase().includes(filters.author.toLowerCase())) return false;
 
         if (filters.search) {
             const searchLower = filters.search.toLowerCase();
-            const titleMatch = (book.title || "").toLowerCase().includes(searchLower);
-            const authorMatch = (book.author || "").toLowerCase().includes(searchLower);
+            const titleMatch = bTitle.toLowerCase().includes(searchLower);
+            const authorMatch = bAuthor.toLowerCase().includes(searchLower);
             if (!titleMatch && !authorMatch) return false;
         }
 
@@ -117,13 +119,13 @@ function Books() {
     });
 
     if (filters.az === "Title (A–Z)") {
-        filteredBooks.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+        filteredBooks.sort((a, b) => (a.title || a.Title || "").localeCompare(b.title || b.Title || ""));
     } else if (filters.az === "Title (Z–A)") {
-        filteredBooks.sort((a, b) => (b.title || "").localeCompare(a.title || ""));
+        filteredBooks.sort((a, b) => (b.title || b.Title || "").localeCompare(a.title || a.Title || ""));
     } else if (filters.az === "Author (A–Z)") {
-        filteredBooks.sort((a, b) => (a.author || "").localeCompare(b.author || ""));
+        filteredBooks.sort((a, b) => (a.author || a.Author || "").localeCompare(b.author || b.Author || ""));
     } else if (filters.az === "Author (Z–A)") {
-        filteredBooks.sort((a, b) => (b.author || "").localeCompare(a.author || ""));
+        filteredBooks.sort((a, b) => (b.author || b.Author || "").localeCompare(a.author || a.Author || ""));
     }
 
     const totalPages = Math.ceil(filteredBooks.length / pageSize);
@@ -136,7 +138,7 @@ function Books() {
             <div className="container-fluid py-4 px-4">
                 <div className="row g-4 align-items-start">
                     <div className="col-md-3 col-lg-2">
-                        <div className="p-4 glass-panel border-0 shadow">
+                        <div className="p-4 glass-panel filter-sidebar border-0 shadow">
                             <h5 className="fw-bold mb-3">Book Filters</h5>
 
                             <div className="mb-3">
@@ -221,12 +223,16 @@ function Books() {
                         {viewMode === "grid" ? (
                             <div className="row g-4">
                                 {paginatedBooks.map(book => {
-                                    const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
+                                    const bookId = book.id || book.Id;
+                                    const title = book.title || book.Title;
+                                    const author = book.author || book.Author;
+                                    const copies = book.copies ?? book.copiesAvailable ?? book.Copies ?? book.CopiesAvailable ?? 0;
+                                    const copyCount = Number(copies);
                                     const isBookAvailable = copyCount > 0;
-                                    const bookType = book.type || "Physical Book";
+                                    const bookType = book.type || book.Type || "Physical Book";
 
                                     return (
-                                        <div className="col-12 col-md-6 col-xl-4 d-flex" key={book.id}>
+                                        <div className="col-12 col-md-6 col-xl-4 d-flex" key={bookId}>
                                             <div
                                                 className="card h-100 w-100 border-0 shadow-sm p-3 position-relative glass-panel d-flex flex-column justify-content-between"
                                                 style={{ borderRadius: "16px", cursor: "pointer" }}
@@ -242,8 +248,8 @@ function Books() {
                                                         </span>
                                                     </div>
 
-                                                    <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={book.title}>{book.title}</h5>
-                                                    <p className="opacity-75 small mb-3 text-truncate">by {book.author}</p>
+                                                    <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={title}>{title}</h5>
+                                                    <p className="opacity-75 small mb-3 text-truncate">by {author}</p>
                                                 </div>
 
                                                 <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top flex-nowrap gap-2" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
@@ -253,7 +259,7 @@ function Books() {
 
                                                     <div className="d-flex align-items-center gap-1 flex-nowrap">
                                                         <Link
-                                                            to={`/books/details/${book.id}`}
+                                                            to={`/books/details/${bookId}`}
                                                             className="btn btn-outline-primary btn-sm px-2 bg-white text-nowrap"
                                                             style={{ borderRadius: "8px" }}
                                                             onClick={e => e.stopPropagation()}
@@ -264,19 +270,19 @@ function Books() {
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleBorrow(book.id);
+                                                                handleBorrow(bookId);
                                                             }}
-                                                            disabled={borrowingId === book.id || !isBookAvailable}
+                                                            disabled={borrowingId === bookId || !isBookAvailable}
                                                             className="btn btn-primary btn-sm px-2 text-nowrap"
                                                             style={{ borderRadius: "8px" }}
                                                         >
-                                                            {borrowingId === book.id ? "..." : "Borrow"}
+                                                            {borrowingId === bookId ? "..." : "Borrow"}
                                                         </button>
 
                                                         {isPrivilegedUser && (
                                                             <div className="d-flex gap-1 flex-nowrap">
-                                                                <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm" onClick={e => e.stopPropagation()}>✎</Link>
-                                                                <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm" onClick={e => e.stopPropagation()}>🗑</Link>
+                                                                <Link to={`/books/update/${bookId}`} className="btn btn-warning btn-sm" onClick={e => e.stopPropagation()}>✎</Link>
+                                                                <Link to={`/books/delete/${bookId}`} className="btn btn-danger btn-sm" onClick={e => e.stopPropagation()}>🗑</Link>
                                                             </div>
                                                         )}
                                                     </div>
@@ -305,15 +311,19 @@ function Books() {
                                             </thead>
                                             <tbody>
                                                 {paginatedBooks.map(book => {
-                                                    const copyCount = Number(book.copies ?? book.copiesAvailable ?? 0);
+                                                    const bookId = book.id || book.Id;
+                                                    const title = book.title || book.Title;
+                                                    const author = book.author || book.Author;
+                                                    const copies = book.copies ?? book.copiesAvailable ?? book.Copies ?? book.CopiesAvailable ?? 0;
+                                                    const copyCount = Number(copies);
                                                     const isBookAvailable = copyCount > 0;
-                                                    const bookType = book.type || "Physical Book";
+                                                    const bookType = book.type || book.Type || "Physical Book";
 
                                                     return (
-                                                        <tr key={book.id}>
-                                                            <td className="fw-semibold">{book.id}</td>
-                                                            <td className="fw-bold text-dark">{book.title}</td>
-                                                            <td>{book.author}</td>
+                                                        <tr key={bookId}>
+                                                            <td className="fw-semibold">{bookId}</td>
+                                                            <td className="fw-bold text-dark">{title}</td>
+                                                            <td>{author}</td>
                                                             <td><span className="badge bg-light text-dark border">{bookType}</span></td>
                                                             <td>{copyCount}</td>
                                                             <td>
@@ -324,23 +334,23 @@ function Books() {
                                                             <td>
                                                                 <div className="d-flex align-items-center gap-1">
                                                                     <Link
-                                                                        to={`/books/details/${book.id}`}
+                                                                        to={`/books/details/${bookId}`}
                                                                         className="btn btn-outline-primary btn-sm px-3 bg-white"
                                                                         style={{ borderRadius: "8px" }}
                                                                     > Details
                                                                     </Link>
 
                                                                     <button
-                                                                        onClick={() => handleBorrow(book.id)}
-                                                                        disabled={borrowingId === book.id || !isBookAvailable}
+                                                                        onClick={() => handleBorrow(bookId)}
+                                                                        disabled={borrowingId === bookId || !isBookAvailable}
                                                                         className="btn btn-primary btn-sm"
                                                                     >
                                                                         Borrow
                                                                     </button>
                                                                     {isPrivilegedUser && (
                                                                         <>
-                                                                            <Link to={`/books/update/${book.id}`} className="btn btn-warning btn-sm">Update</Link>
-                                                                            <Link to={`/books/delete/${book.id}`} className="btn btn-danger btn-sm">Delete</Link>
+                                                                            <Link to={`/books/update/${bookId}`} className="btn btn-warning btn-sm">Update</Link>
+                                                                            <Link to={`/books/delete/${bookId}`} className="btn btn-danger btn-sm">Delete</Link>
                                                                         </>
                                                                     )}
                                                                 </div>
@@ -393,13 +403,13 @@ function Books() {
 
             {showDetailsModal && selectedBook && (
                 <DetailsBook
-                    bookId={selectedBook.id}
+                    bookId={selectedBook.id || selectedBook.Id}
                     bookData={selectedBook}
                     show={showDetailsModal}
                     onClose={handleCloseDetails}
                     onBorrow={(bookToBorrow) => {
                         handleCloseDetails();
-                        handleBorrow(bookToBorrow.id);
+                        handleBorrow(bookToBorrow.id || bookToBorrow.Id);
                     }}
                 />
             )}

@@ -4,7 +4,7 @@ import axios from "axios";
 import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-function BorrowLog() {
+function BorrowingLog() {
     const navigate = useNavigate();
     const [logs, setLogs] = useState([]);
     const [viewMode, setViewMode] = useState("list");
@@ -28,7 +28,12 @@ function BorrowLog() {
         axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/GetAllLog`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(res => setLogs(res.data || []))
+            .then(res => {
+                const rawData = Array.isArray(res.data)
+                    ? res.data
+                    : (res.data?.$values || res.data?.logs || res.data?.data || []);
+                setLogs(rawData);
+            })
             .catch(err => console.error("Error fetching borrowing logs:", err));
     }, [navigate]);
 
@@ -41,19 +46,25 @@ function BorrowLog() {
     }, [filters]);
 
     const filteredLogs = logs.filter(log => {
-        const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
+        const returnDateVal = log.returnDate || log.ReturnDate;
+        const isReturned = returnDateVal && !String(returnDateVal).startsWith("0001");
+
+        const isOverdueVal = log.isOverdue ?? log.IsOverdue ?? false;
 
         if (filters.status === "Active" && isReturned) return false;
         if (filters.status === "Returned" && !isReturned) return false;
-        if (filters.status === "Overdue" && !log.isOverdue) return false;
+        if (filters.status === "Overdue" && !isOverdueVal) return false;
 
-        if (filters.username && !(log.username || "").toLowerCase().includes(filters.username.toLowerCase())) return false;
-        if (filters.bookTitle && !(log.bookTitle || "").toLowerCase().includes(filters.bookTitle.toLowerCase())) return false;
+        const uName = String(log.username || log.Username || "");
+        const bTitle = String(log.bookTitle || log.BookTitle || "");
 
-        if (filters.search && !(
-            (log.username || "").toLowerCase().includes(filters.search.toLowerCase()) ||
-            (log.bookTitle || "").toLowerCase().includes(filters.search.toLowerCase())
-        )) return false;
+        if (filters.username && !uName.toLowerCase().includes(filters.username.toLowerCase())) return false;
+        if (filters.bookTitle && !bTitle.toLowerCase().includes(filters.bookTitle.toLowerCase())) return false;
+
+        if (filters.search) {
+            const s = filters.search.toLowerCase();
+            if (!uName.toLowerCase().includes(s) && !bTitle.toLowerCase().includes(s)) return false;
+        }
 
         return true;
     });
@@ -68,7 +79,7 @@ function BorrowLog() {
             <div className="container-fluid py-4 px-4">
                 <div className="row g-4 align-items-start">
                     <div className="col-md-3 col-lg-2">
-                        <div className="p-4 glass-panel border-0 shadow">
+                        <div className="p-4 glass-panel filter-sidebar border-0 shadow">
                             <h5 className="fw-bold mb-3">Log Filters</h5>
 
                             <div className="mb-3">
@@ -144,12 +155,20 @@ function BorrowLog() {
                                                 </thead>
                                                 <tbody>
                                                     {paginatedLogs.map(log => {
-                                                        const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
+                                                        const logId = log.id || log.Id;
+                                                        const username = log.username || log.Username;
+                                                        const bookTitle = log.bookTitle || log.BookTitle;
+                                                        const borrowDate = log.borrowDate || log.BorrowDate;
+                                                        const dueDate = log.dueDate || log.DueDate;
+                                                        const returnDate = log.returnDate || log.ReturnDate;
+                                                        const isOverdue = log.isOverdue ?? log.IsOverdue ?? false;
+
+                                                        const isReturned = returnDate && !String(returnDate).startsWith("0001");
                                                         let dueDateObj = null;
-                                                        if (log.dueDate && !log.dueDate.startsWith("0001")) {
-                                                            dueDateObj = new Date(log.dueDate);
-                                                        } else if (log.borrowDate) {
-                                                            dueDateObj = new Date(log.borrowDate);
+                                                        if (dueDate && !String(dueDate).startsWith("0001")) {
+                                                            dueDateObj = new Date(dueDate);
+                                                        } else if (borrowDate) {
+                                                            dueDateObj = new Date(borrowDate);
                                                             dueDateObj.setDate(dueDateObj.getDate() + 14);
                                                         }
 
@@ -158,28 +177,28 @@ function BorrowLog() {
                                                         const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
                                                         return (
-                                                            <tr key={log.id}>
-                                                                <td className="fw-semibold">{log.id}</td>
+                                                            <tr key={logId}>
+                                                                <td className="fw-semibold">{logId}</td>
                                                                 <td>
                                                                     <div className="d-flex align-items-center">
                                                                         <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
-                                                                            {log.username ? log.username.charAt(0).toUpperCase() : "U"}
+                                                                            {username ? username.charAt(0).toUpperCase() : "U"}
                                                                         </div>
-                                                                        <span className="fw-bold">{log.username}</span>
+                                                                        <span className="fw-bold">{username}</span>
                                                                     </div>
                                                                 </td>
-                                                                <td className="fw-semibold">{log.bookTitle}</td>
-                                                                <td>{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</td>
+                                                                <td className="fw-semibold">{bookTitle}</td>
+                                                                <td>{borrowDate ? new Date(borrowDate).toLocaleDateString() : "-"}</td>
                                                                 <td>
                                                                     <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
                                                                         {dueDateObj ? dueDateObj.toLocaleDateString() : "-"}
                                                                     </span>
                                                                 </td>
-                                                                <td>{isReturned ? new Date(log.returnDate).toLocaleDateString() : "-"}</td>
+                                                                <td>{isReturned ? new Date(returnDate).toLocaleDateString() : "-"}</td>
                                                                 <td>
                                                                     {isReturned ? (
-                                                                        <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                            {log.isOverdue ? "Returned Late" : "Returned"}
+                                                                        <span className={`badge ${isOverdue ? "bg-danger" : "bg-secondary"}`}>
+                                                                            {isOverdue ? "Returned Late" : "Returned"}
                                                                         </span>
                                                                     ) : isCurrentlyOverdue ? (
                                                                         <span className="badge bg-danger shadow-sm">Overdue</span>
@@ -204,12 +223,20 @@ function BorrowLog() {
                             ) : (
                                 <div className="row g-4">
                                     {paginatedLogs.map(log => {
-                                        const isReturned = log.returnDate && !log.returnDate.startsWith("0001");
+                                        const logId = log.id || log.Id;
+                                        const username = log.username || log.Username;
+                                        const bookTitle = log.bookTitle || log.BookTitle;
+                                        const borrowDate = log.borrowDate || log.BorrowDate;
+                                        const dueDate = log.dueDate || log.DueDate;
+                                        const returnDate = log.returnDate || log.ReturnDate;
+                                        const isOverdue = log.isOverdue ?? log.IsOverdue ?? false;
+
+                                        const isReturned = returnDate && !String(returnDate).startsWith("0001");
                                         let dueDateObj = null;
-                                        if (log.dueDate && !log.dueDate.startsWith("0001")) {
-                                            dueDateObj = new Date(log.dueDate);
-                                        } else if (log.borrowDate) {
-                                            dueDateObj = new Date(log.borrowDate);
+                                        if (dueDate && !String(dueDate).startsWith("0001")) {
+                                            dueDateObj = new Date(dueDate);
+                                        } else if (borrowDate) {
+                                            dueDateObj = new Date(borrowDate);
                                             dueDateObj.setDate(dueDateObj.getDate() + 14);
                                         }
 
@@ -218,22 +245,22 @@ function BorrowLog() {
                                         const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
                                         return (
-                                            <div className="col-12 col-md-6 col-xl-4 d-flex" key={log.id}>
+                                            <div className="col-12 col-md-6 col-xl-4 d-flex" key={logId}>
                                                 <div className="card h-100 w-100 border-0 shadow-sm p-3 glass-panel d-flex flex-column justify-content-between">
                                                     <div>
                                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                                             <div className="d-flex align-items-center">
                                                                 <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
-                                                                    {log.username ? log.username.charAt(0).toUpperCase() : "U"}
+                                                                    {username ? username.charAt(0).toUpperCase() : "U"}
                                                                 </div>
                                                                 <div>
-                                                                    <h6 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={log.username}>{log.username}</h6>
-                                                                    <small className="opacity-75">ID: {log.id}</small>
+                                                                    <h6 className="fw-bold mb-0 text-truncate" style={{ maxWidth: "150px" }} title={username}>{username}</h6>
+                                                                    <small className="opacity-75">ID: {logId}</small>
                                                                 </div>
                                                             </div>
                                                             {isReturned ? (
-                                                                <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                    {log.isOverdue ? "Returned (Late)" : "Returned"}
+                                                                <span className={`badge ${isOverdue ? "bg-danger" : "bg-secondary"}`}>
+                                                                    {isOverdue ? "Returned (Late)" : "Returned"}
                                                                 </span>
                                                             ) : isCurrentlyOverdue ? (
                                                                 <span className="badge bg-danger">Overdue</span>
@@ -241,12 +268,12 @@ function BorrowLog() {
                                                                 <span className="badge bg-success">Active</span>
                                                             )}
                                                         </div>
-                                                        <h5 className="fw-bold mb-3 mt-1 text-truncate" title={log.bookTitle}>{log.bookTitle}</h5>
+                                                        <h5 className="fw-bold mb-3 mt-1 text-truncate" title={bookTitle}>{bookTitle}</h5>
                                                     </div>
                                                     <div className="d-flex flex-column gap-2 mt-auto pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
                                                         <div className="d-flex justify-content-between small">
                                                             <span className="fw-bold opacity-75">Borrowed:</span>
-                                                            <span className="fw-semibold">{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "-"}</span>
+                                                            <span className="fw-semibold">{borrowDate ? new Date(borrowDate).toLocaleDateString() : "-"}</span>
                                                         </div>
                                                         <div className="d-flex justify-content-between small">
                                                             <span className="fw-bold opacity-75">Due Date:</span>
@@ -255,7 +282,7 @@ function BorrowLog() {
                                                         {isReturned && (
                                                             <div className="d-flex justify-content-between small">
                                                                 <span className="fw-bold opacity-75">Returned:</span>
-                                                                <span className="fw-semibold">{new Date(log.returnDate).toLocaleDateString()}</span>
+                                                                <span className="fw-semibold">{new Date(returnDate).toLocaleDateString()}</span>
                                                             </div>
                                                         )}
                                                     </div>
@@ -304,4 +331,4 @@ function BorrowLog() {
     );
 }
 
-export default BorrowLog;
+export default BorrowingLog;

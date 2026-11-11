@@ -37,13 +37,14 @@ function Dashboard() {
 
         try {
             const booksRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, { headers });
-            books = booksRes.data || [];
+            books = Array.isArray(booksRes.data) ? booksRes.data : (booksRes.data?.$values || booksRes.data?.books || booksRes.data?.data || []);
             setAllBooks(books);
 
             let pCount = 0; let eCount = 0; let jCount = 0;
             books.forEach(b => {
-                if (b.type === "eBook") eCount++;
-                else if (b.type === "Journal") jCount++;
+                const bType = b.type || b.Type || "Physical Book";
+                if (bType === "eBook") eCount++;
+                else if (bType === "Journal") jCount++;
                 else pCount++;
             });
 
@@ -58,32 +59,45 @@ function Dashboard() {
         if (isPrivilegedUser) {
             try {
                 const usersRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/User/GetAllUsers`, { headers });
-                users = usersRes.data || [];
+                users = Array.isArray(usersRes.data) ? usersRes.data : (usersRes.data?.$values || usersRes.data?.users || usersRes.data?.data || []);
             } catch (err) { console.warn("Users fetch restricted."); }
         }
 
         try {
             const logsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/GetAllLog`, { headers });
-            let fetchedLogs = logsRes.data || [];
+            let fetchedLogs = Array.isArray(logsRes.data) ? logsRes.data : (logsRes.data?.$values || logsRes.data?.logs || logsRes.data?.data || []);
 
             if (!isPrivilegedUser) {
-                fetchedLogs = fetchedLogs.filter(log => (log.username || "").toLowerCase() === currentUsername.toLowerCase());
+                fetchedLogs = fetchedLogs.filter(log => {
+                    const uName = log.username || log.Username || "";
+                    return uName.toLowerCase() === currentUsername.toLowerCase();
+                });
             }
 
-            logs = [...fetchedLogs].sort((a, b) => new Date(b.borrowDate || Date.now()) - new Date(a.borrowDate || Date.now()));
+            logs = [...fetchedLogs].sort((a, b) => {
+                const dateA = new Date(a.borrowDate || a.BorrowDate || Date.now());
+                const dateB = new Date(b.borrowDate || b.BorrowDate || Date.now());
+                return dateB - dateA;
+            });
         } catch (err) { console.error("Logs fetch failed:", err); }
 
         const calculateActiveOverdue = (log) => {
-            if (log.returnDate) return log.isOverdue;
-            if (!log.borrowDate) return false;
-            const daysBorrowed = (new Date() - new Date(log.borrowDate)) / (1000 * 60 * 60 * 24);
+            const retDate = log.returnDate || log.ReturnDate;
+            const isOvr = log.isOverdue ?? log.IsOverdue ?? false;
+            if (retDate && !String(retDate).startsWith("0001")) return isOvr;
+            const bDate = log.borrowDate || log.BorrowDate;
+            if (!bDate) return false;
+            const daysBorrowed = (new Date() - new Date(bDate)) / (1000 * 60 * 60 * 24);
             return daysBorrowed > 14;
         };
 
         setStats({
             books: books.length,
             users: users.length,
-            borrowed: logs.filter(l => !l.returnDate).length,
+            borrowed: logs.filter(l => {
+                const retDate = l.returnDate || l.ReturnDate;
+                return !retDate || String(retDate).startsWith("0001");
+            }).length,
             overdue: logs.filter(l => calculateActiveOverdue(l)).length
         });
 
@@ -108,9 +122,12 @@ function Dashboard() {
     }, [filters]);
 
     const handleReturn = async (log) => {
-        const targetBookId = log.bookId || allBooks.find(b => b.title === log.bookTitle)?.id;
+        const bId = log.bookId || log.BookId;
+        const bTitle = log.bookTitle || log.BookTitle;
+        const targetBookId = bId || allBooks.find(b => (b.title || b.Title) === bTitle)?.id;
+        const uName = log.username || log.Username;
 
-        setProcessingId(log.id);
+        setProcessingId(log.id || log.Id);
         setReturnMessage({ text: "", type: "" });
 
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
@@ -122,7 +139,7 @@ function Dashboard() {
         try {
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Borrow/ReturnBook`,
-                { bookId: targetBookId, username: log.username },
+                { bookId: targetBookId, username: uName },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -136,14 +153,23 @@ function Dashboard() {
     };
 
     const filteredLogs = recentLogs.filter(log => {
-        const isCurrentlyOverdue = !log.returnDate && log.borrowDate && ((new Date() - new Date(log.borrowDate)) / (1000 * 60 * 60 * 24)) > 14;
-        if (filters.status === "Active" && log.returnDate) return false;
-        if (filters.status === "Returned" && !log.returnDate) return false;
-        if (filters.status === "Overdue" && !log.isOverdue && !isCurrentlyOverdue) return false;
+        const bDate = log.borrowDate || log.BorrowDate;
+        const retDate = log.returnDate || log.ReturnDate;
+        const isOvr = log.isOverdue ?? log.IsOverdue ?? false;
+
+        const isReturned = retDate && !String(retDate).startsWith("0001");
+        const isCurrentlyOverdue = !isReturned && bDate && ((new Date() - new Date(bDate)) / (1000 * 60 * 60 * 24)) > 14;
+
+        if (filters.status === "Active" && isReturned) return false;
+        if (filters.status === "Returned" && !isReturned) return false;
+        if (filters.status === "Overdue" && !isOvr && !isCurrentlyOverdue) return false;
+
+        const uName = String(log.username || log.Username || "");
+        const bTitle = String(log.bookTitle || log.BookTitle || "");
 
         if (filters.search && !(
-            (log.username || "").toLowerCase().includes(filters.search.toLowerCase()) ||
-            (log.bookTitle || "").toLowerCase().includes(filters.search.toLowerCase())
+            uName.toLowerCase().includes(filters.search.toLowerCase()) ||
+            bTitle.toLowerCase().includes(filters.search.toLowerCase())
         )) return false;
 
         return true;
@@ -159,10 +185,9 @@ function Dashboard() {
             <Navbar activePage="dashboard" />
 
             <div className="container-fluid py-4 px-4">
-                <div className="row g-4">
-                    {/* Sidebar Filters */}
+                <div className="row g-4 align-items-start">
                     <div className="col-md-3 col-lg-2">
-                        <div className="p-4 glass-panel border-0 shadow">
+                        <div className="p-4 glass-panel filter-sidebar border-0 shadow">
                             <h5 className="fw-bold mb-3">Filters</h5>
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">STATUS</label>
@@ -178,7 +203,7 @@ function Dashboard() {
                             </button>
 
                             {!isPrivilegedUser && (
-                                <div className="mt-4 pt-4 border-top">
+                                <div className="mt-4 pt-4 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
                                     <h6 className="fw-bold mb-3 small">MY BORROWING LIMIT</h6>
                                     <div className="d-flex justify-content-between align-items-end mb-2">
                                         <h3 className="fw-bold mb-0 text-primary">
@@ -205,7 +230,6 @@ function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Main Content Area */}
                     <div className="col-md-9 col-lg-10 d-flex flex-column">
                         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
                             <div className="d-flex align-items-center flex-grow-1 gap-3">
@@ -225,7 +249,6 @@ function Dashboard() {
                             </div>
                         )}
 
-                        {/* Stat Cards */}
                         <div className="row g-3 mb-4">
                             <div className="col-md-3">
                                 <div className="card border-0 text-white p-3 shadow-sm h-100" style={{ background: "linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)", borderRadius: "16px" }}>
@@ -258,7 +281,6 @@ function Dashboard() {
                         </div>
 
                         <div className="row g-4 align-items-start">
-                            {/* Inventory Breakdown Panel - Natural height, no empty bottom space */}
                             <div className="col-lg-4">
                                 <div className="card border-0 p-4 shadow-sm glass-panel" style={{ borderRadius: "16px" }}>
                                     <h5 className="fw-bold text-dark mb-4">Inventory Breakdown</h5>
@@ -286,7 +308,6 @@ function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Recent Activity Panel */}
                             <div className="col-lg-8">
                                 <div className="card border-0 p-4 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
                                     <div className="d-flex justify-content-between align-items-center mb-3">
@@ -309,39 +330,50 @@ function Dashboard() {
                                             <tbody>
                                                 {paginatedLogs.length > 0 ? (
                                                     paginatedLogs.map(log => {
+                                                        const logId = log.id || log.Id;
+                                                        const username = log.username || log.Username;
+                                                        const bookTitle = log.bookTitle || log.BookTitle;
+                                                        const borrowDate = log.borrowDate || log.BorrowDate;
+                                                        const dueDate = log.dueDate || log.DueDate;
+                                                        const returnDate = log.returnDate || log.ReturnDate;
+                                                        const isOvr = log.isOverdue ?? log.IsOverdue ?? false;
+
                                                         let dueDateObj = null;
-                                                        if (log.dueDate && !log.dueDate.startsWith("0001")) {
-                                                            dueDateObj = new Date(log.dueDate);
-                                                        } else if (log.borrowDate) {
-                                                            dueDateObj = new Date(log.borrowDate);
+                                                        if (dueDate && !String(dueDate).startsWith("0001")) {
+                                                            dueDateObj = new Date(dueDate);
+                                                        } else if (borrowDate) {
+                                                            dueDateObj = new Date(borrowDate);
                                                             dueDateObj.setDate(dueDateObj.getDate() + 14);
                                                         }
 
-                                                        const isCurrentlyOverdue = dueDateObj && new Date() > dueDateObj && !log.returnDate;
+                                                        const isReturned = returnDate && !String(returnDate).startsWith("0001");
+                                                        const today = new Date().setHours(0, 0, 0, 0);
+                                                        const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+                                                        const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
                                                         return (
-                                                            <tr key={log.id}>
+                                                            <tr key={logId}>
                                                                 <td>
                                                                     <div className="d-flex align-items-center gap-2">
                                                                         <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
-                                                                            {log.username ? log.username.charAt(0).toUpperCase() : "U"}
+                                                                            {username ? username.charAt(0).toUpperCase() : "U"}
                                                                         </div>
                                                                         <span className="text-truncate fw-semibold text-dark" style={{ maxWidth: "120px" }}>
-                                                                            {log.username}
+                                                                            {username}
                                                                         </span>
                                                                     </div>
                                                                 </td>
-                                                                <td className="text-truncate" style={{ maxWidth: "180px" }} title={log.bookTitle}>{log.bookTitle}</td>
-                                                                <td>{log.borrowDate ? new Date(log.borrowDate).toLocaleDateString() : "N/A"}</td>
+                                                                <td className="text-truncate" style={{ maxWidth: "180px" }} title={bookTitle}>{bookTitle}</td>
+                                                                <td>{borrowDate ? new Date(borrowDate).toLocaleDateString() : "N/A"}</td>
                                                                 <td>
                                                                     <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
                                                                         {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
                                                                     </span>
                                                                 </td>
                                                                 <td>
-                                                                    {log.returnDate && !log.returnDate.startsWith("0001") ? (
-                                                                        <span className={`badge ${log.isOverdue ? "bg-danger" : "bg-secondary"}`}>
-                                                                            {log.isOverdue ? "Returned Late" : "Returned"}
+                                                                    {isReturned ? (
+                                                                        <span className={`badge ${isOvr ? "bg-danger" : "bg-secondary"}`}>
+                                                                            {isOvr ? "Returned Late" : "Returned"}
                                                                         </span>
                                                                     ) : (
                                                                         isCurrentlyOverdue ? (
@@ -352,13 +384,13 @@ function Dashboard() {
                                                                     )}
                                                                 </td>
                                                                 <td>
-                                                                    {(!log.returnDate || log.returnDate.startsWith("0001")) ? (
+                                                                    {!isReturned ? (
                                                                         <button
                                                                             onClick={() => handleReturn(log)}
-                                                                            disabled={processingId === log.id}
+                                                                            disabled={processingId === logId}
                                                                             className={`btn btn-sm fw-bold ${isCurrentlyOverdue ? 'btn-danger' : 'btn-outline-primary'}`}
                                                                         >
-                                                                            {processingId === log.id ? "..." : "Return"}
+                                                                            {processingId === logId ? "..." : "Return"}
                                                                         </button>
                                                                     ) : (
                                                                         <span className="text-muted small">—</span>
@@ -374,9 +406,8 @@ function Dashboard() {
                                         </table>
                                     </div>
 
-                                    {/* Pagination UI */}
                                     {totalPages > 1 && (
-                                        <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                        <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
                                             <span className="small text-muted fw-semibold">
                                                 Showing {((currentPage - 1) * logsPerPage) + 1} to {Math.min(currentPage * logsPerPage, filteredLogs.length)} of {filteredLogs.length} recent logs
                                             </span>
