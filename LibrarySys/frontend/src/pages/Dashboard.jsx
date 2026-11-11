@@ -160,9 +160,9 @@ function Dashboard() {
 
             <div className="container-fluid py-4 px-4">
                 <div className="row g-4">
-                    {/* Sidebar Filters - Symmetrical glass panel matching Books & Users */}
-                    <div className="col-md-3 col-lg-2 d-flex flex-column">
-                        <div className="p-4 glass-panel border-0 shadow flex-grow-1">
+                    {/* Sidebar Filters */}
+                    <div className="col-md-3 col-lg-2">
+                        <div className="p-4 glass-panel border-0 shadow" style={{ minHeight: "calc(100vh - 120px)" }}>
                             <h5 className="fw-bold mb-3">Filters</h5>
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">STATUS</label>
@@ -178,7 +178,7 @@ function Dashboard() {
                             </button>
 
                             {!isPrivilegedUser && (
-                                <div className="mt-4 pt-4 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
+                                <div className="mt-4 pt-4 border-top">
                                     <h6 className="fw-bold mb-3 small">MY BORROWING LIMIT</h6>
                                     <div className="d-flex justify-content-between align-items-end mb-2">
                                         <h3 className="fw-bold mb-0 text-primary">
@@ -257,11 +257,11 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        <div className="row g-4 flex-grow-1">
-                            {/* Inventory Breakdown Panel */}
-                            <div className="col-lg-4 d-flex">
-                                <div className="card border-0 p-4 shadow-sm h-100 w-100 glass-panel" style={{ borderRadius: "16px" }}>
-                                    <h5 className="fw-bold mb-4">Inventory Breakdown</h5>
+                        <div className="row g-4 align-items-start">
+                            {/* Inventory Breakdown Panel - Natural height, no empty bottom space */}
+                            <div className="col-lg-4">
+                                <div className="card border-0 p-4 shadow-sm glass-panel" style={{ borderRadius: "16px" }}>
+                                    <h5 className="fw-bold text-dark mb-4">Inventory Breakdown</h5>
                                     <div className="d-flex align-items-center justify-content-between">
                                         <div className="position-relative d-flex align-items-center justify-content-center flex-shrink-0"
                                             style={{
@@ -278,23 +278,23 @@ function Dashboard() {
                                             </div>
                                         </div>
                                         <div className="d-flex flex-column gap-2 flex-grow-1 ms-3">
-                                            <div className="d-flex justify-content-between align-items-center"><span className="small opacity-75"><span className="badge bg-primary rounded-circle me-1">•</span>Books</span><span className="fw-bold small">{inventory.physical}%</span></div>
-                                            <div className="d-flex justify-content-between align-items-center"><span className="small opacity-75"><span className="badge bg-info rounded-circle me-1">•</span>eBooks</span><span className="fw-bold small">{inventory.ebook}%</span></div>
-                                            <div className="d-flex justify-content-between align-items-center"><span className="small opacity-75"><span className="badge bg-danger rounded-circle me-1">•</span>Journals</span><span className="fw-bold small">{inventory.journal}%</span></div>
+                                            <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-primary rounded-circle me-1">•</span>Books</span><span className="fw-bold small">{inventory.physical}%</span></div>
+                                            <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-info rounded-circle me-1">•</span>eBooks</span><span className="fw-bold small">{inventory.ebook}%</span></div>
+                                            <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-danger rounded-circle me-1">•</span>Journals</span><span className="fw-bold small">{inventory.journal}%</span></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Recent Activity Panel */}
-                            <div className="col-lg-8 d-flex">
-                                <div className="card border-0 p-4 shadow-sm h-100 w-100 glass-panel d-flex flex-column" style={{ borderRadius: "16px" }}>
+                            <div className="col-lg-8">
+                                <div className="card border-0 p-4 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
                                     <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 className="fw-bold mb-0">{isPrivilegedUser ? "Recent Borrowing Activity" : "My Borrowing History"}</h5>
-                                        {isPrivilegedUser && <Link to="/borrowing-log" className="btn btn-sm btn-outline-dark rounded-pill px-3">View All</Link>}
+                                        <h5 className="fw-bold text-dark mb-0">{isPrivilegedUser ? "Recent Borrowing Activity" : "My Borrowing History"}</h5>
+                                        {isPrivilegedUser && <Link to="/borrowing-log" className="btn btn-sm btn-outline-secondary rounded-pill px-3">View All</Link>}
                                     </div>
 
-                                    <div className="table-responsive flex-grow-1">
+                                    <div className="table-responsive">
                                         <table className="table table-hover align-middle mb-0">
                                             <thead>
                                                 <tr className="small fw-bold">
@@ -323,10 +323,10 @@ function Dashboard() {
                                                             <tr key={log.id}>
                                                                 <td>
                                                                     <div className="d-flex align-items-center gap-2">
-                                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "28px", height: "28px", fontSize: "0.75rem" }}>
+                                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
                                                                             {log.username ? log.username.charAt(0).toUpperCase() : "U"}
                                                                         </div>
-                                                                        <span className="text-truncate fw-semibold text-dark" style={{ maxWidth: "100px" }}>
+                                                                        <span className="text-truncate fw-semibold text-dark" style={{ maxWidth: "120px" }}>
                                                                             {log.username}
                                                                         </span>
                                                                     </div>
@@ -376,9 +376,9 @@ function Dashboard() {
 
                                     {/* Pagination UI */}
                                     {totalPages > 1 && (
-                                        <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15) !important" }}>
-                                            <span className="small opacity-75 fw-semibold">
-                                                Page {currentPage} of {totalPages}
+                                        <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                            <span className="small text-muted fw-semibold">
+                                                Showing {((currentPage - 1) * logsPerPage) + 1} to {Math.min(currentPage * logsPerPage, filteredLogs.length)} of {filteredLogs.length} recent logs
                                             </span>
                                             <div className="btn-group shadow-sm">
                                                 <button
@@ -387,6 +387,9 @@ function Dashboard() {
                                                     disabled={currentPage === 1}
                                                 >
                                                     Previous
+                                                </button>
+                                                <button className="btn btn-primary btn-sm px-4 fw-bold" disabled>
+                                                    {currentPage} / {totalPages}
                                                 </button>
                                                 <button
                                                     className="btn btn-outline-primary btn-sm px-3 bg-white"
