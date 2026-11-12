@@ -199,6 +199,9 @@ function BorrowingLog() {
                                                         const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
                                                         const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
+                                                        const daysUntilDue = dueTime ? Math.ceil((dueTime - today) / (1000 * 60 * 60 * 24)) : null;
+                                                        const isDueSoon = !isReturned && !isCurrentlyOverdue && daysUntilDue !== null && daysUntilDue <= 3 && daysUntilDue >= 0;
+
                                                         return (
                                                             <tr key={logId}>
                                                                 <td className="fw-semibold">{logId}</td>
@@ -213,7 +216,7 @@ function BorrowingLog() {
                                                                 <td className="fw-semibold">{bookTitle}</td>
                                                                 <td>{borrowDate ? new Date(borrowDate).toLocaleDateString() : "-"}</td>
                                                                 <td>
-                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
+                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : isDueSoon ? "text-warning" : ""}`}>
                                                                         {dueDateObj ? dueDateObj.toLocaleDateString() : "-"}
                                                                     </span>
                                                                 </td>
@@ -225,6 +228,8 @@ function BorrowingLog() {
                                                                         </span>
                                                                     ) : isCurrentlyOverdue ? (
                                                                         <span className="badge bg-danger shadow-sm">Overdue</span>
+                                                                    ) : isDueSoon ? (
+                                                                        <span className="badge bg-warning text-dark shadow-sm">Due Soon</span>
                                                                     ) : (
                                                                         <span className="badge bg-success">Active</span>
                                                                     )}
@@ -267,6 +272,9 @@ function BorrowingLog() {
                                         const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
                                         const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
+                                        const daysUntilDue = dueTime ? Math.ceil((dueTime - today) / (1000 * 60 * 60 * 24)) : null;
+                                        const isDueSoon = !isReturned && !isCurrentlyOverdue && daysUntilDue !== null && daysUntilDue <= 3 && daysUntilDue >= 0;
+
                                         return (
                                             <div className="col-12 col-md-6 col-xl-4 d-flex" key={logId}>
                                                 <div className="card h-100 w-100 border-0 shadow-sm p-3 glass-panel d-flex flex-column justify-content-between">
@@ -287,6 +295,8 @@ function BorrowingLog() {
                                                                 </span>
                                                             ) : isCurrentlyOverdue ? (
                                                                 <span className="badge bg-danger">Overdue</span>
+                                                            ) : isDueSoon ? (
+                                                                <span className="badge bg-warning text-dark">Due Soon</span>
                                                             ) : (
                                                                 <span className="badge bg-success">Active</span>
                                                             )}

@@ -351,6 +351,9 @@ function Dashboard() {
                                                         const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
                                                         const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
+                                                        const daysUntilDue = dueTime ? Math.ceil((dueTime - today) / (1000 * 60 * 60 * 24)) : null;
+                                                        const isDueSoon = !isReturned && !isCurrentlyOverdue && daysUntilDue !== null && daysUntilDue <= 3 && daysUntilDue >= 0;
+
                                                         return (
                                                             <tr key={logId}>
                                                                 <td>
@@ -366,7 +369,7 @@ function Dashboard() {
                                                                 <td className="text-truncate" style={{ maxWidth: "180px" }} title={bookTitle}>{bookTitle}</td>
                                                                 <td>{borrowDate ? new Date(borrowDate).toLocaleDateString() : "N/A"}</td>
                                                                 <td>
-                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : ""}`}>
+                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : isDueSoon ? "text-warning" : ""}`}>
                                                                         {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
                                                                     </span>
                                                                 </td>
@@ -378,6 +381,8 @@ function Dashboard() {
                                                                     ) : (
                                                                         isCurrentlyOverdue ? (
                                                                             <span className="badge bg-danger shadow-sm">Overdue</span>
+                                                                        ) : isDueSoon ? (
+                                                                            <span className="badge bg-warning text-dark shadow-sm">Due Soon</span>
                                                                         ) : (
                                                                             <span className="badge bg-success">Active</span>
                                                                         )
