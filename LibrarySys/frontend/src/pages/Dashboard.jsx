@@ -2,7 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
-import LoadingCard from "../components/LoadingCard";
+import LoadingSpinner from "../components/LoadingSpinner";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Dashboard() {
@@ -325,7 +325,7 @@ function Dashboard() {
                                             <div className="row g-3 py-3">
                                                 {Array.from({ length: 3 }).map((_, idx) => (
                                                     <div className="col-md-4" key={idx}>
-                                                        <LoadingCard />
+                                                        <LoadingSpinner />
                                                     </div>
                                                 ))}
                                             </div>
