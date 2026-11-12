@@ -322,17 +322,11 @@ function Dashboard() {
 
                                     <div className="table-responsive">
                                         {isLoading ? (
-                                            <div className="row g-3 py-3">
-                                                {Array.from({ length: 3 }).map((_, idx) => (
-                                                    <div className="col-md-4" key={idx}>
-                                                        <LoadingSpinner />
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            <LoadingSpinner />
                                         ) : (
-                                            <table className="table table-hover align-middle mb-0">
-                                                <thead>
-                                                    <tr className="small fw-bold">
+                                                <table className="table table-hover align-middle mb-0">
+                                                    <thead>
+                                                        <tr className="small fw-bold">
                                                         <th style={{ minWidth: "130px" }}>User</th>
                                                         <th style={{ minWidth: "200px" }}>Book</th>
                                                         <th style={{ minWidth: "110px" }}>Borrow Date</th>
