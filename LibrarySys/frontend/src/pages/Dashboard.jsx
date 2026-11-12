@@ -2,10 +2,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
+import LoadingCard from "../components/LoadingCard";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Dashboard() {
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState({ books: 0, users: 0, borrowed: 0, overdue: 0 });
     const [recentLogs, setRecentLogs] = useState([]);
     const [filters, setFilters] = useState({ status: "All", search: "" });
@@ -24,6 +26,7 @@ function Dashboard() {
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || currentUsername.toUpperCase() === "HMIR";
 
     const fetchDashboardData = useCallback(async () => {
+        setIsLoading(true);
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         if (!token) {
             navigate("/login");
@@ -111,6 +114,8 @@ function Dashboard() {
                 console.error("Failed to fetch borrow count", err);
             }
         }
+
+        setIsLoading(false);
     }, [currentUsername, isPrivilegedUser, navigate]);
 
     useEffect(() => {
@@ -316,102 +321,112 @@ function Dashboard() {
                                     </div>
 
                                     <div className="table-responsive">
-                                        <table className="table table-hover align-middle mb-0">
-                                            <thead>
-                                                <tr className="small fw-bold">
-                                                    <th style={{ minWidth: "130px" }}>User</th>
-                                                    <th style={{ minWidth: "200px" }}>Book</th>
-                                                    <th style={{ minWidth: "110px" }}>Borrow Date</th>
-                                                    <th style={{ minWidth: "110px" }}>Due Date</th>
-                                                    <th style={{ minWidth: "110px" }}>Status</th>
-                                                    <th style={{ minWidth: "90px" }}>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {paginatedLogs.length > 0 ? (
-                                                    paginatedLogs.map(log => {
-                                                        const logId = log.id || log.Id;
-                                                        const username = log.username || log.Username;
-                                                        const bookTitle = log.bookTitle || log.BookTitle;
-                                                        const borrowDate = log.borrowDate || log.BorrowDate;
-                                                        const dueDate = log.dueDate || log.DueDate;
-                                                        const returnDate = log.returnDate || log.ReturnDate;
-                                                        const isOvr = log.isOverdue ?? log.IsOverdue ?? false;
+                                        {isLoading ? (
+                                            <div className="row g-3 py-3">
+                                                {Array.from({ length: 3 }).map((_, idx) => (
+                                                    <div className="col-md-4" key={idx}>
+                                                        <LoadingCard />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <table className="table table-hover align-middle mb-0">
+                                                <thead>
+                                                    <tr className="small fw-bold">
+                                                        <th style={{ minWidth: "130px" }}>User</th>
+                                                        <th style={{ minWidth: "200px" }}>Book</th>
+                                                        <th style={{ minWidth: "110px" }}>Borrow Date</th>
+                                                        <th style={{ minWidth: "110px" }}>Due Date</th>
+                                                        <th style={{ minWidth: "110px" }}>Status</th>
+                                                        <th style={{ minWidth: "90px" }}>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {paginatedLogs.length > 0 ? (
+                                                        paginatedLogs.map(log => {
+                                                            const logId = log.id || log.Id;
+                                                            const username = log.username || log.Username;
+                                                            const bookTitle = log.bookTitle || log.BookTitle;
+                                                            const borrowDate = log.borrowDate || log.BorrowDate;
+                                                            const dueDate = log.dueDate || log.DueDate;
+                                                            const returnDate = log.returnDate || log.ReturnDate;
+                                                            const isOvr = log.isOverdue ?? log.IsOverdue ?? false;
 
-                                                        let dueDateObj = null;
-                                                        if (dueDate && !String(dueDate).startsWith("0001")) {
-                                                            dueDateObj = new Date(dueDate);
-                                                        } else if (borrowDate) {
-                                                            dueDateObj = new Date(borrowDate);
-                                                            dueDateObj.setDate(dueDateObj.getDate() + 14);
-                                                        }
+                                                            let dueDateObj = null;
+                                                            if (dueDate && !String(dueDate).startsWith("0001")) {
+                                                                dueDateObj = new Date(dueDate);
+                                                            } else if (borrowDate) {
+                                                                dueDateObj = new Date(borrowDate);
+                                                                dueDateObj.setDate(dueDateObj.getDate() + 14);
+                                                            }
 
-                                                        const isReturned = returnDate && !String(returnDate).startsWith("0001");
-                                                        const today = new Date().setHours(0, 0, 0, 0);
-                                                        const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
-                                                        const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
+                                                            const isReturned = returnDate && !String(returnDate).startsWith("0001");
+                                                            const today = new Date().setHours(0, 0, 0, 0);
+                                                            const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+                                                            const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
 
-                                                        const daysUntilDue = dueTime ? Math.ceil((dueTime - today) / (1000 * 60 * 60 * 24)) : null;
-                                                        const isDueSoon = !isReturned && !isCurrentlyOverdue && daysUntilDue !== null && daysUntilDue <= 3 && daysUntilDue >= 0;
+                                                            const daysUntilDue = dueTime ? Math.ceil((dueTime - today) / (1000 * 60 * 60 * 24)) : null;
+                                                            const isDueSoon = !isReturned && !isCurrentlyOverdue && daysUntilDue !== null && daysUntilDue <= 3 && daysUntilDue >= 0;
 
-                                                        return (
-                                                            <tr key={logId}>
-                                                                <td>
-                                                                    <div className="d-flex align-items-center gap-2">
-                                                                        <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
-                                                                            {username ? username.charAt(0).toUpperCase() : "U"}
+                                                            return (
+                                                                <tr key={logId}>
+                                                                    <td>
+                                                                        <div className="d-flex align-items-center gap-2">
+                                                                            <div className="bg-primary text-white fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "30px", height: "30px", fontSize: "0.8rem" }}>
+                                                                                {username ? username.charAt(0).toUpperCase() : "U"}
+                                                                            </div>
+                                                                            <span className="text-truncate fw-semibold text-dark" style={{ maxWidth: "120px" }}>
+                                                                                {username}
+                                                                            </span>
                                                                         </div>
-                                                                        <span className="text-truncate fw-semibold text-dark" style={{ maxWidth: "120px" }}>
-                                                                            {username}
+                                                                    </td>
+                                                                    <td className="text-truncate" style={{ maxWidth: "180px" }} title={bookTitle}>{bookTitle}</td>
+                                                                    <td>{borrowDate ? new Date(borrowDate).toLocaleDateString() : "N/A"}</td>
+                                                                    <td>
+                                                                        <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : isDueSoon ? "text-warning" : ""}`}>
+                                                                            {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
                                                                         </span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="text-truncate" style={{ maxWidth: "180px" }} title={bookTitle}>{bookTitle}</td>
-                                                                <td>{borrowDate ? new Date(borrowDate).toLocaleDateString() : "N/A"}</td>
-                                                                <td>
-                                                                    <span className={`fw-semibold ${isCurrentlyOverdue ? "text-danger" : isDueSoon ? "text-warning" : ""}`}>
-                                                                        {dueDateObj ? dueDateObj.toLocaleDateString() : "N/A"}
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    {isReturned ? (
-                                                                        <span className={`badge ${isOvr ? "bg-danger" : "bg-secondary"}`}>
-                                                                            {isOvr ? "Returned Late" : "Returned"}
-                                                                        </span>
-                                                                    ) : (
-                                                                        isCurrentlyOverdue ? (
-                                                                            <span className="badge bg-danger shadow-sm">Overdue</span>
-                                                                        ) : isDueSoon ? (
-                                                                            <span className="badge bg-warning text-dark shadow-sm">Due Soon</span>
+                                                                    </td>
+                                                                    <td>
+                                                                        {isReturned ? (
+                                                                            <span className={`badge ${isOvr ? "bg-danger" : "bg-secondary"}`}>
+                                                                                {isOvr ? "Returned Late" : "Returned"}
+                                                                            </span>
                                                                         ) : (
-                                                                            <span className="badge bg-success">Active</span>
-                                                                        )
-                                                                    )}
-                                                                </td>
-                                                                <td>
-                                                                    {!isReturned ? (
-                                                                        <button
-                                                                            onClick={() => handleReturn(log)}
-                                                                            disabled={processingId === logId}
-                                                                            className={`btn btn-sm fw-bold ${isCurrentlyOverdue ? 'btn-danger' : 'btn-outline-primary'}`}
-                                                                        >
-                                                                            {processingId === logId ? "..." : "Return"}
-                                                                        </button>
-                                                                    ) : (
-                                                                        <span className="text-muted small">—</span>
-                                                                    )}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })
-                                                ) : (
-                                                    <tr><td colSpan="6" className="text-center text-muted py-4">No borrowing activity found.</td></tr>
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                                            isCurrentlyOverdue ? (
+                                                                                <span className="badge bg-danger shadow-sm">Overdue</span>
+                                                                            ) : isDueSoon ? (
+                                                                                <span className="badge bg-warning text-dark shadow-sm">Due Soon</span>
+                                                                            ) : (
+                                                                                <span className="badge bg-success">Active</span>
+                                                                            )
+                                                                        )}
+                                                                    </td>
+                                                                    <td>
+                                                                        {!isReturned ? (
+                                                                            <button
+                                                                                onClick={() => handleReturn(log)}
+                                                                                disabled={processingId === logId}
+                                                                                className={`btn btn-sm fw-bold ${isCurrentlyOverdue ? 'btn-danger' : 'btn-outline-primary'}`}
+                                                                            >
+                                                                                {processingId === logId ? "..." : "Return"}
+                                                                            </button>
+                                                                        ) : (
+                                                                            <span className="text-muted small">—</span>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })
+                                                    ) : (
+                                                        <tr><td colSpan="6" className="text-center text-muted py-4">No borrowing activity found.</td></tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        )}
                                     </div>
 
-                                    {totalPages > 1 && (
+                                    {!isLoading && totalPages > 1 && (
                                         <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
                                             <span className="small text-muted fw-semibold">
                                                 Showing {((currentPage - 1) * logsPerPage) + 1} to {Math.min(currentPage * logsPerPage, filteredLogs.length)} of {filteredLogs.length} recent logs
