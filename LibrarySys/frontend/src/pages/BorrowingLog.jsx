@@ -2,11 +2,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
+import LoadingSpinner from "../components/LoadingSpinner";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function BorrowingLog() {
     const navigate = useNavigate();
     const [logs, setLogs] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [viewMode, setViewMode] = useState("list");
     const [filters, setFilters] = useState({
         status: "All",
@@ -19,6 +21,7 @@ function BorrowingLog() {
     const pageSize = 10;
 
     const fetchLogs = useCallback(() => {
+        setIsLoading(true);
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         if (!token) {
             navigate("/login");
@@ -31,7 +34,6 @@ function BorrowingLog() {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => {
-                console.log("Logs API response:", res.data);
                 if (Array.isArray(res.data)) {
                     setLogs(res.data);
                 } else if (res.data && typeof res.data === "object") {
@@ -41,7 +43,8 @@ function BorrowingLog() {
                     setLogs([]);
                 }
             })
-            .catch(err => console.error("Error fetching borrowing logs:", err));
+            .catch(err => console.error("Error fetching borrowing logs:", err))
+            .finally(() => setIsLoading(false));
     }, [navigate]);
 
     useEffect(() => {
@@ -160,7 +163,13 @@ function BorrowingLog() {
                         </div>
 
                         <div className="d-flex flex-column">
-                            {viewMode === "list" ? (
+                            {isLoading ? (
+                                <div className="card border-0 shadow glass-panel">
+                                    <div className="card-body p-5 d-flex justify-content-center align-items-center" style={{ minHeight: "300px" }}>
+                                        <LoadingSpinner />
+                                    </div>
+                                </div>
+                            ) : viewMode === "list" ? (
                                 <div className="card border-0 shadow glass-panel">
                                     <div className="card-body p-4">
                                         <div className="table-responsive">
@@ -328,7 +337,7 @@ function BorrowingLog() {
                             )}
                         </div>
 
-                        {totalPages > 1 && (
+                        {!isLoading && totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-4 mb-2">
                                 <nav>
                                     <ul className="pagination shadow-sm mb-0">

@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../Navbar";
+import LoadingSpinner from "../components/LoadingSpinner";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function BorrowBook() {
@@ -11,6 +12,7 @@ function BorrowBook() {
     const [message, setMessage] = useState("");
     const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -18,8 +20,12 @@ function BorrowBook() {
     }, []);
 
     const fetchBooks = async () => {
+        setIsFetching(true);
         const token = localStorage.getItem("token")?.trim();
-        if (!token) return;
+        if (!token) {
+            setIsFetching(false);
+            return;
+        }
 
         try {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
@@ -29,6 +35,8 @@ function BorrowBook() {
             setBooks(availableOnly);
         } catch (err) {
             console.error("Error fetching books:", err);
+        } finally {
+            setIsFetching(false);
         }
     };
 
@@ -107,59 +115,63 @@ function BorrowBook() {
                                 </div>
                             )}
 
-                            <form onSubmit={handleBorrowSubmit}>
-                                <div className="mb-4">
-                                    <label className="form-label fw-bold text-dark">Select Book <span className="text-danger">*</span></label>
+                            {isFetching ? (
+                                <LoadingSpinner />
+                            ) : (
+                                <form onSubmit={handleBorrowSubmit}>
+                                    <div className="mb-4">
+                                        <label className="form-label fw-bold text-dark">Select Book <span className="text-danger">*</span></label>
 
-                                    <input
-                                        type="text"
-                                        className="form-control mb-2 shadow-none bg-white text-dark border-0"
-                                        placeholder="Search by title or author..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
+                                        <input
+                                            type="text"
+                                            className="form-control mb-2 shadow-none bg-white text-dark border-0"
+                                            placeholder="Search by title or author..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
 
-                                    <select
-                                        className="form-select form-select-lg shadow-none bg-white text-dark border-0"
-                                        size="5"
-                                        value={selectedBook ? selectedBook.id : ""}
-                                        onChange={(e) => {
-                                            const book = books.find(b => b.id === parseInt(e.target.value));
-                                            setSelectedBook(book || null);
-                                        }}
-                                        required
-                                    >
-                                        <option value="" disabled>-- Click to choose a book --</option>
-                                        {filteredDropdownBooks.map((book) => (
-                                            <option key={book.id} value={book.id} className="py-2 px-2 border-bottom">
-                                                {book.title} (by {book.author}) - {book.copies ?? book.copiesAvailable} left
-                                            </option>
-                                        ))}
-                                        {filteredDropdownBooks.length === 0 && (
-                                            <option disabled>No matching books found</option>
-                                        )}
-                                    </select>
-                                </div>
-
-                                <div className="row mb-4">
-                                    <div className="col-md-6 mb-3 mb-md-0">
-                                        <label className="form-label fw-semibold text-dark small opacity-75">AUTHOR</label>
-                                        <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? selectedBook.author : ""} disabled />
+                                        <select
+                                            className="form-select form-select-lg shadow-none bg-white text-dark border-0"
+                                            size="5"
+                                            value={selectedBook ? selectedBook.id : ""}
+                                            onChange={(e) => {
+                                                const book = books.find(b => b.id === parseInt(e.target.value));
+                                                setSelectedBook(book || null);
+                                            }}
+                                            required
+                                        >
+                                            <option value="" disabled>-- Click to choose a book --</option>
+                                            {filteredDropdownBooks.map((book) => (
+                                                <option key={book.id} value={book.id} className="py-2 px-2 border-bottom">
+                                                    {book.title} (by {book.author}) - {book.copies ?? book.copiesAvailable} left
+                                                </option>
+                                            ))}
+                                            {filteredDropdownBooks.length === 0 && (
+                                                <option disabled>No matching books found</option>
+                                            )}
+                                        </select>
                                     </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label fw-semibold text-dark small opacity-75">STOCK REMAINING</label>
-                                        <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable) : ""} disabled />
+
+                                    <div className="row mb-4">
+                                        <div className="col-md-6 mb-3 mb-md-0">
+                                            <label className="form-label fw-semibold text-dark small opacity-75">AUTHOR</label>
+                                            <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? selectedBook.author : ""} disabled />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-semibold text-dark small opacity-75">STOCK REMAINING</label>
+                                            <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable) : ""} disabled />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <hr className="mb-4" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }} />
+                                    <hr className="mb-4" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }} />
 
-                                <div className="d-grid gap-2">
-                                    <button type="submit" className="btn btn-primary btn-lg fw-bold shadow-sm" disabled={loading || !selectedBook}>
-                                        {loading ? "Processing..." : "Submit Borrow Request"}
-                                    </button>
-                                </div>
-                            </form>
+                                    <div className="d-grid gap-2">
+                                        <button type="submit" className="btn btn-primary btn-lg fw-bold shadow-sm" disabled={loading || !selectedBook}>
+                                            {loading ? "Processing..." : "Submit Borrow Request"}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     </div>
                 </div>

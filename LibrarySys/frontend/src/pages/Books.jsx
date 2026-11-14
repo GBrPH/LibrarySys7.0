@@ -3,11 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
 import DetailsBook from "./DetailsBook";
+import LoadingCard from "../components/LoadingCard";
+import LoadingSpinner from "../components/LoadingSpinner";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Books() {
     const navigate = useNavigate();
     const [books, setBooks] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [borrowMessage, setBorrowMessage] = useState("");
     const [borrowingId, setBorrowingId] = useState(null);
     const [viewMode, setViewMode] = useState("grid");
@@ -31,6 +34,7 @@ function Books() {
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || usernameString === "HMIR";
 
     const fetchBooks = useCallback(() => {
+        setIsLoading(true);
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         if (!token) {
             navigate("/login");
@@ -44,7 +48,8 @@ function Books() {
                 const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || res.data?.data || []);
                 setBooks(rawData);
             })
-            .catch(err => console.error("Error fetching books:", err));
+            .catch(err => console.error("Error fetching books:", err))
+            .finally(() => setIsLoading(false));
     }, [navigate]);
 
     useEffect(() => {
@@ -140,7 +145,6 @@ function Books() {
                     <div className="col-md-3 col-lg-2">
                         <div className="p-4 glass-panel filter-sidebar border-0 shadow">
                             <h5 className="fw-bold mb-3">Book Filters</h5>
-
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">STATUS</label>
                                 <select className="form-select shadow-none" value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
@@ -149,7 +153,6 @@ function Books() {
                                     <option>Borrowed</option>
                                 </select>
                             </div>
-
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">TYPE</label>
                                 <select className="form-select shadow-none" value={filters.type} onChange={e => setFilters({ ...filters, type: e.target.value })}>
@@ -159,12 +162,10 @@ function Books() {
                                     <option>Journal</option>
                                 </select>
                             </div>
-
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">AUTHOR</label>
                                 <input type="text" className="form-control shadow-none" placeholder="Filter by Author" value={filters.author} onChange={e => setFilters({ ...filters, author: e.target.value })} />
                             </div>
-
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">SORT ORDER</label>
                                 <select className="form-select shadow-none" value={filters.az} onChange={e => setFilters({ ...filters, az: e.target.value })}>
@@ -175,7 +176,6 @@ function Books() {
                                     <option>Author (Z–A)</option>
                                 </select>
                             </div>
-
                             <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ status: "All", author: "", copies: "All", search: "", az: "None", type: "All" })}>
                                 Reset Filters
                             </button>
@@ -220,7 +220,23 @@ function Books() {
                             </div>
                         )}
 
-                        {viewMode === "grid" ? (
+                        {isLoading ? (
+                            viewMode === "grid" ? (
+                                <div className="row g-4">
+                                    {Array.from({ length: 6 }).map((_, idx) => (
+                                        <div className="col-12 col-md-6 col-xl-4 d-flex" key={idx}>
+                                            <LoadingCard />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="card border-0 shadow glass-panel" style={{ borderRadius: "16px" }}>
+                                    <div className="card-body p-5 d-flex justify-content-center">
+                                        <LoadingSpinner />
+                                    </div>
+                                </div>
+                            )
+                        ) : viewMode === "grid" ? (
                             <div className="row g-4">
                                 {paginatedBooks.map(book => {
                                     const bookId = book.id || book.Id;
@@ -247,7 +263,6 @@ function Books() {
                                                             {isBookAvailable ? "Available" : "Borrowed"}
                                                         </span>
                                                     </div>
-
                                                     <h5 className="fw-bold text-dark mt-2 mb-1 text-truncate" title={title}>{title}</h5>
                                                     <p className="opacity-75 small mb-3 text-truncate">by {author}</p>
                                                 </div>
@@ -368,7 +383,7 @@ function Books() {
                             </div>
                         )}
 
-                        {totalPages > 1 && (
+                        {!isLoading && totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-4 mb-2">
                                 <nav>
                                     <ul className="pagination shadow-sm mb-0">

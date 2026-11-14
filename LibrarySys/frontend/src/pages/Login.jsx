@@ -9,11 +9,13 @@ function Login() {
     const [message, setMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setMessage("");
+        setIsLoading(true);
 
         try {
             const res = await axios.post(
@@ -21,20 +23,15 @@ function Login() {
                 { username, password, rememberMe }
             );
 
-            console.log("Server Response:", res.data);
-
-            const token = res.data?.token
-                || res.data?.Token
-                || res.data?.accessToken
-                || (typeof res.data === 'string' ? res.data : null);
+            const token = res.data?.token || res.data?.Token || res.data?.accessToken || (typeof res.data === 'string' ? res.data : null);
 
             if (!token) {
                 setMessage("Login failed: Backend response did not contain a token.");
+                setIsLoading(false);
                 return;
             }
 
             const storage = rememberMe ? localStorage : sessionStorage;
-
             (rememberMe ? sessionStorage : localStorage).clear();
 
             storage.setItem("token", token);
@@ -48,14 +45,9 @@ function Login() {
                 }).join(''));
 
                 const decodedToken = JSON.parse(jsonPayload);
-                const userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
-                    || decodedToken.role
-                    || decodedToken.Role
-                    || "Borrower";
-
+                const userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || decodedToken.role || decodedToken.Role || "Borrower";
                 storage.setItem("role", userRole);
             } catch (decodeError) {
-                console.error("Failed to decode token role, defaulting to Borrower:", decodeError);
                 storage.setItem("role", "Borrower");
             }
 
@@ -63,9 +55,10 @@ function Login() {
             navigate("/dashboard");
 
         } catch (err) {
-            console.error("Login API Error:", err.response || err);
             const errorMsg = err.response?.data?.message || err.response?.data || "Login failed. Check your credentials.";
             setMessage(typeof errorMsg === 'string' ? errorMsg : "Login failed. Check your credentials.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -123,8 +116,8 @@ function Login() {
                                 </label>
                             </div>
 
-                            <button type="submit" className="btn btn-primary w-100 btn-lg fs-6 shadow-sm">
-                                Login
+                            <button type="submit" className="btn btn-primary w-100 btn-lg fs-6 shadow-sm" disabled={isLoading}>
+                                {isLoading ? <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> : "Login"}
                             </button>
                         </form>
 

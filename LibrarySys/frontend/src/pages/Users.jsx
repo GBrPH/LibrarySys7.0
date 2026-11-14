@@ -2,11 +2,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
+import LoadingSpinner from "../components/LoadingSpinner";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Users() {
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [viewMode, setViewMode] = useState("list");
     const currentUsername = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.trim();
 
@@ -23,6 +25,7 @@ function Users() {
     const pageSize = 10;
 
     useEffect(() => {
+        setIsLoading(true);
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         if (!token) {
             navigate("/login");
@@ -35,7 +38,6 @@ function Users() {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => {
-                console.log("Users API response:", res.data);
                 if (Array.isArray(res.data)) {
                     setUsers(res.data);
                 } else if (res.data && typeof res.data === "object") {
@@ -45,7 +47,8 @@ function Users() {
                     setUsers([]);
                 }
             })
-            .catch(err => console.error("Error fetching users:", err));
+            .catch(err => console.error("Error fetching users:", err))
+            .finally(() => setIsLoading(false));
     }, [navigate]);
 
     useEffect(() => {
@@ -96,7 +99,6 @@ function Users() {
 
             <div className="container-fluid py-4 px-4">
                 <div className="row g-4 align-items-start">
-                    {/* Sidebar Filters - Frosted Glass Panel */}
                     <div className="col-md-3 col-lg-2">
                         <div className="p-4 glass-panel filter-sidebar border-0 shadow">
                             <h5 className="fw-bold mb-3">Filters</h5>
@@ -136,9 +138,7 @@ function Users() {
                         </div>
                     </div>
 
-                    {/* Main Content Area */}
                     <div className="col-md-9 col-lg-10 d-flex flex-column">
-                        {/* Top Control Bar */}
                         <div className="d-flex align-items-center justify-content-between mb-4">
                             <div className="d-flex align-items-center flex-grow-1">
                                 <div style={{ minWidth: "220px" }}>
@@ -167,9 +167,12 @@ function Users() {
                             </div>
                         </div>
 
-                        {/* DYNAMIC RENDERING BLOCK */}
                         <div className="flex-grow-1 d-flex flex-column">
-                            {viewMode === "list" ? (
+                            {isLoading ? (
+                                <div className="card border-0 shadow flex-grow-1 glass-panel d-flex justify-content-center align-items-center">
+                                    <LoadingSpinner />
+                                </div>
+                            ) : viewMode === "list" ? (
                                 <div className="card border-0 shadow flex-grow-1 glass-panel">
                                     <div className="card-body p-4">
                                         <table className="table table-hover align-middle mb-0">
@@ -288,8 +291,7 @@ function Users() {
                             )}
                         </div>
 
-                        {/* Pagination Controls */}
-                        {totalPages > 1 && (
+                        {!isLoading && totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-auto pt-4 mb-2">
                                 <nav>
                                     <ul className="pagination shadow-sm mb-0">
