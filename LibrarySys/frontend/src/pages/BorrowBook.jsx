@@ -32,10 +32,8 @@ function BorrowBook() {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Extract array safely, handling ASP.NET '$values' wrapper if present
+            // Safely extract array and check all possible casing variations
             const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || res.data?.data || []);
-
-            // Check all possible casing variations for 'copies'
             const availableOnly = rawData.filter(b => {
                 const copies = b.copies ?? b.copiesAvailable ?? b.Copies ?? b.CopiesAvailable ?? 0;
                 return Number(copies) > 0;
@@ -49,10 +47,13 @@ function BorrowBook() {
         }
     };
 
-    const filteredDropdownBooks = books.filter(b =>
-        b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.author.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // --- FIX: Safely check both uppercase and lowercase properties ---
+    const filteredDropdownBooks = books.filter(b => {
+        const title = String(b.title || b.Title || "").toLowerCase();
+        const author = String(b.author || b.Author || "").toLowerCase();
+        const search = searchTerm.toLowerCase();
+        return title.includes(search) || author.includes(search);
+    });
 
     const handleBorrowSubmit = async (e) => {
         e.preventDefault();
@@ -73,12 +74,10 @@ function BorrowBook() {
         }
 
         try {
+            const bookId = selectedBook.id || selectedBook.Id; // Safely get ID
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Borrow/BorrowBook`,
-                {
-                    bookId: selectedBook.id,
-                    username: username
-                },
+                { bookId: bookId, username: username },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -90,13 +89,11 @@ function BorrowBook() {
 
         } catch (err) {
             console.error("Borrow error:", err);
-
             if (err.response?.status === 401) {
                 localStorage.clear();
                 navigate("/login");
                 return;
             }
-
             setMessage(err.response?.data?.message || "Failed to process the loan.");
             setIsError(true);
         } finally {
@@ -142,19 +139,27 @@ function BorrowBook() {
                                         <select
                                             className="form-select form-select-lg shadow-none bg-white text-dark border-0"
                                             size="5"
-                                            value={selectedBook ? selectedBook.id : ""}
+                                            value={selectedBook ? (selectedBook.id || selectedBook.Id) : ""}
                                             onChange={(e) => {
-                                                const book = books.find(b => b.id === parseInt(e.target.value));
+                                                const selectedId = parseInt(e.target.value);
+                                                const book = books.find(b => (b.id || b.Id) === selectedId);
                                                 setSelectedBook(book || null);
                                             }}
                                             required
                                         >
                                             <option value="" disabled>-- Click to choose a book --</option>
-                                            {filteredDropdownBooks.map((book) => (
-                                                <option key={book.id} value={book.id} className="py-2 px-2 border-bottom">
-                                                    {book.title} (by {book.author}) - {book.copies ?? book.copiesAvailable ?? book.Copies ?? book.CopiesAvailable} left
-                                                </option>
-                                            ))}
+                                            {filteredDropdownBooks.map((book) => {
+                                                const bId = book.id || book.Id;
+                                                const bTitle = book.title || book.Title;
+                                                const bAuthor = book.author || book.Author;
+                                                const bCopies = book.copies ?? book.copiesAvailable ?? book.Copies ?? book.CopiesAvailable;
+
+                                                return (
+                                                    <option key={bId} value={bId} className="py-2 px-2 border-bottom">
+                                                        {bTitle} (by {bAuthor}) - {bCopies} left
+                                                    </option>
+                                                );
+                                            })}
                                             {filteredDropdownBooks.length === 0 && (
                                                 <option disabled>No matching books found</option>
                                             )}
@@ -164,7 +169,7 @@ function BorrowBook() {
                                     <div className="row mb-4">
                                         <div className="col-md-6 mb-3 mb-md-0">
                                             <label className="form-label fw-semibold text-dark small opacity-75">AUTHOR</label>
-                                            <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? selectedBook.author : ""} disabled />
+                                            <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? (selectedBook.author || selectedBook.Author) : ""} disabled />
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold text-dark small opacity-75">STOCK REMAINING</label>
