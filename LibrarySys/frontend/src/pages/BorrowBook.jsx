@@ -31,7 +31,12 @@ function BorrowBook() {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const availableOnly = (res.data || []).filter(b => Number(b.copies ?? b.copiesAvailable ?? 0) > 0);
+            const availableOnly = (res.data || []).filter(b => {
+                // Check all possible casings for copies
+                const copies = b.copies ?? b.copiesAvailable ?? b.Copies ?? b.CopiesAvailable ?? 0;
+                return Number(copies) > 0;
+            });
+
             setBooks(availableOnly);
         } catch (err) {
             console.error("Error fetching books:", err);
