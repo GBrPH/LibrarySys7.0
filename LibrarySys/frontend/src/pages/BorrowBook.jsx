@@ -25,12 +25,27 @@ function BorrowBook() {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const availableOnly = (res.data || []).filter(b => Number(b.copies ?? b.copiesAvailable ?? 0) > 0);
-            setBooks(availableOnly);
+
+            // Extract the array, handling ASP.NET's $values wrapper if it exists
+            const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || []);
+
+            console.log("Raw Book Data from C#:", rawData[0]); // <--- THIS WILL TELL US THE TRUTH
+
+            // Set ALL books into state, ignoring the copies filter for now
+            setBooks(rawData);
+
         } catch (err) {
             console.error("Error fetching books:", err);
         }
     };
+
+    // Update the search filter to safely check for uppercase C# properties too
+    const filteredDropdownBooks = books.filter(b => {
+        const title = String(b.title || b.Title || "").toLowerCase();
+        const author = String(b.author || b.Author || "").toLowerCase();
+        const search = searchTerm.toLowerCase();
+        return title.includes(search) || author.includes(search);
+    });
 
     const filteredDropdownBooks = books.filter(b =>
         b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
