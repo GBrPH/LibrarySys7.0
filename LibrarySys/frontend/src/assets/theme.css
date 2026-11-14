@@ -33,110 +33,55 @@ body {
     font-size: 1.25rem !important;
 }
 
-/* --- Top Navbar Inverse Curve --- */
+/* --- Top Navbar (Glassmorphism Glow) --- */
 .curved-navbar {
     background-color: #212529; /* Matches Bootstrap bg-dark */
     display: flex;
-    align-items: flex-end;
+    align-items: center; /* Centered vertically for the new pill design */
     height: 70px;
     padding: 0 2rem;
     margin-bottom: 0 !important;
-    /* ADD THESE TWO LINES TO REMOVE THE SEAM */
     border-bottom: none !important;
     box-shadow: none !important;
 }
 
-.navbar-brand-container {
-    padding-bottom: 20px;
-}
-
-.curved-navbar .nav-links {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin: 0 auto; /* Centers the tabs in the navbar */
-    height: 55px;
-}
-
-    .curved-navbar .nav-links li {
-        position: relative;
+    .curved-navbar .nav-links {
         display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0 auto; /* Centers the tabs in the navbar */
         align-items: center;
-        border-top-left-radius: 20px;
-        border-top-right-radius: 20px;
-        transition: background-color 0.3s;
+        gap: 0.5rem; /* Small space between pill buttons */
     }
 
-        /* NEW: Dashed border for inactive tabs to show clickable bounds */
-        .curved-navbar .nav-links li:not(.active) {
-            border: 1px dashed rgba(255, 255, 255, 0.15);
-            border-bottom: none; /* Keeps it flat on the bottom */
-            margin: 0 3px; /* Small gap between bordered tabs */
-        }
-
+        /* Default state for inactive links */
         .curved-navbar .nav-links li a {
-            position: relative;
-            z-index: 1;
-            color: #adb5bd;
             text-decoration: none;
-            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px; /* Pill shape */
+            font-weight: 500;
             font-size: 1.05rem;
-            transition: color 0.3s;
-            /* Expanding the padding inside the <a> tag ensures the entire bounded box is clickable */
-            padding: 10px 25px;
+            transition: all 0.3s ease;
             display: block;
-            height: 100%;
         }
 
-        .curved-navbar .nav-links li:hover a {
+            .curved-navbar .nav-links li a:hover {
+                color: #ffffff;
+                background: rgba(255, 255, 255, 0.05); /* Subtle hover for inactive tabs */
+            }
+
+        /* --- ACTIVE STATE GLASSMORPHISM --- */
+        .curved-navbar .nav-links li.active a {
             color: #ffffff;
+            background: rgba(255, 255, 255, 0.15); /* Semi-transparent white */
+            backdrop-filter: blur(10px); /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25); /* Subtle bright edge */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), /* Drop shadow */
+            inset 0 0 10px rgba(255, 255, 255, 0.05), /* Inner glow */
+            0 0 15px rgba(67, 97, 238, 0.3); /* Slight blue outer glow */
         }
-
-        /* --- ACTIVE STATE MAGIC --- */
-        .curved-navbar .nav-links li.active {
-            background-color: var(--bg-light);
-            border: 1px solid var(--bg-light);
-            border-bottom: none;
-            margin: 0 3px; 
-        }
-
-            .curved-navbar .nav-links li.active a {
-                color: var(--brand-primary);
-            }
-
-            /* Bottom-Left Inverse Curve */
-            .curved-navbar .nav-links li.active::before {
-                content: "";
-                position: absolute;
-                bottom: 0;
-                left: -20px;
-                width: 20px;
-                height: 20px;
-                background-color: transparent;
-                border-bottom-right-radius: 20px;
-                /* Matches exactly to --bg-light */
-                box-shadow: 10px 10px 0 0 var(--bg-light);
-                pointer-events: none;
-            }
-
-            /* Bottom-Right Inverse Curve */
-            .curved-navbar .nav-links li.active::after {
-                content: "";
-                position: absolute;
-                bottom: 0;
-                right: -20px;
-                width: 20px;
-                height: 20px;
-                background-color: transparent;
-                border-bottom-left-radius: 20px;
-                /* Matches exactly to --bg-light */
-                box-shadow: -10px 10px 0 0 var(--bg-light);
-                pointer-events: none;
-            }
-
-.auth-buttons {
-    padding-bottom: 15px;
-}
 
 /* Nav Links */
 .navbar .nav-link {
@@ -334,7 +279,5 @@ body {
     .btn-outline-primary:hover,
     .btn-outline-primary:focus,
     .btn-outline-primary:active {
-        background-color: var(--brand-primary) !important;
-        color: #ffffff !important;
-        border-color: var(--brand-primary) !important;
+        background-color: var(--brand-primary)
     }

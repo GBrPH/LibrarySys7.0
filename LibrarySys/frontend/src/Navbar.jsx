@@ -16,18 +16,21 @@ function Navbar({ activePage }) {
 
     const handleLogout = () => {
         localStorage.clear();
-        sessionStorage.clear(); 
+        sessionStorage.clear();
         navigate("/login");
     };
 
     return (
-        <nav className="curved-navbar">
+        <nav className="curved-navbar d-flex align-items-center">
             {/* Brand Logo */}
-            <div className="navbar-brand-container">
+            <div className="navbar-brand-container ps-4">
                 <Link
                     className="text-white fw-bold fs-4 text-decoration-none"
                     to="/"
-                    style={{ caretColor: "transparent", userSelect: "none", outline: "none" }}> LibrarySys </Link>
+                    style={{ caretColor: "transparent", userSelect: "none", outline: "none" }}
+                >
+                    LibrarySys
+                </Link>
             </div>
 
             <ul className="nav-links mx-auto">
@@ -55,7 +58,7 @@ function Navbar({ activePage }) {
                 )}
             </ul>
 
-            <div className="auth-buttons ms-auto pe-3">
+            <div className="auth-buttons ms-auto pe-4">
                 {token ? (
                     <div className="d-flex align-items-center gap-3">
                         <button onClick={handleLogout} className="btn btn-danger fw-semibold px-4 shadow-sm">
@@ -69,11 +72,10 @@ function Navbar({ activePage }) {
                         >
                             {userInitial}
                         </div>
-
                     </div>
                 ) : (
                     <>
-                        <Link className="btn btn-outline-primary me-3" to="/login">Login</Link>
+                        <Link className="btn btn-outline-primary text-white border-white me-3" to="/login">Login</Link>
                         <Link className="btn btn-primary shadow-sm" to="/signup">Sign Up</Link>
                     </>
                 )}
