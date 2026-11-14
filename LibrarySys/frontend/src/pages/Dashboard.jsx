@@ -212,20 +212,20 @@ function Dashboard() {
                                     <h6 className="fw-bold mb-3 small">MY BORROWING LIMIT</h6>
                                     <div className="d-flex justify-content-between align-items-end mb-2">
                                         <h3 className="fw-bold mb-0 text-primary">
-                                            {borrowData.activeBorrows} <span className="fs-6 opacity-75">/ {borrowData.maxLimit}</span>
+                                            {isLoading ? <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> : borrowData.activeBorrows} <span className="fs-6 opacity-75">/ {borrowData.maxLimit}</span>
                                         </h3>
                                     </div>
                                     <div className="progress mt-2" style={{ height: "6px", borderRadius: "10px", backgroundColor: "rgba(0,0,0,0.1)" }}>
                                         <div
                                             className={`progress-bar ${progressPercentage >= 100 ? 'bg-danger' : 'bg-primary'}`}
                                             role="progressbar"
-                                            style={{ width: `${progressPercentage}%` }}
+                                            style={{ width: `${isLoading ? 0 : progressPercentage}%`, transition: 'width 0.5s ease' }}
                                             aria-valuenow={borrowData.activeBorrows}
                                             aria-valuemin="0"
                                             aria-valuemax={borrowData.maxLimit}
                                         ></div>
                                     </div>
-                                    {progressPercentage >= 100 && (
+                                    {!isLoading && progressPercentage >= 100 && (
                                         <small className="text-danger mt-2 d-block fw-semibold" style={{ fontSize: "0.75rem" }}>
                                             Limit reached. Return a book to borrow again.
                                         </small>
@@ -258,28 +258,36 @@ function Dashboard() {
                             <div className="col-md-3">
                                 <div className="card border-0 text-white p-3 shadow-sm h-100" style={{ background: "linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)", borderRadius: "16px" }}>
                                     <small className="text-white-50 text-uppercase fw-bold">Total Books</small>
-                                    <h2 className="fw-bold my-2">{stats.books}</h2>
+                                    <h2 className="fw-bold my-2">
+                                        {isLoading ? <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> : stats.books}
+                                    </h2>
                                     <small className="text-white-50">Items in Library</small>
                                 </div>
                             </div>
                             <div className="col-md-3">
                                 <div className="card border-0 p-3 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
                                     <small className="text-uppercase fw-bold opacity-75">Total Users</small>
-                                    <h2 className="fw-bold my-2 text-dark">{isPrivilegedUser ? stats.users : "—"}</h2>
+                                    <h2 className="fw-bold my-2 text-dark">
+                                        {isLoading ? <span className="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span> : (isPrivilegedUser ? stats.users : "—")}
+                                    </h2>
                                     <small className="text-success fw-bold">{isPrivilegedUser ? "Active Members" : "Restricted Access"}</small>
                                 </div>
                             </div>
                             <div className="col-md-3">
                                 <div className="card border-0 p-3 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
                                     <small className="text-uppercase fw-bold opacity-75">Borrowed</small>
-                                    <h2 className="fw-bold my-2 text-warning">{stats.borrowed}</h2>
+                                    <h2 className="fw-bold my-2 text-warning">
+                                        {isLoading ? <span className="spinner-border spinner-border-sm text-warning" role="status" aria-hidden="true"></span> : stats.borrowed}
+                                    </h2>
                                     <small className="opacity-75">{isPrivilegedUser ? "Out for Reading" : "My Active Borrows"}</small>
                                 </div>
                             </div>
                             <div className="col-md-3">
                                 <div className="card border-0 p-3 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
                                     <small className="text-uppercase fw-bold opacity-75">Overdue</small>
-                                    <h2 className="fw-bold my-2 text-danger">{stats.overdue}</h2>
+                                    <h2 className="fw-bold my-2 text-danger">
+                                        {isLoading ? <span className="spinner-border spinner-border-sm text-danger" role="status" aria-hidden="true"></span> : stats.overdue}
+                                    </h2>
                                     <small className="text-danger fw-bold">{isPrivilegedUser ? "Action Needed" : "My Overdue Books"}</small>
                                 </div>
                             </div>
@@ -287,29 +295,38 @@ function Dashboard() {
 
                         <div className="row g-4 align-items-start">
                             <div className="col-lg-4">
-                                <div className="card border-0 p-4 shadow-sm glass-panel" style={{ borderRadius: "16px" }}>
+                                <div className="card border-0 p-4 shadow-sm glass-panel h-100" style={{ borderRadius: "16px" }}>
                                     <h5 className="fw-bold text-dark mb-4">Inventory Breakdown</h5>
-                                    <div className="d-flex align-items-center justify-content-between">
-                                        <div className="position-relative d-flex align-items-center justify-content-center flex-shrink-0"
-                                            style={{
-                                                width: "130px", height: "130px", borderRadius: "50%",
-                                                background: `conic-gradient(
-                                                    #4361ee 0% ${inventory.physical}%, 
-                                                    #4cc9f0 ${inventory.physical}% ${inventory.physical + inventory.ebook}%, 
-                                                    #f72585 ${inventory.physical + inventory.ebook}% 100%
-                                                )`
-                                            }}>
-                                            <div className="bg-white rounded-circle d-flex flex-column align-items-center justify-content-center shadow-sm" style={{ width: "90px", height: "90px" }}>
-                                                <h5 className="fw-bold mb-0 text-dark">{inventory.physical}%</h5>
-                                                <small className="text-muted" style={{ fontSize: "0.65rem" }}>Books</small>
+
+                                    {isLoading ? (
+                                        <div className="d-flex justify-content-center align-items-center w-100" style={{ minHeight: "130px" }}>
+                                            <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
+                                                <span className="visually-hidden">Loading...</span>
                                             </div>
                                         </div>
-                                        <div className="d-flex flex-column gap-2 flex-grow-1 ms-3">
-                                            <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-primary rounded-circle me-1">•</span>Books</span><span className="fw-bold small">{inventory.physical}%</span></div>
-                                            <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-info rounded-circle me-1">•</span>eBooks</span><span className="fw-bold small">{inventory.ebook}%</span></div>
-                                            <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-danger rounded-circle me-1">•</span>Journals</span><span className="fw-bold small">{inventory.journal}%</span></div>
+                                    ) : (
+                                        <div className="d-flex align-items-center justify-content-between">
+                                            <div className="position-relative d-flex align-items-center justify-content-center flex-shrink-0"
+                                                style={{
+                                                    width: "130px", height: "130px", borderRadius: "50%",
+                                                    background: `conic-gradient(
+                                                        #4361ee 0% ${inventory.physical}%, 
+                                                        #4cc9f0 ${inventory.physical}% ${inventory.physical + inventory.ebook}%, 
+                                                        #f72585 ${inventory.physical + inventory.ebook}% 100%
+                                                    )`
+                                                }}>
+                                                <div className="bg-white rounded-circle d-flex flex-column align-items-center justify-content-center shadow-sm" style={{ width: "90px", height: "90px" }}>
+                                                    <h5 className="fw-bold mb-0 text-dark">{inventory.physical}%</h5>
+                                                    <small className="text-muted" style={{ fontSize: "0.65rem" }}>Books</small>
+                                                </div>
+                                            </div>
+                                            <div className="d-flex flex-column gap-2 flex-grow-1 ms-3">
+                                                <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-primary rounded-circle me-1">•</span>Books</span><span className="fw-bold small">{inventory.physical}%</span></div>
+                                                <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-info rounded-circle me-1">•</span>eBooks</span><span className="fw-bold small">{inventory.ebook}%</span></div>
+                                                <div className="d-flex justify-content-between align-items-center"><span className="small text-muted"><span className="badge bg-danger rounded-circle me-1">•</span>Journals</span><span className="fw-bold small">{inventory.journal}%</span></div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -324,9 +341,9 @@ function Dashboard() {
                                         {isLoading ? (
                                             <LoadingSpinner />
                                         ) : (
-                                                <table className="table table-hover align-middle mb-0">
-                                                    <thead>
-                                                        <tr className="small fw-bold">
+                                            <table className="table table-hover align-middle mb-0">
+                                                <thead>
+                                                    <tr className="small fw-bold">
                                                         <th style={{ minWidth: "130px" }}>User</th>
                                                         <th style={{ minWidth: "200px" }}>Book</th>
                                                         <th style={{ minWidth: "110px" }}>Borrow Date</th>
