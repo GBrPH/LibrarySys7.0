@@ -31,8 +31,12 @@ function BorrowBook() {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const availableOnly = (res.data || []).filter(b => {
-                // Check all possible casings for copies
+
+            // Extract array safely, handling ASP.NET '$values' wrapper if present
+            const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || res.data?.data || []);
+
+            // Check all possible casing variations for 'copies'
+            const availableOnly = rawData.filter(b => {
                 const copies = b.copies ?? b.copiesAvailable ?? b.Copies ?? b.CopiesAvailable ?? 0;
                 return Number(copies) > 0;
             });
@@ -148,7 +152,7 @@ function BorrowBook() {
                                             <option value="" disabled>-- Click to choose a book --</option>
                                             {filteredDropdownBooks.map((book) => (
                                                 <option key={book.id} value={book.id} className="py-2 px-2 border-bottom">
-                                                    {book.title} (by {book.author}) - {book.copies ?? book.copiesAvailable} left
+                                                    {book.title} (by {book.author}) - {book.copies ?? book.copiesAvailable ?? book.Copies ?? book.CopiesAvailable} left
                                                 </option>
                                             ))}
                                             {filteredDropdownBooks.length === 0 && (
@@ -164,7 +168,7 @@ function BorrowBook() {
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label fw-semibold text-dark small opacity-75">STOCK REMAINING</label>
-                                            <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable) : ""} disabled />
+                                            <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable ?? selectedBook.Copies ?? selectedBook.CopiesAvailable) : ""} disabled />
                                         </div>
                                     </div>
 
