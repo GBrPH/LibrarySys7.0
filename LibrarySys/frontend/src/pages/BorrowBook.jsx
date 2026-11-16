@@ -18,17 +18,32 @@ function BorrowBook() {
     }, []);
 
     const fetchBooks = async () => {
+        setIsFetching(true);
         const token = localStorage.getItem("token")?.trim();
-        if (!token) return;
+        if (!token) {
+            setIsFetching(false);
+            return;
+        }
 
         try {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const availableOnly = (res.data || []).filter(b => Number(b.copies ?? b.copiesAvailable ?? 0) > 0);
-            setBooks(availableOnly);
+
+            console.log("RAW API RESPONSE:", res.data);
+
+            // Extract the array, whatever shape it takes
+            const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || res.data?.data || []);
+
+            console.log("EXTRACTED ARRAY:", rawData);
+
+            // BYPASS ALL FILTERS FOR NOW
+            setBooks(rawData);
+
         } catch (err) {
             console.error("Error fetching books:", err);
+        } finally {
+            setIsFetching(false);
         }
     };
 
