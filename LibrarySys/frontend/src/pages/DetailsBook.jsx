@@ -14,7 +14,8 @@ function DetailsBook() {
     const [borrowing, setBorrowing] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("token")?.trim();
+        // FIX: Check both localStorage and sessionStorage
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         setLoading(true);
 
         axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetBookById/${id}`, {
@@ -35,8 +36,9 @@ function DetailsBook() {
         setBorrowing(true);
         setBorrowMessage("");
 
-        const token = localStorage.getItem("token")?.trim();
-        const storedUsername = localStorage.getItem("username")?.trim();
+        // FIX: Check both localStorage and sessionStorage
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
+        const storedUsername = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.trim();
 
         if (!token || !storedUsername) {
             setBorrowMessage("Session missing. Please log in again.");
