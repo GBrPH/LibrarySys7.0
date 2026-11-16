@@ -100,16 +100,23 @@ namespace LibrarySys.BackEnd.Controllers
                 l.UserId == user.Id &&
                 (l.ReturnDate == null || l.ReturnDate == DateTime.MinValue));
 
-            if (totalActiveBorrows >= maxTotalBooks)
+            // ----- ADMIN/LIBRARIAN BYPASS FOR 5-BOOK LIMIT -----
+            // If the user's role is Admin or Librarian, they can borrow unlimited books.
+            bool isPrivilegedUser = user.Role != null &&
+                                    (user.Role.ToLower() == "admin" || user.Role.ToLower() == "librarian");
+
+            if (!isPrivilegedUser && totalActiveBorrows >= maxTotalBooks)
             {
                 return BadRequest(new { message = $"You have reached the maximum limit of {maxTotalBooks} borrowed books. Please return some books before borrowing more." });
             }
+            // ---------------------------------------------------
 
             var activeBorrowsForThisBook = _db.BorrowingLogs.Count(l =>
                 l.UserId == user.Id &&
                 l.BookId == book.Id &&
                 (l.ReturnDate == null || l.ReturnDate == DateTime.MinValue));
 
+            // We still enforce the rule that no one (even an Admin) can borrow multiple copies of the exact same book at the exact same time to prevent hoarding classroom sets under one name.
             if (activeBorrowsForThisBook >= maxCopiesOfSameBook)
             {
                 return BadRequest(new { message = $"You have reached the limit of {maxCopiesOfSameBook} active borrow(s) for this specific title. Please return a copy before borrowing it again." });
@@ -159,7 +166,6 @@ namespace LibrarySys.BackEnd.Controllers
             if (log == null) return BadRequest(new { message = "No active borrow record found for this book." });
 
             log.ReturnDate = DateTime.UtcNow;
-
             log.IsOverdue = (DateTime.UtcNow - log.BorrowDate).TotalDays > 14;
 
             book.Copies++;
@@ -183,7 +189,5 @@ namespace LibrarySys.BackEnd.Controllers
             string statusMsg = log.IsOverdue ? "returned late (overdue)" : "returned successfully";
             return Ok(new { message = $"'{book.Title}' was {statusMsg}." });
         }
-
-        
     }
 }
