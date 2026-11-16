@@ -11,7 +11,6 @@ function BorrowBook() {
     const [message, setMessage] = useState("");
     const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [isFetching, setIsFetching] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -19,36 +18,28 @@ function BorrowBook() {
     }, []);
 
     const fetchBooks = async () => {
-        setIsFetching(true);
         const token = localStorage.getItem("token")?.trim();
-        if (!token) {
-            setIsFetching(false);
-            return;
-        }
+        if (!token) return;
 
         try {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetAllBooks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            console.log("RAW API RESPONSE:", res.data);
+            // Handle ASP.NET $values wrapper if present, then safely check properties
+            const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || []);
+            const availableOnly = rawData.filter(b => {
+                const copies = b.copies ?? b.copiesAvailable ?? b.Copies ?? b.CopiesAvailable ?? 0;
+                return Number(copies) > 0;
+            });
 
-            // Extract the array, whatever shape it takes
-            const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || res.data?.data || []);
-
-            console.log("EXTRACTED ARRAY:", rawData);
-
-            // BYPASS ALL FILTERS FOR NOW to prove data loads
-            setBooks(rawData);
-
+            setBooks(availableOnly);
         } catch (err) {
             console.error("Error fetching books:", err);
-        } finally {
-            setIsFetching(false);
         }
     };
 
-    // --- FIX: Safely extract strings before calling toLowerCase() ---
+    // Safely filter by title or author
     const filteredDropdownBooks = books.filter(b => {
         const title = String(b.title || b.Title || "").toLowerCase();
         const author = String(b.author || b.Author || "").toLowerCase();
@@ -75,15 +66,14 @@ function BorrowBook() {
         }
 
         try {
-            // FIX: Safely grab ID regardless of casing
             const bookId = selectedBook.id || selectedBook.Id;
 
+            // --- THE FIX: Match the C# API Routing exactly ---
+            // The book ID goes in the path: /BorrowBook/123
+            // The username goes in the query string: ?username=johndoe
             const response = await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/Borrow/BorrowBook`,
-                {
-                    bookId: bookId,
-                    username: username
-                },
+                `${process.env.REACT_APP_API_URL}/api/Book/BorrowBook/${bookId}?username=${encodeURIComponent(username)}`,
+                {}, // Empty body because data is in the URL
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -102,7 +92,7 @@ function BorrowBook() {
                 return;
             }
 
-            setMessage(err.response?.data?.message || "Failed to process the loan.");
+            setMessage(err.response?.data?.message || err.response?.data || "Failed to process the loan.");
             setIsError(true);
         } finally {
             setLoading(false);
@@ -153,7 +143,6 @@ function BorrowBook() {
                                         required
                                     >
                                         <option value="" disabled>-- Click to choose a book --</option>
-                                        {/* FIX: Safely extract Title, Author, and Copies */}
                                         {filteredDropdownBooks.map((book) => {
                                             const bId = book.id || book.Id;
                                             const bTitle = book.title || book.Title;
@@ -175,12 +164,10 @@ function BorrowBook() {
                                 <div className="row mb-4">
                                     <div className="col-md-6 mb-3 mb-md-0">
                                         <label className="form-label fw-semibold text-dark small opacity-75">AUTHOR</label>
-                                        {/* FIX: Safely extract Author */}
                                         <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? (selectedBook.author || selectedBook.Author) : ""} disabled />
                                     </div>
                                     <div className="col-md-6">
                                         <label className="form-label fw-semibold text-dark small opacity-75">STOCK REMAINING</label>
-                                        {/* FIX: Safely extract Copies */}
                                         <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable ?? selectedBook.Copies ?? selectedBook.CopiesAvailable) : ""} disabled />
                                     </div>
                                 </div>
