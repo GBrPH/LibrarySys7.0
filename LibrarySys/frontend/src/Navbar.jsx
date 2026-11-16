@@ -47,10 +47,6 @@ function Navbar({ activePage }) {
                     </li>
                 )}
 
-                <li className={activePage === "borrow" ? "active" : ""}>
-                    <Link to="/borrow">Borrow</Link>
-                </li>
-
                 {isPrivilegedUser && (
                     <li className={activePage === "borrowing-log" || activePage === "logs" ? "active" : ""}>
                         <Link to="/borrowing-log">Logs</Link>

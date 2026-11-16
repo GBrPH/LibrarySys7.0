@@ -57,7 +57,6 @@ function AppContent() {
                 <Route path="/users/delete/:id" element={<PrivateRoute><DeleteUser /></PrivateRoute>} />
 
                 <Route path="/borrowing-log" element={<PrivateRoute><BorrowingLog /></PrivateRoute>} />
-                <Route path="/borrow" element={<PrivateRoute><BorrowBook /></PrivateRoute>} />
 
                 <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
 
