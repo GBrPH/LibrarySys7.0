@@ -11,6 +11,7 @@ function BorrowBook() {
     const [message, setMessage] = useState("");
     const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,7 +38,7 @@ function BorrowBook() {
 
             console.log("EXTRACTED ARRAY:", rawData);
 
-            // BYPASS ALL FILTERS FOR NOW
+            // BYPASS ALL FILTERS FOR NOW to prove data loads
             setBooks(rawData);
 
         } catch (err) {
@@ -47,11 +48,13 @@ function BorrowBook() {
         }
     };
 
-    // Only ONE declaration of filteredDropdownBooks
-    const filteredDropdownBooks = books.filter(b =>
-        b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.author.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // --- FIX: Safely extract strings before calling toLowerCase() ---
+    const filteredDropdownBooks = books.filter(b => {
+        const title = String(b.title || b.Title || "").toLowerCase();
+        const author = String(b.author || b.Author || "").toLowerCase();
+        const search = searchTerm.toLowerCase();
+        return title.includes(search) || author.includes(search);
+    });
 
     const handleBorrowSubmit = async (e) => {
         e.preventDefault();
@@ -72,10 +75,13 @@ function BorrowBook() {
         }
 
         try {
+            // FIX: Safely grab ID regardless of casing
+            const bookId = selectedBook.id || selectedBook.Id;
+
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Borrow/BorrowBook`,
                 {
-                    bookId: selectedBook.id,
+                    bookId: bookId,
                     username: username
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -138,19 +144,28 @@ function BorrowBook() {
                                     <select
                                         className="form-select form-select-lg shadow-none bg-white text-dark border-0"
                                         size="5"
-                                        value={selectedBook ? selectedBook.id : ""}
+                                        value={selectedBook ? (selectedBook.id || selectedBook.Id) : ""}
                                         onChange={(e) => {
-                                            const book = books.find(b => b.id === parseInt(e.target.value));
+                                            const selectedId = parseInt(e.target.value);
+                                            const book = books.find(b => (b.id || b.Id) === selectedId);
                                             setSelectedBook(book || null);
                                         }}
                                         required
                                     >
                                         <option value="" disabled>-- Click to choose a book --</option>
-                                        {filteredDropdownBooks.map((book) => (
-                                            <option key={book.id} value={book.id} className="py-2 px-2 border-bottom">
-                                                {book.title} (by {book.author}) - {book.copies ?? book.copiesAvailable} left
-                                            </option>
-                                        ))}
+                                        {/* FIX: Safely extract Title, Author, and Copies */}
+                                        {filteredDropdownBooks.map((book) => {
+                                            const bId = book.id || book.Id;
+                                            const bTitle = book.title || book.Title;
+                                            const bAuthor = book.author || book.Author;
+                                            const bCopies = book.copies ?? book.copiesAvailable ?? book.Copies ?? book.CopiesAvailable;
+
+                                            return (
+                                                <option key={bId} value={bId} className="py-2 px-2 border-bottom">
+                                                    {bTitle} (by {bAuthor}) - {bCopies} left
+                                                </option>
+                                            );
+                                        })}
                                         {filteredDropdownBooks.length === 0 && (
                                             <option disabled>No matching books found</option>
                                         )}
@@ -160,11 +175,13 @@ function BorrowBook() {
                                 <div className="row mb-4">
                                     <div className="col-md-6 mb-3 mb-md-0">
                                         <label className="form-label fw-semibold text-dark small opacity-75">AUTHOR</label>
-                                        <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? selectedBook.author : ""} disabled />
+                                        {/* FIX: Safely extract Author */}
+                                        <input type="text" className="form-control bg-white text-dark border-0" value={selectedBook ? (selectedBook.author || selectedBook.Author) : ""} disabled />
                                     </div>
                                     <div className="col-md-6">
                                         <label className="form-label fw-semibold text-dark small opacity-75">STOCK REMAINING</label>
-                                        <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable) : ""} disabled />
+                                        {/* FIX: Safely extract Copies */}
+                                        <input type="text" className="form-control bg-white fw-bold text-primary border-0" value={selectedBook ? (selectedBook.copies ?? selectedBook.copiesAvailable ?? selectedBook.Copies ?? selectedBook.CopiesAvailable) : ""} disabled />
                                     </div>
                                 </div>
 
