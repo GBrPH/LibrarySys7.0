@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
 import DetailsBook from "./DetailsBook";
-import LoadingCard from "../components/LoadingCard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -223,9 +222,38 @@ function Books() {
                         {isLoading ? (
                             viewMode === "grid" ? (
                                 <div className="row g-4">
-                                    {Array.from({ length: 6 }).map((_, idx) => (
-                                        <div className="col-12 col-md-6 col-xl-4 d-flex" key={idx}>
-                                            <LoadingCard />
+                                    {Array.from({ length: 6 }).map((_, index) => (
+                                        <div className="col-12 col-md-6 col-xl-4 d-flex" key={index}>
+                                            <div
+                                                className="card h-100 w-100 border-0 shadow-sm p-3 position-relative glass-panel d-flex flex-column justify-content-between"
+                                                style={{ borderRadius: "16px", minHeight: "220px" }}
+                                            >
+                                                <div className="placeholder-glow">
+                                                    {/* Fake Badges */}
+                                                    <div className="d-flex justify-content-between align-items-start mb-2">
+                                                        <span className="placeholder col-4 rounded" style={{ height: "24px" }}></span>
+                                                        <span className="placeholder col-3 rounded" style={{ height: "24px" }}></span>
+                                                    </div>
+
+                                                    {/* Fake Title and Author */}
+                                                    <h5 className="mt-3 mb-2">
+                                                        <span className="placeholder col-10 rounded"></span>
+                                                    </h5>
+                                                    <p className="mb-3">
+                                                        <span className="placeholder col-6 rounded"></span>
+                                                    </p>
+                                                </div>
+
+                                                {/* Fake Footer with Copies and Buttons */}
+                                                <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top flex-nowrap gap-2 placeholder-glow" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
+                                                    <span className="placeholder col-3 rounded" style={{ height: "20px" }}></span>
+
+                                                    <div className="d-flex align-items-center gap-1 flex-nowrap">
+                                                        <span className="placeholder rounded" style={{ width: "65px", height: "31px" }}></span>
+                                                        <span className="placeholder rounded" style={{ width: "65px", height: "31px" }}></span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
