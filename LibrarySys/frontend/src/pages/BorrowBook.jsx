@@ -26,7 +26,6 @@ function BorrowBook() {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Handle ASP.NET $values wrapper if present, then safely check properties
             const rawData = Array.isArray(res.data) ? res.data : (res.data?.$values || res.data?.books || []);
             const availableOnly = rawData.filter(b => {
                 const copies = b.copies ?? b.copiesAvailable ?? b.Copies ?? b.CopiesAvailable ?? 0;
@@ -39,7 +38,6 @@ function BorrowBook() {
         }
     };
 
-    // Safely filter by title or author
     const filteredDropdownBooks = books.filter(b => {
         const title = String(b.title || b.Title || "").toLowerCase();
         const author = String(b.author || b.Author || "").toLowerCase();
@@ -68,12 +66,9 @@ function BorrowBook() {
         try {
             const bookId = selectedBook.id || selectedBook.Id;
 
-            // --- THE FIX: Match the C# API Routing exactly ---
-            // The book ID goes in the path: /BorrowBook/123
-            // The username goes in the query string: ?username=johndoe
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/Book/BorrowBook/${bookId}?username=${encodeURIComponent(username)}`,
-                {}, // Empty body because data is in the URL
+                {}, 
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
