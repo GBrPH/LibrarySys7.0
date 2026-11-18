@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function SignUp() {
@@ -10,17 +10,19 @@ function SignUp() {
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSignUp = async (e) => {
         e.preventDefault();
         setMessage("");
+        setIsLoading(true);
 
         try {
-            // Using relative routing for Vercel proxy
-            // Update "Register" if your C# method is named differently (e.g., /AddUser)
+            // Updated to use the environment variable to match Login.jsx
+            // Verify if your backend route is /api/User/Register or /api/Auth/Register
             await axios.post(
-                "/api/User/Register",
+                `${process.env.REACT_APP_API_URL}/api/User/Register`,
                 {
                     id: 0,
                     username: username,
@@ -44,79 +46,81 @@ function SignUp() {
             } else {
                 setMessage("Failed to register. Please try again.");
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="position-relative vh-100 w-100 overflow-hidden bg-white d-flex align-items-center justify-content-center">
+        <div className="container d-flex align-items-center justify-content-center min-vh-100">
+            <div className="row justify-content-center w-100">
+                <div className="col-md-5 col-lg-4">
+                    <div className="card shadow-lg p-4 border-0 glass-panel">
+                        <h2 className="text-center mb-4 fw-bold text-dark">Sign Up</h2>
 
-            {/* Top Animated Wave */}
-            <div className="position-absolute top-0 start-0 w-100" style={{ height: "45vh", zIndex: 1 }}>
-                <svg viewBox="0 0 1440 320" className="w-100 h-100 wave-animation-left" preserveAspectRatio="none">
-                    <path fill="#8ebafd" d="M0,192L80,181.3C160,171,320,149,480,165.3C640,181,800,235,960,240C1120,245,1280,203,1360,181.3L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"></path>
-                    <path fill="#2575fc" d="M0,128L60,112C120,96,240,64,360,85.3C480,107,600,181,720,197.3C840,213,960,171,1080,144C1200,117,1320,107,1380,101.3L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
-                </svg>
-            </div>
+                        <form onSubmit={handleSignUp}>
+                            <div className="mb-3">
+                                <label className="form-label text-dark fw-semibold small">Name (What should we call you?)</label>
+                                <input
+                                    type="text"
+                                    className="form-control form-control-lg fs-6 shadow-none"
+                                    value={fullName}
+                                    maxLength={50}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-            {/* Bottom Animated Wave */}
-            <div className="position-absolute bottom-0 start-0 w-100" style={{ height: "30vh", zIndex: 1 }}>
-                <svg viewBox="0 0 1440 320" className="w-100 h-100 wave-animation-right" preserveAspectRatio="none">
-                    <path fill="#2575fc" d="M0,192L80,202.7C160,213,320,235,480,213.3C640,192,800,128,960,122.7C1120,117,1280,171,1360,197.3L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
-                </svg>
-            </div>
+                            <div className="mb-3">
+                                <label className="form-label text-dark fw-semibold small">Username</label>
+                                <input
+                                    type="text"
+                                    className="form-control form-control-lg fs-6 shadow-none"
+                                    value={username}
+                                    maxLength={20}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-            {/* Form Card */}
-            <div className="card shadow-lg p-4 rounded-4 border-0 position-relative" style={{ maxWidth: "420px", width: "90%", zIndex: 2 }}>
-                <h2 className="text-center mb-4 fw-bold" style={{ color: "#2575fc" }}>SIGN UP</h2>
+                            <div className="mb-4">
+                                <label className="form-label text-dark fw-semibold small">Password</label>
+                                <div className="input-group">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        className="form-control form-control-lg fs-6 shadow-none border-end-0"
+                                        value={password}
+                                        minLength={6}
+                                        maxLength={50}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary bg-white border-start-0"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? "⚿" : "🔒︎"}
+                                    </button>
+                                </div>
+                            </div>
 
-                <form onSubmit={handleSignUp}>
-                    <div className="mb-3">
-                        <label className="form-label text-secondary fw-semibold small">NAME (What should we call you?)</label>
-                        <input type="text" className="form-control form-control-lg fs-6" value={fullName} maxLength={50} onChange={(e) => setFullName(e.target.value)} required />
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label text-secondary fw-semibold small">USERNAME</label>
-                        <input type="text" className="form-control form-control-lg fs-6" value={username} maxLength={20} onChange={(e) => setUsername(e.target.value)} required />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="form-label text-secondary fw-semibold small">PASSWORD</label>
-                        <div className="input-group">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                className="form-control form-control-lg fs-6 shadow-none border-end-0"
-                                value={password}
-                                minLength={6}
-                                maxLength={50}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary bg-white border-start-0"
-                                style={{ borderColor: "#dee2e6" }}
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? "Hide" : "Show"}
+                            <button type="submit" className="btn btn-primary w-100 btn-lg fs-6 shadow-sm" disabled={isLoading}>
+                                {isLoading ? <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> : "Register"}
                             </button>
+                        </form>
+
+                        {message && (
+                            <p className={`mt-3 text-center mb-0 fw-semibold ${isSuccess ? "text-success" : "text-danger"}`}>
+                                {message}
+                            </p>
+                        )}
+
+                        <div className="text-center mt-4">
+                            <span className="text-dark opacity-75 small">Already have an account? </span>
+                            <Link to="/login" className="text-decoration-none fw-semibold text-primary">Login</Link>
                         </div>
                     </div>
-
-                    <button type="submit" className="btn btn-primary w-100 btn-lg fs-6 shadow-sm fw-semibold" style={{ backgroundColor: "#2575fc", borderColor: "#2575fc" }}>
-                        Register
-                    </button>
-                </form>
-
-                {message && (
-                    <p className={`mt-3 text-center mb-0 fw-semibold ${isSuccess ? "text-success" : "text-danger"}`}>
-                        {message}
-                    </p>
-                )}
-
-                <div className="text-center mt-4">
-                    <span className="text-muted small">Already have an account? </span>
-                    <Link to="/login" className="text-decoration-none fw-bold" style={{ color: "#2575fc" }}>Login</Link>
                 </div>
             </div>
         </div>
