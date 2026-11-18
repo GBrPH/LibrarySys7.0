@@ -1,5 +1,4 @@
-﻿// src/components/LoadingSpinner.jsx
-import React from "react";
+﻿import React from "react";
 import "./Loading.css";
 
 function LoadingSpinner() {
