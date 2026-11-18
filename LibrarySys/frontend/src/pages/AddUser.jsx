@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function AddUser() {
     const navigate = useNavigate();
-    const [fullName, setFullName] = useState("");
+    const [fullName, setFullName] = useState(""); 
     const [username, setUsername] = useState("");
     const [role, setRole] = useState("Student");
     const [isActive, setIsActive] = useState(true);
