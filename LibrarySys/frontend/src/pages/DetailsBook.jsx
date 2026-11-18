@@ -14,7 +14,6 @@ function DetailsBook() {
     const [borrowing, setBorrowing] = useState(false);
 
     useEffect(() => {
-        // FIX: Check both localStorage and sessionStorage
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         setLoading(true);
 
@@ -36,7 +35,6 @@ function DetailsBook() {
         setBorrowing(true);
         setBorrowMessage("");
 
-        // FIX: Check both localStorage and sessionStorage
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         const storedUsername = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.trim();
 
@@ -54,7 +52,6 @@ function DetailsBook() {
             );
 
             setBorrowMessage(response.data.message || "Book borrowed successfully!");
-            // Refresh copies
             if (book) {
                 const currentCopies = Number(book.copies ?? book.copiesAvailable ?? 1);
                 setBook({ ...book, copies: Math.max(0, currentCopies - 1) });
