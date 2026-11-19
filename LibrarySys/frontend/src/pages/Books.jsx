@@ -60,8 +60,8 @@ function Books() {
     }, [filters]);
 
     const handleOpenDetails = (book) => {
-        setSelectedBook(book);
-        setShowDetailsModal(true);
+        const bookId = book.id || book.Id;
+        navigate(`/books/details/${bookId}`);
     };
 
     const handleCloseDetails = () => {
@@ -443,19 +443,6 @@ function Books() {
                     </div>
                 </div>
             </div>
-
-            {showDetailsModal && selectedBook && (
-                <DetailsBook
-                    bookId={selectedBook.id || selectedBook.Id}
-                    bookData={selectedBook}
-                    show={showDetailsModal}
-                    onClose={handleCloseDetails}
-                    onBorrow={(bookToBorrow) => {
-                        handleCloseDetails();
-                        handleBorrow(bookToBorrow.id || bookToBorrow.Id);
-                    }}
-                />
-            )}
         </div>
     );
 }
