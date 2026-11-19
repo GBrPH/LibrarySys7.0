@@ -9,7 +9,7 @@ function AddBook() {
         title: "",
         author: "",
         copies: "",
-        type: "Physical Book" 
+        type: "Physical Book"
     });
     const [message, setMessage] = useState({ text: "", type: "" });
     const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ function AddBook() {
         setLoading(true);
         setMessage({ text: "", type: "" });
 
-        const token = localStorage.getItem("token")?.trim();
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
         if (!token) {
             setMessage({ text: "Authentication token missing. Please log in again.", type: "danger" });
             setLoading(false);
