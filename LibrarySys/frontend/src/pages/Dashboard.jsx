@@ -283,12 +283,23 @@ function Dashboard() {
                                 </div>
                             </div>
                             <div className="col-md-3">
-                                <div className="card border-0 p-3 shadow-sm h-100 glass-panel" style={{ borderRadius: "16px" }}>
+                                <div
+                                    className="card border-0 p-3 shadow-sm h-100 glass-panel"
+                                    style={{
+                                        borderRadius: "16px",
+                                        cursor: isPrivilegedUser ? "pointer" : "default",
+                                        transition: "transform 0.15s ease"
+                                    }}
+                                    onClick={() => {
+                                        if (isPrivilegedUser) navigate("/borrowing-log?status=Overdue");
+                                    }}
+                                    title={isPrivilegedUser ? "View current overdue logs" : undefined}
+                                >
                                     <small className="text-uppercase fw-bold opacity-75">Overdue</small>
                                     <h2 className="fw-bold my-2 text-danger">
                                         {isLoading ? <span className="spinner-border spinner-border-sm text-danger" role="status" aria-hidden="true"></span> : stats.overdue}
                                     </h2>
-                                    <small className="text-danger fw-bold">{isPrivilegedUser ? "Action Needed" : "My Overdue Books"}</small>
+                                    <small className="text-danger fw-bold">{isPrivilegedUser ? "Action Needed →" : "My Overdue Books"}</small>
                                 </div>
                             </div>
                         </div>

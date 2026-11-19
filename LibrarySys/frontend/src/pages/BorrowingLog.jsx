@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -7,11 +7,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function BorrowingLog() {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const validStatuses = ["All", "Active", "Returned", "Overdue"];
+    const paramStatus = searchParams.get("status");
+    const initialStatus = validStatuses.includes(paramStatus) ? paramStatus : "All";
+
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [viewMode, setViewMode] = useState("list");
     const [filters, setFilters] = useState({
-        status: "All",
+        status: initialStatus,
         username: "",
         bookTitle: "",
         search: ""
@@ -19,6 +24,13 @@ function BorrowingLog() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
+
+    useEffect(() => {
+        const statusFromUrl = searchParams.get("status");
+        if (statusFromUrl && validStatuses.includes(statusFromUrl)) {
+            setFilters(prev => ({ ...prev, status: statusFromUrl }));
+        }
+    }, [searchParams]);
 
     const fetchLogs = useCallback(() => {
         setIsLoading(true);
@@ -55,6 +67,20 @@ function BorrowingLog() {
         setCurrentPage(1);
     }, [filters]);
 
+    const handleStatusChange = (newStatus) => {
+        setFilters(prev => ({ ...prev, status: newStatus }));
+        if (newStatus === "All") {
+            setSearchParams({});
+        } else {
+            setSearchParams({ status: newStatus });
+        }
+    };
+
+    const handleResetFilters = () => {
+        setFilters({ status: "All", username: "", bookTitle: "", search: "" });
+        setSearchParams({});
+    };
+
     const filteredLogs = logs.filter(log => {
         const returnDateVal = log.returnDate || log.ReturnDate;
         const isReturned = returnDateVal && !String(returnDateVal).startsWith("0001");
@@ -72,13 +98,13 @@ function BorrowingLog() {
 
         const today = new Date().setHours(0, 0, 0, 0);
         const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
-        const isCurrentlyOverdue = dueTime && today > dueTime && !isReturned;
+        const isCurrentlyOverdue = Boolean(dueTime && today > dueTime && !isReturned);
 
         if (filters.status !== "All") {
             const targetStatus = filters.status.toLowerCase();
             if (targetStatus === "active" && (isReturned || isCurrentlyOverdue || isOverdueVal)) return false;
             if (targetStatus === "returned" && !isReturned) return false;
-            if (targetStatus === "overdue" && !isOverdueVal && !isCurrentlyOverdue) return false;
+            if (targetStatus === "overdue" && !isCurrentlyOverdue) return false;
         }
 
         const uName = String(log.username || log.Username || "");
@@ -110,7 +136,11 @@ function BorrowingLog() {
 
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">STATUS</label>
-                                <select className="form-select shadow-none" value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
+                                <select
+                                    className="form-select shadow-none"
+                                    value={filters.status}
+                                    onChange={e => handleStatusChange(e.target.value)}
+                                >
                                     <option>All</option>
                                     <option>Active</option>
                                     <option>Returned</option>
@@ -128,7 +158,7 @@ function BorrowingLog() {
                                 <input type="text" className="form-control shadow-none" placeholder="Filter by Book Title" value={filters.bookTitle} onChange={e => setFilters({ ...filters, bookTitle: e.target.value })} />
                             </div>
 
-                            <button className="btn btn-primary w-100 mt-2" onClick={() => setFilters({ status: "All", username: "", bookTitle: "", search: "" })}>
+                            <button className="btn btn-primary w-100 mt-2" onClick={handleResetFilters}>
                                 Reset Filters
                             </button>
                         </div>
