@@ -84,14 +84,27 @@ function Dashboard() {
             });
         } catch (err) { console.error("Logs fetch failed:", err); }
 
-        const calculateActiveOverdue = (log) => {
+        const isLogCurrentlyOverdue = (log) => {
             const retDate = log.returnDate || log.ReturnDate;
-            const isOvr = log.isOverdue ?? log.IsOverdue ?? false;
-            if (retDate && !String(retDate).startsWith("0001")) return isOvr;
-            const bDate = log.borrowDate || log.BorrowDate;
-            if (!bDate) return false;
-            const daysBorrowed = (new Date() - new Date(bDate)) / (1000 * 60 * 60 * 24);
-            return daysBorrowed > 14;
+            const isReturned = Boolean(retDate && !String(retDate).startsWith("0001"));
+            if (isReturned) return false;
+
+            const dueDate = log.dueDate || log.DueDate;
+            const borrowDate = log.borrowDate || log.BorrowDate;
+            let dueDateObj = null;
+
+            if (dueDate && !String(dueDate).startsWith("0001")) {
+                dueDateObj = new Date(dueDate);
+            } else if (borrowDate) {
+                dueDateObj = new Date(borrowDate);
+                dueDateObj.setDate(dueDateObj.getDate() + 14);
+            }
+
+            if (!dueDateObj) return false;
+
+            const today = new Date().setHours(0, 0, 0, 0);
+            const dueTime = new Date(dueDateObj).setHours(0, 0, 0, 0);
+            return today > dueTime;
         };
 
         setStats({
@@ -101,7 +114,7 @@ function Dashboard() {
                 const retDate = l.returnDate || l.ReturnDate;
                 return !retDate || String(retDate).startsWith("0001");
             }).length,
-            overdue: logs.filter(l => calculateActiveOverdue(l)).length
+            overdue: logs.filter(l => isLogCurrentlyOverdue(l)).length
         });
 
         setRecentLogs(logs.slice(0, 15));
@@ -159,15 +172,26 @@ function Dashboard() {
 
     const filteredLogs = recentLogs.filter(log => {
         const bDate = log.borrowDate || log.BorrowDate;
+        const dDate = log.dueDate || log.DueDate;
         const retDate = log.returnDate || log.ReturnDate;
-        const isOvr = log.isOverdue ?? log.IsOverdue ?? false;
 
-        const isReturned = retDate && !String(retDate).startsWith("0001");
-        const isCurrentlyOverdue = !isReturned && bDate && ((new Date() - new Date(bDate)) / (1000 * 60 * 60 * 24)) > 14;
+        const isReturned = Boolean(retDate && !String(retDate).startsWith("0001"));
+
+        let dueDateObj = null;
+        if (dDate && !String(dDate).startsWith("0001")) {
+            dueDateObj = new Date(dDate);
+        } else if (bDate) {
+            dueDateObj = new Date(bDate);
+            dueDateObj.setDate(dueDateObj.getDate() + 14);
+        }
+
+        const today = new Date().setHours(0, 0, 0, 0);
+        const dueTime = dueDateObj ? new Date(dueDateObj).setHours(0, 0, 0, 0) : null;
+        const isCurrentlyOverdue = Boolean(!isReturned && dueTime && today > dueTime);
 
         if (filters.status === "Active" && isReturned) return false;
         if (filters.status === "Returned" && !isReturned) return false;
-        if (filters.status === "Overdue" && !isOvr && !isCurrentlyOverdue) return false;
+        if (filters.status === "Overdue" && !isCurrentlyOverdue) return false;
 
         const uName = String(log.username || log.Username || "");
         const bTitle = String(log.bookTitle || log.BookTitle || "");
