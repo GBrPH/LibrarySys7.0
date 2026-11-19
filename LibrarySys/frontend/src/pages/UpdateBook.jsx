@@ -16,9 +16,14 @@ function UpdateBook() {
     const [message, setMessage] = useState({ text: "", type: "" });
     const [loading, setLoading] = useState(false);
 
+    const getToken = () => (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
+
     useEffect(() => {
-        const token = localStorage.getItem("token")?.trim();
-        if (!token) return;
+        const token = getToken();
+        if (!token) {
+            setMessage({ text: "Authentication token missing. Please log in again.", type: "danger" });
+            return;
+        }
 
         axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetBookById/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -26,10 +31,10 @@ function UpdateBook() {
             .then(res => {
                 if (res.data) {
                     setBookData({
-                        title: res.data.title || "",
-                        author: res.data.author || "",
-                        copies: res.data.copies ?? res.data.copiesAvailable ?? "",
-                        type: res.data.type || "Physical Book"
+                        title: res.data.title || res.data.Title || "",
+                        author: res.data.author || res.data.Author || "",
+                        copies: res.data.copies ?? res.data.copiesAvailable ?? res.data.Copies ?? "",
+                        type: res.data.type || res.data.Type || "Physical Book"
                     });
                 }
             })
@@ -44,9 +49,9 @@ function UpdateBook() {
         setLoading(true);
         setMessage({ text: "", type: "" });
 
-        const token = localStorage.getItem("token")?.trim();
+        const token = getToken();
         if (!token) {
-            setMessage({ text: "Authentication token missing.", type: "danger" });
+            setMessage({ text: "Authentication token missing. Please log in again.", type: "danger" });
             setLoading(false);
             return;
         }
