@@ -19,21 +19,18 @@ namespace LibrarySys.BackEnd.Services
         }
 
         private BookDto ToDto(Book book) =>
-    book == null ? null : new BookDto
-    {
-        Id = book.Id,
-        Title = book.Title,
-        Author = book.Author,
-
-        // Change CopiesAvailable to Copies
-        Copies = book.Copies,
-
-        Type = book.Type,
-        IsAvailable = book.IsAvailable,
-        BorrowedByUserId = book.BorrowedByUserId,
-        BorrowedDate = book.BorrowedDate,
-        DueDate = book.DueDate
-    };
+            book == null ? null : new BookDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                Copies = book.Copies,
+                Type = book.Type,
+                IsAvailable = book.IsAvailable,
+                BorrowedByUserId = book.BorrowedByUserId,
+                BorrowedDate = book.BorrowedDate,
+                DueDate = book.DueDate
+            };
 
         private Book ToModel(BookDto dto) =>
             dto == null ? null : new Book
@@ -42,16 +39,13 @@ namespace LibrarySys.BackEnd.Services
                 Title = dto.Title,
                 Author = dto.Author,
                 BorrowerName = dto.BorrowerName ?? "",
-
-                // Change CopiesAvailable to Copies
                 Copies = dto.Copies,
-
                 Type = dto.Type,
                 IsAvailable = dto.IsAvailable,
                 BorrowedByUserId = dto.BorrowedByUserId,
                 BorrowedDate = dto.BorrowedDate,
                 DueDate = dto.DueDate
-            };  
+            };
 
         public IEnumerable<BookDto> GetAll()
         {
@@ -105,6 +99,20 @@ namespace LibrarySys.BackEnd.Services
             return ToDto(returned);
         }
 
-        public bool Delete(int id) => _repo.Delete(id);
+        public (bool Success, bool IsConflict, string Message) Delete(int id)
+        {
+            var book = _repo.GetById(id);
+            if (book == null)
+                return (false, false, "Book not found.");
+
+            if (book.Copies <= 0 || !book.IsAvailable)
+                return (false, true, $"Cannot delete '{book.Title}': all copies are currently borrowed.");
+
+            var deleted = _repo.Delete(id);
+            if (!deleted)
+                return (false, false, "Book not found.");
+
+            return (true, false, "Book deleted successfully.");
+        }
     }
 }

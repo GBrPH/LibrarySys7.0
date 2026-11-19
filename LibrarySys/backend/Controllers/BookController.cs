@@ -83,8 +83,14 @@ namespace LibrarySys.BackEnd.Controllers
         [Authorize(Roles = "Librarian")]
         public IActionResult DeleteBook(int id)
         {
-            var deleted = _bookService.Delete(id);
-            if (!deleted) return NotFound();
+            var result = _bookService.Delete(id);
+
+            if (result.IsConflict)
+                return Conflict(new { message = result.Message });
+
+            if (!result.Success)
+                return NotFound(new { message = result.Message });
+
             return NoContent();
         }
     }
