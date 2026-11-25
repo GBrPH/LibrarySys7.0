@@ -47,6 +47,11 @@ namespace LibrarySys.BackEnd.Services
             return ToDto(saved);
         }
 
+        public int GetActiveBorrowCount(int bookId)
+        {
+            return _repo.GetAll().Count(log => log.BookId == bookId && log.ReturnDate == null);
+        }
+
         public void LogReturn(int bookId, int userId, DateTime returnDate)
         {
             _repo.LogReturn(bookId, userId, returnDate);

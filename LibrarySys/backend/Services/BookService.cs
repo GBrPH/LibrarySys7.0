@@ -105,8 +105,9 @@ namespace LibrarySys.BackEnd.Services
             if (book == null)
                 return (false, false, "Book not found.");
 
-            if (book.Copies <= 0 || !book.IsAvailable)
-                return (false, true, $"Cannot delete '{book.Title}': all copies are currently borrowed.");
+            var activeBorrows = _logService.GetActiveBorrowCount(id);
+            if (activeBorrows > 0)
+                return (false, true, $"Cannot delete '{book.Title}': {activeBorrows} {(activeBorrows == 1 ? "copy is" : "copies are")} currently borrowed.");
 
             var deleted = _repo.Delete(id);
             if (!deleted)
