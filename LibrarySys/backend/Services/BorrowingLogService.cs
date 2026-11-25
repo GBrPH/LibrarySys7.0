@@ -49,7 +49,9 @@ namespace LibrarySys.BackEnd.Services
 
         public int GetActiveBorrowCount(int bookId)
         {
-            return _repo.GetAll().Count(log => log.BookId == bookId && log.ReturnDate == null);
+            return _repo.GetAll().Count(log =>
+                log.BookId == bookId &&
+                (log.ReturnDate == null || log.ReturnDate == DateTime.MinValue));
         }
 
         public void LogReturn(int bookId, int userId, DateTime returnDate)
