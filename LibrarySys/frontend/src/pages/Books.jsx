@@ -39,7 +39,6 @@ function Books() {
     const roleString = (localStorage.getItem("role") || sessionStorage.getItem("role"))?.toUpperCase() || "";
     const usernameString = (localStorage.getItem("username") || sessionStorage.getItem("username"))?.toUpperCase() || "";
     const isPrivilegedUser = roleString.includes("LIBRARIAN") || roleString.includes("ADMIN") || usernameString === "HMIR";
-    const isAdmin = roleString.includes("ADMIN") || usernameString === "HMIR";
 
     const fetchBooks = useCallback(() => {
         setIsLoading(true);
@@ -356,18 +355,16 @@ function Books() {
 
                                                         {isPrivilegedUser && (
                                                             <div className="d-flex gap-1 flex-nowrap">
-                                                                {isAdmin && (
-                                                                    <button
-                                                                        className="btn btn-info btn-sm text-white"
-                                                                        title="View Active Borrowers"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handleViewBorrowers(book);
-                                                                        }}
-                                                                    >
-                                                                        👥
-                                                                    </button>
-                                                                )}
+                                                                <button
+                                                                    className="btn btn-info btn-sm text-white"
+                                                                    title="View Active Borrowers"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleViewBorrowers(book);
+                                                                    }}
+                                                                >
+                                                                    👥
+                                                                </button>
                                                                 <Link to={`/books/update/${bookId}`} className="btn btn-warning btn-sm" onClick={e => e.stopPropagation()}>✎</Link>
                                                                 <Link to={`/books/delete/${bookId}`} className="btn btn-danger btn-sm" onClick={e => e.stopPropagation()}>🗑</Link>
                                                             </div>
@@ -437,14 +434,12 @@ function Books() {
                                                                     </button>
                                                                     {isPrivilegedUser && (
                                                                         <>
-                                                                            {isAdmin && (
-                                                                                <button
-                                                                                    className="btn btn-info btn-sm text-white"
-                                                                                    onClick={() => handleViewBorrowers(book)}
-                                                                                >
-                                                                                    Borrowers
-                                                                                </button>
-                                                                            )}
+                                                                            <button
+                                                                                className="btn btn-info btn-sm text-white"
+                                                                                onClick={() => handleViewBorrowers(book)}
+                                                                            >
+                                                                                Borrowers
+                                                                            </button>
                                                                             <Link to={`/books/update/${bookId}`} className="btn btn-warning btn-sm">Update</Link>
                                                                             <Link to={`/books/delete/${bookId}`} className="btn btn-danger btn-sm">Delete</Link>
                                                                         </>
