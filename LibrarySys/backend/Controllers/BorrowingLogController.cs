@@ -35,7 +35,7 @@ namespace LibrarySys.BackEnd.Controllers
         }
 
         [HttpGet("ActiveBorrowers/{bookId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Librarian")]
         public ActionResult<IEnumerable<ActiveBorrowerDto>> GetActiveBorrowers(int bookId)
         {
             var borrowers = _service.GetActiveBorrowersByBookId(bookId);
