@@ -20,7 +20,8 @@ function Books() {
         show: false,
         bookTitle: "",
         loading: false,
-        list: []
+        list: [],
+        error: ""
     });
 
     const [filters, setFilters] = useState({
@@ -82,7 +83,7 @@ function Books() {
         const title = book.title || book.Title;
         const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
 
-        setBorrowersModal({ show: true, bookTitle: title, loading: true, list: [] });
+        setBorrowersModal({ show: true, bookTitle: title, loading: true, list: [], error: "" });
 
         try {
             const res = await axios.get(
@@ -90,10 +91,16 @@ function Books() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             const raw = Array.isArray(res.data) ? res.data : (res.data?.$values || []);
-            setBorrowersModal({ show: true, bookTitle: title, loading: false, list: raw });
+            setBorrowersModal({ show: true, bookTitle: title, loading: false, list: raw, error: "" });
         } catch (err) {
             console.error("Error fetching active borrowers:", err);
-            setBorrowersModal({ show: true, bookTitle: title, loading: false, list: [] });
+            const status = err.response?.status;
+            const errMsg = status === 403
+                ? "Access denied (403). Your account role is not authorized for this endpoint."
+                : status === 404
+                    ? "Endpoint not found (404). Make sure the backend is republished."
+                    : "Failed to load active borrowers.";
+            setBorrowersModal({ show: true, bookTitle: title, loading: false, list: [], error: errMsg });
         }
     };
 
@@ -512,6 +519,8 @@ function Books() {
                             <div className="modal-body">
                                 {borrowersModal.loading ? (
                                     <p className="text-muted mb-0">Loading borrowers...</p>
+                                ) : borrowersModal.error ? (
+                                    <div className="alert alert-danger mb-0">{borrowersModal.error}</div>
                                 ) : borrowersModal.list.length === 0 ? (
                                     <p className="text-muted mb-0">No active borrowers for this book.</p>
                                 ) : (
