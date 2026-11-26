@@ -33,5 +33,13 @@ namespace LibrarySys.BackEnd.Controllers
             var history = _service.GetHistoryByUser(userId);
             return Ok(history);
         }
+
+        [HttpGet("ActiveBorrowers/{bookId}")]
+        [Authorize(Roles = "Admin,Librarian")]
+        public ActionResult<IEnumerable<ActiveBorrowerDto>> GetActiveBorrowers(int bookId)
+        {
+            var borrowers = _service.GetActiveBorrowersByBookId(bookId);
+            return Ok(borrowers);
+        }
     }
 }

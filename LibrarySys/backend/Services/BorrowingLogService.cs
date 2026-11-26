@@ -54,6 +54,25 @@ namespace LibrarySys.BackEnd.Services
                 (log.ReturnDate == null || log.ReturnDate == DateTime.MinValue));
         }
 
+        public IEnumerable<ActiveBorrowerDto> GetActiveBorrowersByBookId(int bookId)
+        {
+            return _repo.GetAll()
+                .Where(log =>
+                    log.BookId == bookId &&
+                    (log.ReturnDate == null || log.ReturnDate == DateTime.MinValue))
+                .OrderBy(log => log.DueDate)
+                .Select(log => new ActiveBorrowerDto
+                {
+                    BorrowingLogId = log.Id,
+                    UserId = log.UserId,
+                    Username = log.Username,
+                    BorrowDate = log.BorrowDate,
+                    DueDate = log.DueDate,
+                    IsOverdue = log.IsOverdue || (log.DueDate != DateTime.MinValue && log.DueDate < DateTime.UtcNow)
+                })
+                .ToList();
+        }
+
         public void LogReturn(int bookId, int userId, DateTime returnDate)
         {
             _repo.LogReturn(bookId, userId, returnDate);

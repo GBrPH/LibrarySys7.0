@@ -8,6 +8,7 @@ function DeleteBook() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [book, setBook] = useState(null);
+    const [activeBorrowers, setActiveBorrowers] = useState([]);
     const [message, setMessage] = useState("");
     const [isError, setIsError] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -17,11 +18,19 @@ function DeleteBook() {
 
     useEffect(() => {
         const token = getToken();
-        axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetBookById/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(res => {
-                setBook(res.data);
+        const headers = { Authorization: `Bearer ${token}` };
+
+        Promise.all([
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Book/GetBookById/${id}`, { headers }),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/BorrowingLog/ActiveBorrowers/${id}`, { headers })
+                .catch(() => ({ data: [] }))
+        ])
+            .then(([bookRes, borrowersRes]) => {
+                setBook(bookRes.data);
+                const rawBorrowers = Array.isArray(borrowersRes.data)
+                    ? borrowersRes.data
+                    : (borrowersRes.data?.$values || []);
+                setActiveBorrowers(rawBorrowers);
                 setLoading(false);
             })
             .catch(err => {
@@ -30,8 +39,16 @@ function DeleteBook() {
             });
     }, [id]);
 
-    const copies = book ? Number(book.copies ?? book.Copies ?? 0) : 0;
-    const isBorrowedOut = book && copies === 0;
+    const hasActiveBorrowers = activeBorrowers.length > 0;
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "—";
+        return new Date(dateStr).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        });
+    };
 
     const handleDelete = async () => {
         setDeleting(true);
@@ -67,14 +84,15 @@ function DeleteBook() {
                 <div className="col-md-9 col-lg-10 p-4">
                     <h3 className="fw-bold mb-4 text-danger">Delete Book</h3>
 
-                    <div className="card border-0 shadow-sm p-4 rounded-4" style={{ maxWidth: "500px" }}>
+                    <div className="card border-0 shadow-sm p-4 rounded-4" style={{ maxWidth: "650px" }}>
                         {loading ? (
                             <p className="text-muted mb-0">Loading book details...</p>
                         ) : book ? (
                             <>
-                                {isBorrowedOut && (
+                                {hasActiveBorrowers && (
                                     <div className="alert alert-warning mb-3" role="alert">
-                                        <strong>Cannot delete:</strong> This book currently has 0 copies available due to active borrowing records. All copies must be returned first.
+                                        <strong>Cannot delete:</strong> {activeBorrowers.length} active{" "}
+                                        {activeBorrowers.length === 1 ? "borrower currently holds" : "borrowers currently hold"} a copy of this book. All copies must be returned first.
                                     </div>
                                 )}
 
@@ -82,10 +100,41 @@ function DeleteBook() {
                                     Are you sure you want to delete <strong>{book.title || book.Title}</strong> by {book.author || book.Author}?
                                 </p>
 
+                                {hasActiveBorrowers && (
+                                    <div className="table-responsive my-3">
+                                        <table className="table table-sm table-bordered align-middle mb-0">
+                                            <thead className="table-light">
+                                                <tr className="small">
+                                                    <th>Borrower</th>
+                                                    <th>Borrowed</th>
+                                                    <th>Due Date</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {activeBorrowers.map(b => (
+                                                    <tr key={b.borrowingLogId || b.BorrowingLogId}>
+                                                        <td className="fw-semibold">{b.username || b.Username}</td>
+                                                        <td>{formatDate(b.borrowDate || b.BorrowDate)}</td>
+                                                        <td>{formatDate(b.dueDate || b.DueDate)}</td>
+                                                        <td>
+                                                            {(b.isOverdue || b.IsOverdue) ? (
+                                                                <span className="badge bg-danger">Overdue</span>
+                                                            ) : (
+                                                                <span className="badge bg-primary">Active</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+
                                 <div className="d-flex gap-2 mt-3">
                                     <button
                                         onClick={handleDelete}
-                                        disabled={isBorrowedOut || deleting}
+                                        disabled={hasActiveBorrowers || deleting}
                                         className="btn btn-danger fw-semibold px-4"
                                     >
                                         {deleting ? "Deleting..." : "Confirm Delete"}

@@ -16,6 +16,13 @@ function Books() {
     const [selectedBook, setSelectedBook] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
 
+    const [borrowersModal, setBorrowersModal] = useState({
+        show: false,
+        bookTitle: "",
+        loading: false,
+        list: []
+    });
+
     const [filters, setFilters] = useState({
         status: "All",
         author: "",
@@ -67,6 +74,26 @@ function Books() {
     const handleCloseDetails = () => {
         setSelectedBook(null);
         setShowDetailsModal(false);
+    };
+
+    const handleViewBorrowers = async (book) => {
+        const bookId = book.id || book.Id;
+        const title = book.title || book.Title;
+        const token = (localStorage.getItem("token") || sessionStorage.getItem("token"))?.trim();
+
+        setBorrowersModal({ show: true, bookTitle: title, loading: true, list: [] });
+
+        try {
+            const res = await axios.get(
+                `${process.env.REACT_APP_API_URL}/api/BorrowingLog/ActiveBorrowers/${bookId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const raw = Array.isArray(res.data) ? res.data : (res.data?.$values || []);
+            setBorrowersModal({ show: true, bookTitle: title, loading: false, list: raw });
+        } catch (err) {
+            console.error("Error fetching active borrowers:", err);
+            setBorrowersModal({ show: true, bookTitle: title, loading: false, list: [] });
+        }
     };
 
     const handleBorrow = async (bookId) => {
@@ -229,13 +256,11 @@ function Books() {
                                                 style={{ borderRadius: "16px", minHeight: "220px" }}
                                             >
                                                 <div className="placeholder-glow">
-                                                    {/* Fake Badges */}
                                                     <div className="d-flex justify-content-between align-items-start mb-2">
                                                         <span className="placeholder col-4 rounded" style={{ height: "24px" }}></span>
                                                         <span className="placeholder col-3 rounded" style={{ height: "24px" }}></span>
                                                     </div>
 
-                                                    {/* Fake Title and Author */}
                                                     <h5 className="mt-3 mb-2">
                                                         <span className="placeholder col-10 rounded"></span>
                                                     </h5>
@@ -244,7 +269,6 @@ function Books() {
                                                     </p>
                                                 </div>
 
-                                                {/* Fake Footer with Copies and Buttons */}
                                                 <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top flex-nowrap gap-2 placeholder-glow" style={{ borderColor: "rgba(30, 41, 59, 0.15)" }}>
                                                     <span className="placeholder col-3 rounded" style={{ height: "20px" }}></span>
 
@@ -324,6 +348,16 @@ function Books() {
 
                                                         {isPrivilegedUser && (
                                                             <div className="d-flex gap-1 flex-nowrap">
+                                                                <button
+                                                                    className="btn btn-info btn-sm text-white"
+                                                                    title="View Active Borrowers"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleViewBorrowers(book);
+                                                                    }}
+                                                                >
+                                                                    👥
+                                                                </button>
                                                                 <Link to={`/books/update/${bookId}`} className="btn btn-warning btn-sm" onClick={e => e.stopPropagation()}>✎</Link>
                                                                 <Link to={`/books/delete/${bookId}`} className="btn btn-danger btn-sm" onClick={e => e.stopPropagation()}>🗑</Link>
                                                             </div>
@@ -380,7 +414,8 @@ function Books() {
                                                                         to={`/books/details/${bookId}`}
                                                                         className="btn btn-outline-primary btn-sm px-3 bg-white"
                                                                         style={{ borderRadius: "8px" }}
-                                                                    > Details
+                                                                    >
+                                                                        Details
                                                                     </Link>
 
                                                                     <button
@@ -392,6 +427,12 @@ function Books() {
                                                                     </button>
                                                                     {isPrivilegedUser && (
                                                                         <>
+                                                                            <button
+                                                                                className="btn btn-info btn-sm text-white"
+                                                                                onClick={() => handleViewBorrowers(book)}
+                                                                            >
+                                                                                Borrowers
+                                                                            </button>
                                                                             <Link to={`/books/update/${bookId}`} className="btn btn-warning btn-sm">Update</Link>
                                                                             <Link to={`/books/delete/${bookId}`} className="btn btn-danger btn-sm">Delete</Link>
                                                                         </>
@@ -443,6 +484,75 @@ function Books() {
                     </div>
                 </div>
             </div>
+
+            {borrowersModal.show && (
+                <div
+                    className="modal fade show d-block"
+                    tabIndex="-1"
+                    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                    onClick={() => setBorrowersModal(prev => ({ ...prev, show: false }))}
+                >
+                    <div className="modal-dialog modal-dialog-centered" onClick={e => e.stopPropagation()}>
+                        <div className="modal-content border-0 shadow rounded-4">
+                            <div className="modal-header">
+                                <h5 className="modal-title fw-bold">
+                                    Active Borrowers — {borrowersModal.bookTitle}
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setBorrowersModal(prev => ({ ...prev, show: false }))}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                {borrowersModal.loading ? (
+                                    <p className="text-muted mb-0">Loading borrowers...</p>
+                                ) : borrowersModal.list.length === 0 ? (
+                                    <p className="text-muted mb-0">No active borrowers for this book.</p>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <table className="table table-sm align-middle mb-0">
+                                            <thead>
+                                                <tr className="small text-muted">
+                                                    <th>Username</th>
+                                                    <th>Borrowed</th>
+                                                    <th>Due Date</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {borrowersModal.list.map(b => (
+                                                    <tr key={b.borrowingLogId || b.BorrowingLogId}>
+                                                        <td className="fw-semibold">{b.username || b.Username}</td>
+                                                        <td>{new Date(b.borrowDate || b.BorrowDate).toLocaleDateString()}</td>
+                                                        <td>{new Date(b.dueDate || b.DueDate).toLocaleDateString()}</td>
+                                                        <td>
+                                                            {(b.isOverdue || b.IsOverdue) ? (
+                                                                <span className="badge bg-danger">Overdue</span>
+                                                            ) : (
+                                                                <span className="badge bg-primary">Active</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setBorrowersModal(prev => ({ ...prev, show: false }))}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
