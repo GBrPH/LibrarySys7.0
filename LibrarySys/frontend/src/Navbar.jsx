@@ -41,6 +41,12 @@ function Navbar({ activePage }) {
                     <Link to="/books">Books</Link>
                 </li>
 
+                {!isPrivilegedUser && (
+                    <li className={activePage === "my-books" ? "active" : ""}>
+                        <Link to="/my-books">My Books</Link>
+                    </li>
+                )}
+
                 {isPrivilegedUser && (
                     <li className={activePage === "users" ? "active" : ""}>
                         <Link to="/users">Users</Link>

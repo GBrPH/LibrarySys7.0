@@ -7,6 +7,7 @@ import PrivateRoute from "./components/PrivateRoute";
 
 import Dashboard from "./pages/Dashboard";
 import Books from "./pages/Books";
+import MyBooks from "./pages/MyBooks";
 import AddBook from "./pages/AddBook";
 import UpdateBook from "./pages/UpdateBook";
 import DeleteBook from "./pages/DeleteBook";
@@ -46,6 +47,7 @@ function AppContent() {
                 <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
                 <Route path="/books" element={<PrivateRoute><Books /></PrivateRoute>} />
+                <Route path="/my-books" element={<PrivateRoute><MyBooks /></PrivateRoute>} />
                 <Route path="/add-book" element={<PrivateRoute><AddBook /></PrivateRoute>} />
                 <Route path="/books/update/:id" element={<PrivateRoute><UpdateBook /></PrivateRoute>} />
                 <Route path="/books/delete/:id" element={<PrivateRoute><DeleteBook /></PrivateRoute>} />
