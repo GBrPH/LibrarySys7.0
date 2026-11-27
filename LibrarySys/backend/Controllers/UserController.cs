@@ -53,7 +53,7 @@ namespace LibrarySys.BackEnd.Controllers
             return Ok(new { message = "Your Full Name has been updated successfully!" });
         }
 
-        [HttpPost("BorrowBookforUser")]
+        [HttpPost("Register")]
         [AllowAnonymous]
         public ActionResult<UserDto> RegisterBorrower([FromBody] UserDto dto)
         {
