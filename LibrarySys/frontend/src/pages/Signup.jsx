@@ -19,10 +19,9 @@ function SignUp() {
         setIsLoading(true);
 
         try {
-            // Updated to use the environment variable to match Login.jsx
-            // Verify if your backend route is /api/User/Register or /api/Auth/Register
+            const baseUrl = process.env.REACT_APP_API_URL || "";
             await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/User/Register`,
+                `${baseUrl}/api/User/Register`,
                 {
                     id: 0,
                     username: username,
@@ -41,8 +40,16 @@ function SignUp() {
             console.error("Sign up failed:", err);
             setIsSuccess(false);
 
-            if (err.response && err.response.status === 400) {
-                setMessage(err.response.data);
+            const data = err.response?.data;
+            if (err.response?.status === 400) {
+                if (typeof data === "string") {
+                    setMessage(data);
+                } else if (data?.errors) {
+                    const firstError = Object.values(data.errors).flat()[0];
+                    setMessage(firstError || "Invalid registration details.");
+                } else {
+                    setMessage(data?.message || data?.title || "Invalid registration details.");
+                }
             } else {
                 setMessage("Failed to register. Please try again.");
             }
@@ -91,7 +98,7 @@ function SignUp() {
                                         className="form-control form-control-lg fs-6 shadow-none border-end-0"
                                         value={password}
                                         minLength={6}
-                                        maxLength={50}
+                                        maxLength={24}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
                                     />
